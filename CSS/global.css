@@ -4,18 +4,26 @@
   font-style: normal;
   font-display: swap;
 }
-:root{
-    --preto: #000000;
-    --cinza-escuro: #161616;
-    --branco: #FFFFFF;
-    --verde-brasil: #009B3A;
-    --amarelo-brasil: #FEDF00;
-    --azul-brasil: #002776;
-    
+/* --- PAINEL DE CORES (VARIÁVEIS) --- */
+:root {
+  --cor-verde-neon: #12E06C;
+  --cor-fundo-principal: #050B14;
+  --cor-fundo-secundario: #0F1A2C;
+  --cor-texto-claro: #FFFFFF;
+  --cor-texto-cinza: #A0AAB5;
 }
-body{
-     font-family: "Montserrat";
-    margin: 0;
-    padding: 0;
-    background-color: var(--branco);
+
+/* --- CONFIGURAÇÕES GERAIS --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
+body {
+  /* Usando a variável de fundo aqui! */
+  background-color: var(--cor-fundo-secundario); 
+  color: var(--cor-texto-claro);
+  overflow-x: hidden; 
 }
