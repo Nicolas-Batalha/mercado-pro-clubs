@@ -1,0 +1,48 @@
+.main-header{
+    align-items: center;
+    margin: auto;
+    margin-bottom: 20px;
+}
+.logo{
+    width: 100%;
+    height: 300px;
+    
+}
+.menu-carrossel{
+    width: 100%;
+  overflow-x: auto; /* Habilita a rolagem horizontal */
+  -webkit-overflow-scrolling: touch; /* Deixa o deslizar suave no celular */
+}
+.menu-carrossel::-webkit-scrollbar {
+  display: none; 
+}
+.lista-links{
+  display: flex; 
+  list-style: none; 
+  padding: 0 20px; /* Espaço inicial e final do carrossel */
+  margin: 0;
+  gap: 10px; /* Espaço entre um botão e outro */
+
+}
+.lista-links li {
+  white-space: nowrap; /* Impede que o texto quebre de linha */
+}
+/* Estilo dos "botões" do menu */
+.lista-links a { 
+  color: #A0AAB5; /* Cinza Claro */
+  text-decoration: none; 
+  font-size: 15px;
+  padding: 8px 18px;
+  background: #050B14; /* Fundo mais escuro */
+  border-radius: 20px; /* Deixa com formato arredondado */
+  display: block;
+ transition: transform 0.3s ease, background 0.3s, color 0.3s;
+  font-size: 24px;
+} 
+.lista-links a.ativo, 
+.lista-links a:hover {
+  background: #12E06C; /* Verde Neon */
+  color: #050B14; /* Texto escuro para dar contraste com o verde */
+  font-weight: bold;
+  transform: scale(1.1);
+}
