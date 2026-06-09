@@ -1,0 +1,49 @@
+.conteiner-info{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.cadastro-form{
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.input-group{
+  background-color: var(--cor-fundo-principal);
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 10px;
+  align-items: center;
+  width: 80%;
+}
+.input-group input{
+  width: 180px;         
+  height: 40px;         
+  padding: 10px;        
+  font-size: 16px;      
+  border-radius: 5px;   
+}
+@media screen and (min-width:1024px) {
+  .input-group{
+  background-color: var(--cor-fundo-principal);
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 10px;
+  align-items: center;
+  width: 500px;
+}
+  .input-group input{
+  width: 300px;         
+  height: 40px;         
+  padding: 10px;        
+  font-size: 16px;      
+  border-radius: 5px;   
+}
+}
+
+

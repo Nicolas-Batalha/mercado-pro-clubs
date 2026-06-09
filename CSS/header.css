@@ -51,6 +51,25 @@
   font-weight: bold;
   transform: scale(1.1);
 }
+.conteiner-perfil{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+}
+.conteiner-title{
+  font-size: 24px;
+  text-transform: uppercase;
+}
+.conteiner-text{
+  text-align: center;
+  font-size: 18px;
+  margin: 20px;
+}
+.conteiner-info{
+  font-size: 20px;
+  text-transform: uppercase;
+}
 @media screen and (min-width:1024px) {
   .menu-carrossel{
     display: flex;

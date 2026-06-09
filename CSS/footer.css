@@ -1,0 +1,23 @@
+.main-footer{
+    background-color: var(--cor-fundo-principal);
+    padding: 10px;
+}
+.footer{
+   display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.footer-text{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    gap: 20px;
+}
+.logo-footer{
+    display: flex;
+    filter: invert(1);
+    width: 100%;
+    align-items: center;
+}

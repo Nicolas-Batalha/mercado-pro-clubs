@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../CSS/style.css">
+    <title>cadastrar-se| mercado pro clubs</title>
+</head>
+<body>
+  <header class="main-header">
+    <a class="logo" href="../index.html" title="voltar para a página inicial">
+        <img
+          src="../IMG/logo maior.svg"
+          class="logo"
+          alt="Pro Clubs Hub Brasil Logo"
+        />
+      </a>
+      <section class="conteiner-perfil">
+        <h2 class="conteiner-title">CRIE SEU PERFIL DE JOGADOR</h2>
+        <p class="conteiner-text">Preencha os dados abaixo para entrar no mercado <br> e ser contratado por grandes clubes.</p>
+      </section>
+  </header>
+  <main class="form-container">
+ <form action="" class="cadastro-form">
+  <div class="conteiner-info">
+  <h4 class="conteiner-info">Informações Básicas</h4>
+  </div>
+<div class="input-group">
+                    <label for="nome">Nome Completo / usuario</label>
+                    <input type="text" id="nome" placeholder="Digite seu nome ou usuario" required>
+                    <div class="input-group">
+                      <label for="email">email</label>
+                      <input type="email" name="email"  id="email" placeholder="exemplo@email.com" required>
+                    <div class="input-group">
+                      <label for="senha">Senha:</label>
+                      <input type="password" name="senha" id="senha" required size="10" maxlength="8" />
+                    <div class="input-group">
+                      <label for="senha">Repetir Senha:</label>
+                      <input oninput="validarSenha(this)" type="password" name="senha1" id="senha1" required size="8" maxlength="10" />  
+                      </div>
+                    </div>
+                    </div>
+                </div>
+ </form>
+  </main>
+</body>
+</html>
