@@ -5,7 +5,7 @@
   background: linear-gradient(180deg, #0F1A2C 0%, #050B14 100%);
   background-image: 
     linear-gradient(to bottom, rgba(5, 11, 20, 0.7), rgba(5, 11, 20, 0.95)), 
-    url('/IMG/foto-do-jogo.jpg'); /* O nome do seu arquivo deve ser exatamente este */
+    url('../IMG/foto-do-jogo.jpg'); /* O nome do seu arquivo deve ser exatamente este */
     
   background-size: cover;
   background-position: center top;
