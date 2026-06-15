@@ -27,6 +27,31 @@
   font-size: 16px;      
   border-radius: 5px;   
 }
+.form-actions {
+    margin-top: 40px;
+}
+.btn-submit {
+    background-color: #12E06C;
+  color: #050B14;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 15px 40px;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */
+
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(18, 224, 108, 0.4);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
 @media screen and (min-width:1024px) {
   .input-group{
   background-color: var(--cor-fundo-principal);

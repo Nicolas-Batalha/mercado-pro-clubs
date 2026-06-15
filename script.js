@@ -14,5 +14,5 @@ const observador = new IntersectionObserver((entradas) => {
 
 // Pede para o observador vigiar cada um dos cards
 elementosAnimados.forEach((elemento) => {
-  observador.observe(elemento);
+  observador.observe(elemento); 
 });
