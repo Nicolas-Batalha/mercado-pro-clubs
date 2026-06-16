@@ -87,6 +87,10 @@
     background-color: #FFFFFF;
     color: #1f1f1f;
 }
+.logo_google{
+  width: 20px;
+  height: 20px;
+}
 
 .ea-btn {
     background-color: #E61C24; /* Vermelho característico da EA */

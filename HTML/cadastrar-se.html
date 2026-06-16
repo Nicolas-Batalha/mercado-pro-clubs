@@ -38,30 +38,24 @@
 
     <div class="input-group">
       <label for="senha">Senha:</label>
-      <input type="password" name="senha" id="senha" required size="10" maxlength="8" />
+      <input type="password" name="senha" id="senha" required size="10" maxlength="10" />
     </div>
 
     <div class="input-group">
       <label for="senha1">Repetir Senha:</label>
-      <input oninput="validarSenha(this)" type="password" name="senha1" id="senha1" required size="8" maxlength="10" />  
+      <input oninput="validarSenha(this)" type="password" name="senha1" id="senha1" required size="10" maxlength="10" />  
     </div>
 
     <div class="form-actions">
       <button type="submit" class="btn-submit">SALVAR E PUBLICAR PERFIL</button>
     </div>
-
-    <img src="../IMG/pesquisa.png" alt="">
-
+    <p class="conteiner-text">ou</p>
     <div class="contas-section">
       <button type="button" class="btn-social google-btn" id="btn-google">
+        <img src="../IMG/pesquisa.png" class="logo_google" alt="logo da google">
         <i class="fa-brands fa-google"></i> Criar com o Google
       </button>
-      
-      <img src="../IMG/artes-eletronicas.png" alt="logo da EA">
-      
-      <button type="button" class="btn-social ea-btn" id="btn-ea">
-        <i class="fa-solid fa-gamepad"></i> Vincular Conta EA Sports
-      </button>
+
     </div>
   </form>
 </main>
