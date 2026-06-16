@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../CSS/style.css">
-    <title>cadastrar-se| mercado pro clubs</title>
-</head>
+    <title>Mercado Pro Clubs - Conectar Conta</title>
+</head> 
 <body>
   <header class="main-header">
     <a class="logo" href="../index.html" title="voltar para a página inicial">
@@ -21,31 +21,51 @@
       </section>
   </header>
   <main class="form-container">
- <form action="" class="cadastro-form">
-  <div class="conteiner-info">
-  <h4 class="conteiner-info">cadastro no site </h4>
-  </div>
-<div class="input-group">
-                    <label for="nome">Nome Completo / usuario</label>
-                    <input type="text" id="nome" placeholder="Digite seu nome ou usuario" required>
-                    <div class="input-group">
-                      <label for="email">email</label>
-                      <input type="email" name="email"  id="email" placeholder="exemplo@email.com" required>
-                    <div class="input-group">
-                      <label for="senha">Senha:</label>
-                      <input type="password" name="senha" id="senha" required size="10" maxlength="8" />
-                    <div class="input-group">
-                      <label for="senha">Repetir Senha:</label>
-                      <input oninput="validarSenha(this)" type="password" name="senha1" id="senha1" required size="8" maxlength="10" />  
-                      </div>
-                    </div>
-                    </div>
-                </div>
+  <form action="" class="cadastro-form" id="form-cadastro">
+    <div class="conteiner-info">
+      <h4 class="conteiner-info">cadastro no site</h4>
+    </div>
 
-             <div class="form-actions">
-                <button type="submit" class="btn-submit">SALVAR E PUBLICAR PERFIL</button>
-            </div>
+    <div class="input-group">
+      <label for="nome">Nome Completo / usuário</label>
+      <input type="text" id="nome" placeholder="Digite seu nome ou usuario" required>
+    </div>
+
+    <div class="input-group">
+      <label for="email">email</label>
+      <input type="email" name="email" id="email" placeholder="exemplo@email.com" required>
+    </div>
+
+    <div class="input-group">
+      <label for="senha">Senha:</label>
+      <input type="password" name="senha" id="senha" required size="10" maxlength="8" />
+    </div>
+
+    <div class="input-group">
+      <label for="senha1">Repetir Senha:</label>
+      <input oninput="validarSenha(this)" type="password" name="senha1" id="senha1" required size="8" maxlength="10" />  
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-submit">SALVAR E PUBLICAR PERFIL</button>
+    </div>
+
+    <img src="../IMG/pesquisa.png" alt="">
+
+    <div class="contas-section">
+      <button type="button" class="btn-social google-btn" id="btn-google">
+        <i class="fa-brands fa-google"></i> Criar com o Google
+      </button>
+      
+      <img src="../IMG/artes-eletronicas.png" alt="logo da EA">
+      
+      <button type="button" class="btn-social ea-btn" id="btn-ea">
+        <i class="fa-solid fa-gamepad"></i> Vincular Conta EA Sports
+      </button>
+    </div>
   </form>
-  </main>
+</main>
+
+<script type="module" src="../JS/auth.js"></script>
 </body>
 </html>
