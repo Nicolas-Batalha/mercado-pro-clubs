@@ -3,10 +3,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Credenciais oficiais do Mercado Pro Clubs enviadas por você
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Credenciais oficiais do Mercado Pro Clubs
+// ATENÇÃO: Se o erro "API key not valid" continuar, revise o Passo 2 abaixo!
 const firebaseConfig = {
-  apiKey: "AIzaSyA6X9ExKAaNCDdpCr-4h8rUVDMFANRB7Ag",
+  apiKey: "AIzaSyA6X9ExKAaNCDdpCr-4h8rUVDMFANRB7Ag", 
   authDomain: "mercado-pro-clubs.firebaseapp.com",
   projectId: "mercado-pro-clubs",
   storageBucket: "mercado-pro-clubs.firebasestorage.app",
@@ -14,6 +14,7 @@ const firebaseConfig = {
   appId: "1:1018354864332:web:8a60b4a80942c490c43269",
   measurementId: "G-97YN402WJF"
 };
+
 // Inicializando os serviços do Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
@@ -23,7 +24,6 @@ const googleProvider = new GoogleAuthProvider();
 // --- MAPEANDO ELEMENTOS DA INTERFACE (HTML) ---
 const formCadastro = document.getElementById('form-cadastro');
 const btnGoogle = document.getElementById('btn-google');
-const btnEA = document.getElementById('btn-ea');
 
 // --- 1. FUNÇÃO: CADASTRO COM E-MAIL E SENHA ---
 if (formCadastro) {
@@ -64,18 +64,21 @@ if (btnGoogle) {
       })
       .catch((error) => {
         console.error("Erro no login do Google:", error.message);
-        alert("Falha ao conectar com sua Conta Google.");
+        alert("Falha ao conectar com sua Conta Google. Verifique as configurações do Firebase.");
       });
   });
 }
 
-// --- 4. VALIDAÇÃO DE SENHA EM TEMPO REAL ---
+// --- 3. VALIDAÇÃO DE SENHA EM TEMPO REAL ---
 // Tornando a função visível globalmente para o atributo oninput do HTML
 window.validarSenha = function(input) {
-  const senha = document.getElementById('senha').value;
-  if (input.value !== senha) {
-    input.setCustomValidity('As senhas não batem!');
-  } else {
-    input.setCustomValidity(''); // Tudo limpo e validado
+  const senhaElement = document.getElementById('senha');
+  if (senhaElement) {
+    const senha = senhaElement.value;
+    if (input.value !== senha) {
+      input.setCustomValidity('As senhas não batem!');
+    } else {
+      input.setCustomValidity(''); // Tudo limpo e validado
+    }
   }
 };
