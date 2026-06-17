@@ -23,7 +23,7 @@
 
 body {
   /* Usando a variável de fundo aqui! */
-  background-color: var(--cor-fundo-secundario); 
+  background-color: var(--cor-fundo-secundario);
   color: var(--cor-texto-claro);
   overflow-x: hidden; 
 }
