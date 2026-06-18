@@ -6,6 +6,38 @@ main {
     justify-content: center;
     width: 100%;
 }
+.meuperfil{
+   display: flex; 
+   justify-content: center;
+  list-style: none; 
+  padding: 0 20px; /* Espaço inicial e final do carrossel */
+  margin: 0;
+  gap: 10px; /* Espaço entre um botão e outro */
+  
+}
+.meuperfil li{
+    white-space: nowrap;
+}
+/* Estilo dos "botões" do menu */
+.meuperfil a { 
+  color: #A0AAB5; /* Cinza Claro */
+  text-decoration: none; 
+  font-size: 15px;
+  padding: 8px 18px;
+  background: var(--cor-fundo-secundario); /* Fundo mais escuro */
+  border-radius: 20px; /* Deixa com formato arredondado */
+  display: block;
+ transition: transform 0.3s ease, background 0.3s, color 0.3s;
+  font-size: 24px;
+  align-items: center;
+} 
+.meuperfil a.ativo, 
+.meuperfil a:hover {
+  background: #12E06C; /* Verde Neon */
+  color: var(--cor-fundo-secundario); /* Texto escuro para dar contraste com o verde */
+  font-weight: bold;
+  transform: scale(1.1);
+}
 /* section de cada seção */
 .detalhes-jogador{
     display: flex;
@@ -185,7 +217,7 @@ display: flex;
   /* Cria colunas que se adaptam automaticamente ao tamanho disponível */
   grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
   gap: 30px;
-  margin-bottom: 10px;
+  margin: 10px;
 }
 .text-categoria{
     text-align: center;
@@ -303,5 +335,15 @@ input[type="radio"] {
 .color-hover input[type="radio"]:checked + .pc{
  background-color: #ffffff;
 }
+@media screen and (min-width:1024px) {
 
+}
+@media screen and (min-width:320px){
+  .detalhes-jogador{
+    width: auto;
+    height: auto;
+    padding: auto;
+    margin: auto;
+  }
+}
 

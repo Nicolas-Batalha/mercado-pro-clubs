@@ -9,25 +9,24 @@ if (inputUpload) {
       const leitor = new FileReader();
       leitor.onload = function(e) {
         fotoPreview.src = e.target.result;
+        localStorage.setItem('fotoPerfil', e.target.result); // Salva a foto em formato texto
       };
       leitor.readAsDataURL(arquivo);
     }
   });
 }
 
-// --- 2. LÓGICA DO AGENTE LIVRE (FREE AGENT) ---
+// --- 2. LÓGICA DO AGENTE LIVRE ---
 const inputClube = document.getElementById('clube-atual');
 const checkAgenteLivre = document.getElementById('agente-livre');
 
 if (checkAgenteLivre && inputClube) {
   checkAgenteLivre.addEventListener('change', function() {
     if (this.checked) {
-      // Se marcou a caixinha: preenche automático, bloqueia o campo e muda a cor
       inputClube.value = 'Sem Clube (Free Agent)';
       inputClube.disabled = true;
       inputClube.style.opacity = '0.5';
     } else {
-      // Se desmarcou: limpa o campo e libera para digitar de novo
       inputClube.value = '';
       inputClube.disabled = false;
       inputClube.style.opacity = '1';
@@ -35,34 +34,49 @@ if (checkAgenteLivre && inputClube) {
   });
 }
 
-// --- 3. SALVAR DADOS DO JOGADOR ---
+// --- 3. SALVAR E CARREGAR DADOS ---
 const formDados = document.getElementById('form-dados-jogador');
 
+// Carregar dados salvos ao abrir a página
+document.addEventListener('DOMContentLoaded', () => {
+  if(localStorage.getItem('nickname')) document.getElementById('nickname').value = localStorage.getItem('nickname');
+  if(localStorage.getItem('eaId')) document.getElementById('ea-id').value = localStorage.getItem('eaId');
+  if(localStorage.getItem('altura')) document.getElementById('altura').value = localStorage.getItem('altura');
+  if(localStorage.getItem('peso')) document.getElementById('peso').value = localStorage.getItem('peso');
+  if(localStorage.getItem('clube')) document.getElementById('clube-atual').value = localStorage.getItem('clube');
+  if(localStorage.getItem('fotoPerfil')) fotoPreview.src = localStorage.getItem('fotoPerfil');
+
+  // Carregar rádio da Posição
+  const posSalva = localStorage.getItem('posicao');
+  if(posSalva) {
+    const radioPos = document.querySelector(`input[name="posicao"][value="${posSalva}"]`);
+    if(radioPos) radioPos.checked = true;
+  }
+
+  // Carregar rádio da Plataforma
+  const platSalva = localStorage.getItem('plataforma');
+  if(platSalva) {
+    const radioPlat = document.querySelector(`input[name="plataforma"][value="${platSalva}"]`);
+    if(radioPlat) radioPlat.checked = true;
+  }
+});
+
+// Salvar dados no Submit
 if (formDados) {
   formDados.addEventListener('submit', function(event) {
     event.preventDefault(); 
     
-    // Captura os valores antigos
-    const nickname = document.getElementById('nickname').value;
-    const eaId = document.getElementById('ea-id').value;
-    const altura = document.getElementById('altura').value;
-    const peso = document.getElementById('peso').value;
-    const clube = document.getElementById('clube-atual').value;
-    const plataforma = document.getElementById('plataforma').value;
-    
-    // Captura a POSIÇÃO SELECIONADA (procura qual rádio com name="posicao" está checado)
     const posicaoSelecionada = document.querySelector('input[name="posicao"]:checked');
-    const posicao = posicaoSelecionada ? posicaoSelecionada.value : 'Não informada';
+    const plataformaSelecionada = document.querySelector('input[name="plataforma"]:checked');
+
+    localStorage.setItem('nickname', document.getElementById('nickname').value);
+    localStorage.setItem('eaId', document.getElementById('ea-id').value);
+    localStorage.setItem('altura', document.getElementById('altura').value);
+    localStorage.setItem('peso', document.getElementById('peso').value);
+    localStorage.setItem('clube', document.getElementById('clube-atual').value);
+    if(posicaoSelecionada) localStorage.setItem('posicao', posicaoSelecionada.value);
+    if(plataformaSelecionada) localStorage.setItem('plataforma', plataformaSelecionada.value);
     
-    console.log("=== Dados Completos do Perfil ===");
-    console.log("Nickname:", nickname);
-    console.log("EA ID:", eaId);
-    console.log("Altura:", altura + " cm");
-    console.log("Peso:", peso + " kg");
-    console.log("Clube Atual:", clube);
-    console.log("Posição Principal:", posicao);
-    console.log("qual plataforma joga:",plataforma)
-    
-    alert(`Perfil atualizado! Bem-vindo, novo ${posicao} do Mercado Pro Clubs!`);
+    alert(`Perfil do Mercado Pro Clubs atualizado com sucesso!`);
   });
 }
