@@ -236,54 +236,71 @@ display: flex;
   box-shadow: 0 0 10px rgba(18, 224, 108, 0.4);
 }
 /*plataforma*/
-
-.plataforma{
-    display: flex;
-    flex-direction: row;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 30px;
-    margin-bottom: 10px;
+input[type="radio"] {
+  display: none; 
 }
-.btn-plataforma{
+/* Atualize a classe plataforma principal para garantir que ela ocupe o espaço correto */
+.plataforma {
     display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 10px;
-  background-color: #222;
-  color: #fff;
-  border: 1px solid #333;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 15px;
-  transition: all 0.3s ease;
-  width: 100px;
- 
- 
+    justify-content: center;
+    width: 100%;
+}
+
+/* Cria o layout de colunas lado a lado */
+.container-plataformas {
+    display: flex;
+    justify-content: center;
+    gap: 50px; /* Aumente ou diminua este valor para afastar/aproximar as colunas */
+}
+
+/* Organiza os itens DENTRO de cada coluna (um embaixo do outro) */
+.coluna-plataforma {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza os botões dentro da própria coluna */
+    gap: 15px; /* Espaço entre os botões */
+}
+
+/* Mantém os botões com a mesma largura, para o visual ficar simétrico */
+.btn-plataforma {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background-color: #222;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    width: 150px; /* DEFINE UMA LARGURA FIXA PARA OS BOTÕES FICAREM IGUAIS */
+    text-align: center;
 }
 .btn-plataforma:hover{
     border-color: #12E06C;
   color: #12E06C;
 }
-.grid-posicoes input[type="radio"]:checked + .btn-plataforma {
+.color-hover input[type="radio"]:checked + .btn-plataforma  {
   background-color: #12E06C;
   color: #111;
   border-color: #12E06C;
   box-shadow: 0 0 10px rgba(18, 224, 108, 0.4);
 }
-.grid-posicoes input[type="radio"]:checked + .nintendo{
+.color-hover input[type="radio"]:checked + .nintendo{
     background-color: rgba(248, 0, 0, 0.836);
     color: #ffffff;
 }
-.grid-posicoes input[type="radio"]:checked +.playstation{
+.color-hover input[type="radio"]:checked +.playstation{
     background-color: rgba(0, 0, 255, 0.281);
     color: #ffffff;
     
 }
-.grid-posicoes input[type="radio"]:checked + .xbox{
+.color-hover input[type="radio"]:checked + .xbox{
  background-color:#12E06C ;
 }
-.grid-posicoes input[type="radio"]:checked + .pc{
+.color-hover input[type="radio"]:checked + .pc{
  background-color: #ffffff;
 }
 
