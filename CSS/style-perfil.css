@@ -2,57 +2,46 @@
 main {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centraliza horizontalmente */
-    justify-content: center;
+    align-items: center;
     width: 100%;
 }
-.meuperfil{
-   display: flex; 
-   justify-content: center;
-  list-style: none; 
-  padding: 0 20px; /* Espaço inicial e final do carrossel */
-  margin: 0;
-  gap: 10px; /* Espaço entre um botão e outro */
-  
+ 
+/* --- Menu de navegação --- */
+.meuperfil {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0 20px;
+    margin: 0;
+    gap: 10px;
 }
-.meuperfil li{
+ 
+.meuperfil li {
     white-space: nowrap;
 }
-/* Estilo dos "botões" do menu */
-.meuperfil a { 
-  color: #A0AAB5; /* Cinza Claro */
-  text-decoration: none; 
-  font-size: 15px;
-  padding: 8px 18px;
-  background: var(--cor-fundo-secundario); /* Fundo mais escuro */
-  border-radius: 20px; /* Deixa com formato arredondado */
-  display: block;
- transition: transform 0.3s ease, background 0.3s, color 0.3s;
-  font-size: 24px;
-  align-items: center;
-} 
-.meuperfil a.ativo, 
-.meuperfil a:hover {
-  background: #12E06C; /* Verde Neon */
-  color: var(--cor-fundo-secundario); /* Texto escuro para dar contraste com o verde */
-  font-weight: bold;
-  transform: scale(1.1);
-}
-/* section de cada seção */
-.detalhes-jogador{
-    display: flex;
-    justify-content: center;
+ 
+.meuperfil a {
+    color: #A0AAB5;
+    text-decoration: none;
+    font-size: 20px;
+    padding: 8px 18px;
+    background: var(--cor-fundo-secundario);
+    border-radius: 20px;
+    display: block;
+    transition: transform 0.3s ease, background 0.3s, color 0.3s;
     align-items: center;
-    width:500px;
 }
-
-.posicoes{
-    display: flex;
-    flex-direction:column;
-    justify-content: space-around;
-    width: 100%;
+ 
+.meuperfil a.ativo,
+.meuperfil a:hover {
+    background: #12E06C;
+    color: var(--cor-fundo-secundario);
+    font-weight: bold;
+    transform: scale(1.1);
 }
-.titulo{
+ 
+/* --- Títulos --- */
+.titulo {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -60,240 +49,225 @@ main {
     text-transform: uppercase;
     margin: 20px;
 }
-.user-icon{
+ 
+/* --- Foto de perfil --- */
+.user-icon {
     display: flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
 }
-.user-name{
-    display: grid;
-
-}
-.perfil-imagem-container{
-display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  background-color: #1a1a1a; /* Fundo escuro */
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 300px;
-  margin: 0 auto;
-}
-.img-icon{
-    width: 250px;
-  height: 250px;
-  border-radius: 50%; /* Faz a imagem ficar perfeitamente redonda */
-  object-fit: cover; /* Garante que a foto não fique esticada ou espremida */
-  border: 3px solid #12E06C; /* Borda com a cor principal do site */
-  box-shadow: 0 0 10px rgba(18, 224, 108, 0.3);
-}
-.upload{
-   background-color: #12E06C;
-  color: #111;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s;
-  display: inline-block;
-}
-.perfil-container{
+ 
+.perfil-container {
     margin-top: 10px;
-    
 }
-.acoes-perfil{
-     display: flex;
+ 
+.perfil-imagem-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 300px;
+    margin: 0 auto;
+}
+ 
+.img-icon {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #12E06C;
+    box-shadow: 0 0 10px rgba(18, 224, 108, 0.3);
+}
+ 
+.acoes-perfil {
+    display: flex;
     justify-content: center;
     align-items: center;
-
 }
-.user-button{
-    
-    margin-bottom: 10px;
-    background-color: var(--cor-verde-neon);
-    padding: 15px;
-    border-radius: 20px;
-}
-.user-button :hover {
-    color: var( --cor-fundo-principal);
-}
-/* Novos Estilos para o Formulário */
+ 
+/* --- Formulário --- */
 .perfil-dados-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
-
+ 
+.detalhes-jogador {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+}
+ 
 .campo-grupo {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
 }
-
+ 
 .linha-dupla {
-  display: flex;
-  gap: 15px;
+    display: flex;
+    gap: 15px;
 }
-
+ 
 .campo-grupo label {
-  font-size: 14px;
-  color: #ccc;
-  font-weight: bold;
+    font-size: 14px;
+    color: #ccc;
+    font-weight: bold;
 }
-
+ 
 .campo-grupo input {
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #333;
-  background-color: #222;
-  color: white;
-  font-size: 16px;
-  outline: none;
-  transition: border-color 0.3s;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background-color: #222;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
 }
-
+ 
 .campo-grupo input:focus {
-  border-color: #12E06C;
+    border-color: #12E06C;
 }
-
+ 
 .btn-salvar {
-  background-color: #12E06C;
-  color: #111;
-  padding: 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-  margin-top: 10px;
-  transition: background-color 0.3s;
+    background-color: #12E06C;
+    color: #111;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 10px;
+    transition: background-color 0.3s;
 }
-
+ 
 .btn-salvar:hover {
-  background-color: #0fb356;
+    background-color: #0fb356;
 }
-/* --- Estilos do Checkbox de Agente Livre --- */
+ 
+/* --- Checkbox agente livre --- */
 .checkbox-grupo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
 }
-
+ 
 .checkbox-grupo input[type="checkbox"] {
-  /* Remove a largura padrão de 100% dos inputs normais */
-  width: 20px; 
-  height: 20px;
-  cursor: pointer;
-  accent-color: #12E06C; /* Pinta o checkbox com o verde neon quando marcado */
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #12E06C;
 }
-
+ 
 .checkbox-grupo label {
-  font-size: 14px;
-  color: #aaa;
-  cursor: pointer;
-  font-weight: normal;
+    font-size: 14px;
+    color: #aaa;
+    cursor: pointer;
+    font-weight: normal;
 }
-/* --- Estilos da Posição do Jogador (Estilo EA FC) --- */
-.titulo-posicao {
-  margin-top: 10px;
-  font-size: 15px;
-  color: #ccc;
-  font-weight: bold;
-  text-align: center;
+ 
+/* --- Seção de posições --- */
+.posicoes {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 100%;
 }
-.por-posicao{
+ 
+.grid-posicoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+    gap: 30px;
+    margin: 10px;
+}
+ 
+.por-posicao {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
 }
-.grid-posicoes {
-  display: grid;
-  /* Cria colunas que se adaptam automaticamente ao tamanho disponível */
-  grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
-  gap: 30px;
-  margin: 10px;
-}
-.text-categoria{
+ 
+.text-categoria {
     text-align: center;
     font-size: 25px;
     margin: 20px;
 }
-.defesa{
-    height: 40px;
-}
-/* Esconde a bolinha de seleção feia do navegador */
-.grid-posicoes input[type="radio"] {
-  display: none; 
-}
-
-/* Estiliza o texto como se fosse um botão */
-.btn-posicao {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 10px;
-  background-color: #222;
-  color: #fff;
-  border: 1px solid #333;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 15px;
-  transition: all 0.3s ease;
  
- 
-}
-
-.img-posicao{
+.img-posicao {
     height: 100px;
     width: 100%;
 }
-/* Efeito ao passar o mouse */
+ 
+/* FIX: escopo restrito — só esconde radios dentro do grid de posições */
+.grid-posicoes input[type="radio"] {
+    display: none;
+}
+ 
+.btn-posicao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background-color: #222;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+ 
 .btn-posicao:hover {
-  border-color: #12E06C;
-  color: #12E06C;
+    border-color: #12E06C;
+    color: #12E06C;
 }
-
-/* EFEITO MÁGICO: Quando o input oculto está marcado, muda o label seguinte */
+ 
 .grid-posicoes input[type="radio"]:checked + .btn-posicao {
-  background-color: #12E06C;
-  color: #111;
-  border-color: #12E06C;
-  box-shadow: 0 0 10px rgba(18, 224, 108, 0.4);
+    background-color: #12E06C;
+    color: #111;
+    border-color: #12E06C;
+    box-shadow: 0 0 10px rgba(18, 224, 108, 0.4);
 }
-/*plataforma*/
-input[type="radio"] {
-  display: none; 
-}
-/* Atualize a classe plataforma principal para garantir que ela ocupe o espaço correto */
+ 
+/* --- Seção de plataformas --- */
 .plataforma {
     display: flex;
     justify-content: center;
     width: 100%;
 }
-
-/* Cria o layout de colunas lado a lado */
+ 
 .container-plataformas {
     display: flex;
     justify-content: center;
-    gap: 50px; /* Aumente ou diminua este valor para afastar/aproximar as colunas */
+    flex-wrap: wrap; /* FIX: evita overflow em telas pequenas */
+    gap: 30px;
 }
-
-/* Organiza os itens DENTRO de cada coluna (um embaixo do outro) */
+ 
 .coluna-plataforma {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centraliza os botões dentro da própria coluna */
-    gap: 15px; /* Espaço entre os botões */
+    align-items: center;
+    gap: 15px;
 }
-
-/* Mantém os botões com a mesma largura, para o visual ficar simétrico */
+ 
+/* FIX: escopo restrito — só esconde radios dentro do container de plataformas */
+.container-plataformas input[type="radio"] {
+    display: none;
+}
+ 
 .btn-plataforma {
     display: flex;
     justify-content: center;
@@ -307,43 +281,70 @@ input[type="radio"] {
     font-weight: bold;
     font-size: 15px;
     transition: all 0.3s ease;
-    width: 150px; /* DEFINE UMA LARGURA FIXA PARA OS BOTÕES FICAREM IGUAIS */
+    width: 150px;
     text-align: center;
 }
-.btn-plataforma:hover{
+ 
+.btn-plataforma:hover {
     border-color: #12E06C;
-  color: #12E06C;
+    color: #12E06C;
 }
-.color-hover input[type="radio"]:checked + .btn-plataforma  {
-  background-color: #12E06C;
-  color: #111;
-  border-color: #12E06C;
-  box-shadow: 0 0 10px rgba(18, 224, 108, 0.4);
+ 
+.color-hover input[type="radio"]:checked + .btn-plataforma {
+    background-color: #12E06C;
+    color: #111;
+    border-color: #12E06C;
+    box-shadow: 0 0 10px rgba(18, 224, 108, 0.4);
 }
-.color-hover input[type="radio"]:checked + .nintendo{
-    background-color: rgba(248, 0, 0, 0.836);
+ 
+.color-hover input[type="radio"]:checked + .nintendo {
+    background-color: #e00000;
     color: #ffffff;
 }
-.color-hover input[type="radio"]:checked +.playstation{
-    background-color: rgba(0, 0, 255, 0.281);
+ 
+.color-hover input[type="radio"]:checked + .playstation {
+    background-color: #003791;
     color: #ffffff;
-    
 }
-.color-hover input[type="radio"]:checked + .xbox{
- background-color:#12E06C ;
+ 
+.color-hover input[type="radio"]:checked + .xbox {
+    background-color: #12E06C;
+    color: #111;
 }
-.color-hover input[type="radio"]:checked + .pc{
- background-color: #ffffff;
+ 
+.color-hover input[type="radio"]:checked + .pc {
+    background-color: #ffffff;
+    color: #111;
 }
-@media screen and (min-width:1024px) {
-
+ 
+/* --- Responsividade --- */
+@media screen and (max-width: 600px) {
+    .detalhes-jogador {
+        width: 100%;
+        padding: 0 16px;
+    }
+ 
+    .container-plataformas {
+        gap: 20px;
+    }
+ 
+    .btn-plataforma {
+        width: 130px;
+    }
+ 
+    .linha-dupla {
+        flex-direction: column;
+    }
 }
-@media screen and (min-width:320px){
-  .detalhes-jogador{
-    width: auto;
-    height: auto;
-    padding: auto;
-    margin: auto;
-  }
+ 
+@media screen and (min-width: 1024px) {
+    .perfil-dados-form {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+ 
+    .posicoes {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 }
-

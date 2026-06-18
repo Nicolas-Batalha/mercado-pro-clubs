@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,162 +16,175 @@
         />
       </a>
       <div class="menu-carrossel">
-      <nav >
-        <ul class="meuperfil">
-          <li><a href="times.html">Times</a></li>
-          <li><a href="jogadores.html" >Jogadores</a></li>
-          <li><a href="noticias.html">Notícias</a></li>
-          <li><a href="contato.html">torneio</a></li>
-        </ul>
-      </nav>
-    </div>
+        <nav>
+          <ul class="meuperfil">
+            <li><a href="../HTML/times.html">Times</a></li>
+            <li><a href="#">Jogadores</a></li>
+            <li><a href="#">Notícias</a></li>
+            <li><a href="#">torneio</a></li>
+          </ul>
+        </nav>
+      </div>
     </header>
+
     <main>
-        <h1 class="titulo"> Meu Perfil</h1>
+        <h1 class="titulo">Meu Perfil</h1>
+
         <section class="user-icon">
             <div class="perfil-container">
                 <div class="perfil-imagem-container">
-                    <img id="foto-perfil-preview" src="../IMG/user-icon.svg" class="img-icon" alt="imagem de iconec exemplo">
-                </div>  
+                    <img id="foto-perfil-preview" src="../IMG/user-icon.svg" class="img-icon" alt="foto de perfil do jogador">
+                </div>
                 <div class="acoes-perfil">
-    <label for="upload-foto" class="btn-salvar">Fazer upload de sua foto</label>
-    <input type="file" id="upload-foto" class="upload" accept="image/*" style="display: none;">
-</div>
-             </div>
+                    <label for="upload-foto" class="btn-salvar">Fazer upload de sua foto</label>
+                    <input type="file" id="upload-foto" class="upload" accept="image/*" style="display: none;">
+                </div>
+            </div>
         </section>
-        <section class="detalhes-jogador">
-             <form id="form-dados-jogador" class="perfil-dados-form">
+
+        <form id="form-dados-jogador" class="perfil-dados-form">
+
+            <section class="detalhes-jogador">
                 <h2 class="titulo">detalhes do jogador</h2>
-    <div class="campo-grupo">
-      <label for="nickname">Nickname (Nome no Site)</label>
-      <input type="text" id="nickname" placeholder="Ex: Allejo" required>
-    </div>
 
-    <div class="campo-grupo">
-      <label for="ea-id">ID da EA (Origin Name)</label>
-      <input type="text" id="ea-id" placeholder="Ex: JogadorPro123" required>
-    </div>
+                <div class="campo-grupo">
+                    <label for="nickname">Nickname (Nome no Site)</label>
+                    <input type="text" id="nickname" placeholder="Ex: Allejo" required>
+                </div>
 
-    <div class="linha-dupla">
-      <div class="campo-grupo">
-        <label for="altura">Altura (cm)</label>
-        <input type="number" id="altura" placeholder="Ex: 180" min="150" max="220" required>
-      </div>
+                <div class="campo-grupo">
+                    <label for="ea-id">ID da EA (Origin Name)</label>
+                    <input type="text" id="ea-id" placeholder="Ex: JogadorPro123" required>
+                </div>
 
-      <div class="campo-grupo">
-        <label for="peso">Peso (kg)</label>
-        <input type="number" id="peso" placeholder="Ex: 75" min="40" max="150" required>
-      </div>
-    </div>
+                <div class="linha-dupla">
+                    <div class="campo-grupo">
+                        <label for="altura">Altura (cm)</label>
+                        <input type="number" id="altura" placeholder="Ex: 180" min="150" max="220" required>
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="peso">Peso (kg)</label>
+                        <input type="number" id="peso" placeholder="Ex: 75" min="40" max="150" required>
+                    </div>
+                </div>
+            </section>
 
-    
+            <section class="clube">
+                <h2 class="titulo">clube atual</h2>
 
-</div>
-        </section>
-        <section class="clube">
-            <h2 class="titulo">clube atual</h2>
-        <div class="campo-grupo">
-      <label for="clube-atual">Clube Atual</label>
-      <input type="text" id="clube-atual" placeholder="Ex: Mercado FC" required>
-      
-      <div class="checkbox-grupo">
-        <input type="checkbox" id="agente-livre">
-        <label for="agente-livre">Estou Sem Clube (Free Agent)</label>
-      </div>
-    </div>
-    </section>
-    <section class="posicoes">
-        <h2 class="titulo">Posição</h2>
-        <div class="campo-grupo">
-      
-      <div class="grid-posicoes">
-        <div class="por-posicao defesa">
-            <img src="../IMG/zaga.svg" class="img-posicao" alt="">
-        <h3 class="text-categoria">defesa</h3>
-        <input type="radio" name="posicao" id="pos-gol" value="GOL" required>
-        <label for="pos-gol" class="btn-posicao defesa">GOL</label>
+                <div class="campo-grupo">
+                    <label for="clube-atual">Clube Atual</label>
+                    <input type="text" id="clube-atual" placeholder="Ex: Mercado FC" required>
 
-        <input type="radio" name="posicao" id="pos-zag" value="ZAG">
-        <label for="pos-zag" class="btn-posicao defesa">ZAG</label>
+                    <div class="checkbox-grupo">
+                        <input type="checkbox" id="agente-livre">
+                        <label for="agente-livre">Estou Sem Clube (Free Agent)</label>
+                    </div>
+                </div>
+            </section>
 
-        <input type="radio" name="posicao" id="pos-ld" value="LD">
-        <label for="pos-ld" class="btn-posicao defesa">LD</label>
+            <section class="posicoes">
+                <h2 class="titulo">Posição</h2>
 
-        <input type="radio" name="posicao" id="pos-le" value="LE">
-        <label for="pos-le" class="btn-posicao defesa">LE</label>
-        </div>
-        <div class="por-posicao">
-            <img src="../IMG/meio.svg" class="img-posicao" alt="">
-        <h3 class="text-categoria">meio campo</h3>
-        <input type="radio" name="posicao" id="pos-vol" value="VOL">
-        <label for="pos-vol" class="btn-posicao">VOL</label>
+                <div class="campo-grupo">
+                    <div class="grid-posicoes">
 
-        <input type="radio" name="posicao" id="pos-mc" value="MC">
-        <label for="pos-mc" class="btn-posicao">MC</label>
+                        <div class="por-posicao defesa">
+                            <img src="../IMG/zaga.svg" class="img-posicao" alt="">
+                            <h3 class="text-categoria">defesa</h3>
 
-        <input type="radio" name="posicao" id="pos-mei" value="MEI">
-        <label for="pos-mei" class="btn-posicao">MEI</label>
+                            <input type="radio" name="posicao" id="pos-gol" value="GOL" required>
+                            <label for="pos-gol" class="btn-posicao defesa">GOL</label>
 
-        <input type="radio" name="posicao" id="pos-me/md" value="Me/md">
-        <label for="pos-me/md" class="btn-posicao">ME/MD</label>
-        </div>
-        <div class="por-posicao">
-            <img src="../IMG/ataque.svg" class="img-posicao" alt="">
-        <h3 class="text-categoria">ataque</h3>
+                            <input type="radio" name="posicao" id="pos-zag" value="ZAG">
+                            <label for="pos-zag" class="btn-posicao defesa">ZAG</label>
 
-        <input type="radio" name="posicao" id="pos-pe" value="PE">
-        <label for="pos-pe" class="btn-posicao">PE</label>
+                            <input type="radio" name="posicao" id="pos-ld" value="LD">
+                            <label for="pos-ld" class="btn-posicao defesa">LD</label>
 
-        <input type="radio" name="posicao" id="pos-pd" value="PD">
-        <label for="pos-pd" class="btn-posicao">PD</label>
+                            <input type="radio" name="posicao" id="pos-le" value="LE">
+                            <label for="pos-le" class="btn-posicao defesa">LE</label>
+                        </div>
 
-        <input type="radio" name="posicao" id="pos-ata" value="ATA">
-        <label for="pos-ata" class="btn-posicao">ATA</label>
+                        <div class="por-posicao">
+                            <img src="../IMG/meio.svg" class="img-posicao" alt="">
+                            <h3 class="text-categoria">meio campo</h3>
 
-         <input type="radio" name="posicao" id="pos-sa" value="SA">
-        <label for="pos-sa" class="btn-posicao">SA</label>
-        </div>
-      </div>
-    </div>
-    </section>
-    <h2 class="titulo">plataformas</h2>
-    <section class="plataforma">
-        <div class="color-hover container-plataformas">
-            
-            <div class="coluna-plataforma">
-                <h3 class="plataforma-text">nova-geração</h3>
+                            <input type="radio" name="posicao" id="pos-vol" value="VOL">
+                            <label for="pos-vol" class="btn-posicao">VOL</label>
 
-                <input type="radio" name="plataforma" id="nintendo switch 2" value="nintendo switch 2" required>
-                <label for="nintendo switch 2" class="btn-plataforma nintendo">nintendo switch 2</label>
+                            <input type="radio" name="posicao" id="pos-mc" value="MC">
+                            <label for="pos-mc" class="btn-posicao">MC</label>
 
-                <input type="radio" name="plataforma" id="playstation 5" value="playstation 5" required>
-                <label for="playstation 5" class="btn-plataforma playstation">playstation 5</label>
+                            <input type="radio" name="posicao" id="pos-mei" value="MEI">
+                            <label for="pos-mei" class="btn-posicao">MEI</label>
 
-                <input type="radio" name="plataforma" id="xbox serie" value="xbox serie" required>
-                <label for="xbox serie" class="btn-plataforma xbox">xbox serie</label>
+                            <input type="radio" name="posicao" id="pos-memd" value="ME/MD">
+                            <label for="pos-memd" class="btn-posicao">ME/MD</label>
+                        </div>
 
-                <input type="radio" name="plataforma" id="pc" value="pc" required>
-                <label for="pc" class="btn-plataforma pc">PC</label>    
-            </div>
-              
-            <div class="coluna-plataforma">
-                <h3 class="plataforma-text">velha-geração</h3>
+                        <div class="por-posicao">
+                            <img src="../IMG/ataque.svg" class="img-posicao" alt="">
+                            <h3 class="text-categoria">ataque</h3>
 
-                <input type="radio" name="plataforma" id="nintendo switch" value="nintendo switch" required>
-                <label for="nintendo switch" class="btn-plataforma nintendo">nintendo switch</label>
+                            <input type="radio" name="posicao" id="pos-pe" value="PE">
+                            <label for="pos-pe" class="btn-posicao">PE</label>
 
-                <input type="radio" name="plataforma" id="playstation 4" value="playstation 4" required>
-                <label for="playstation 4" class="btn-plataforma playstation">playstation 4</label>
+                            <input type="radio" name="posicao" id="pos-pd" value="PD">
+                            <label for="pos-pd" class="btn-posicao">PD</label>
 
-                <input type="radio" name="plataforma" id="xbox one" value="xbox one" required>
-                <label for="xbox one" class="btn-plataforma xbox">xbox one</label>
-            </div>
+                            <input type="radio" name="posicao" id="pos-ata" value="ATA">
+                            <label for="pos-ata" class="btn-posicao">ATA</label>
 
-        </div>
-    </section>
-    <button type="submit" class="btn-salvar">Salvar Perfil</button>
-    </form>
+                            <input type="radio" name="posicao" id="pos-sa" value="SA">
+                            <label for="pos-sa" class="btn-posicao">SA</label>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <h2 class="titulo">plataformas</h2>
+            <section class="plataforma">
+                <div class="color-hover container-plataformas">
+
+                    <div class="coluna-plataforma">
+                        <h3 class="plataforma-text">nova-geração</h3>
+
+                        <input type="radio" name="plataforma" id="plat-switch2" value="nintendo switch 2" required>
+                        <label for="plat-switch2" class="btn-plataforma nintendo">nintendo switch 2</label>
+
+                        <input type="radio" name="plataforma" id="plat-ps5" value="playstation 5">
+                        <label for="plat-ps5" class="btn-plataforma playstation">playstation 5</label>
+
+                        <input type="radio" name="plataforma" id="plat-xboxs" value="xbox serie">
+                        <label for="plat-xboxs" class="btn-plataforma xbox">xbox serie</label>
+
+                        <input type="radio" name="plataforma" id="plat-pc" value="pc">
+                        <label for="plat-pc" class="btn-plataforma pc">PC</label>
+                    </div>
+
+                    <div class="coluna-plataforma">
+                        <h3 class="plataforma-text">velha-geração</h3>
+
+                        <input type="radio" name="plataforma" id="plat-switch" value="nintendo switch">
+                        <label for="plat-switch" class="btn-plataforma nintendo">nintendo switch</label>
+
+                        <input type="radio" name="plataforma" id="plat-ps4" value="playstation 4">
+                        <label for="plat-ps4" class="btn-plataforma playstation">playstation 4</label>
+
+                        <input type="radio" name="plataforma" id="plat-xboxo" value="xbox one">
+                        <label for="plat-xboxo" class="btn-plataforma xbox">xbox one</label>
+                    </div>
+
+                </div>
+            </section>
+
+            <button type="submit" class="btn-salvar">Salvar Perfil</button>
+
+        </form>
     </main>
+
     <script src="../js/script-perfil.js"></script>
 </body>
 </html>

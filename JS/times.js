@@ -27,15 +27,6 @@ if (vagasClubes.length === 0) {
             estilo: "competitivo",
             descricao: "Clube focado em campeonatos. Precisamos de um volante (VOL) que saiba sair jogando e tenha microfone. Treinos terça e quinta às 20h."
         },
-        {
-            id: Date.now() - 50000,
-            clube: "Resenha United",
-            plataforma: "ps5",
-            posicao: "ata",
-            jogo: "eafc25", // FIX: campo jogo adicionado
-            estilo: "casual",
-            descricao: "Galera mais velha, jogamos só final de semana para dar risada. Precisamos de um atacante que não seja fominha."
-        }
     ];
     salvarNoBanco();
 }
