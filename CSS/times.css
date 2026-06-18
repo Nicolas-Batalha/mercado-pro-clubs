@@ -1,0 +1,203 @@
+/* --- SEÇÃO LFG (Looking For Group) --- */
+.lfg-section {
+    padding: 40px 20px;
+    background-color: #0f0f0f;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+}
+
+.lfg-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Cabeçalho e Filtros */
+.lfg-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.lfg-header h2 {
+    color: #12E06C; /* Verde Neon Tático */
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.lfg-filtros {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.lfg-select, .lfg-input {
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 1px solid #333;
+    padding: 10px 15px;
+    border-radius: 8px;
+    outline: none;
+    font-family: inherit;
+    transition: 0.3s;
+}
+
+.lfg-select:focus, .lfg-input:focus, .lfg-textarea:focus {
+    border-color: #12E06C;
+}
+
+/* Criador de Anúncios */
+.lfg-criador {
+    background-color: #1a1a1a;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    margin-bottom: 40px;
+}
+
+.lfg-criador h3 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.form-linha {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-linha .lfg-input {
+    flex: 1;
+}
+
+.lfg-textarea {
+    width: 100%;
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 8px;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 15px;
+}
+
+.btn-publicar {
+    background-color: #12E06C;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.3s;
+    font-family: inherit;
+}
+
+.btn-publicar:hover {
+    background-color: #0fb857;
+    transform: translateY(-2px);
+}
+
+/* Feed e Cards */
+.lfg-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.lfg-card {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 20px;
+    transition: 0.3s;
+}
+
+.lfg-card:hover {
+    border-color: #555;
+    transform: translateY(-3px);
+}
+
+.card-topo {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Badges Coloridas */
+.badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.badge-xbox { background-color: #107C10; color: #fff; }
+.badge-ps5 { background-color: #003791; color: #fff; }
+.badge-pc { background-color: #d32f2f; color: #fff; }
+.badge-posicao { background-color: #333; color: #12E06C; border: 1px solid #12E06C; }
+
+.card-corpo .gamertag {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+}
+
+.card-corpo .descricao {
+    color: #bbb;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.card-rodape {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #333;
+    padding-top: 15px;
+}
+
+.estilo-jogo {
+    font-size: 0.85rem;
+    color: #888;
+    background-color: #222;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.btn-chamar {
+    background-color: transparent;
+    color: #12E06C;
+    border: 1px solid #12E06C;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-chamar:hover {
+    background-color: #12E06C;
+    color: #000;
+}
+
+/* Responsividade para Celulares */
+@media (max-width: 600px) {
+    .form-linha {
+        flex-direction: column;
+    }
+    .lfg-filtros {
+        flex-direction: column;
+    }
+}
+
+.titulo-time {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    text-transform: uppercase;
+    margin: 20px;
+}

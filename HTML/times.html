@@ -18,16 +18,122 @@
       <div class="menu-carrossel">
       <nav >
         <ul class="lista-links">
-          <li><a href="HTML/meu-perfil.html">meu perfil</a></li>
-          <li><a href="jogadores.html" >Jogadores</a></li>
-          <li><a href="noticias.html">Notícias</a></li>
-          <li><a href="contato.html">torneio</a></li>
+          <li><a href="../HTML/meu-perfil.html">meu perfil</a></li>
+          <li><a href="#" >Jogadores</a></li>
+          <li><a href="#">Notícias</a></li>
+          <li><a href="#">torneio</a></li>
         </ul>
       </nav>
     </div>
     </header>
-    <main class="main-times">
+    <main>
+    <section class="lfg-section">
+    <div class="lfg-container">
+      
+        <div class="lfg-header">
+            <h2>Mercado de Transferências</h2>
+            <p>Encontre o seu esquadrão ou recrute para o seu clube.</p>
+            
+            <div class="lfg-filtros">
+                <select id="filtro-plataforma" class="lfg-select">
+                    <option value="todas">Todas as Plataformas</option>
+                    <option value="switch2">nintendo switch 2</option>
+                    <option value="switch">nintendo switch</option>
+                    <option value="xboxS">Xbox Series X/S</option>
+                    <option value="xboxO">Xbox Series X/S</option>
+                    <option value="ps5">PlayStation 5</option>
+                    <option value="ps4">PlayStation 4</option>
+                    <option value="pc">PC</option>
+                </select>
+                <select id="filtro-posicao" class="lfg-select">
+                    <option value="todas">Todas as Posições</option>
+                    <option value="ata">Ataque (ATA)</option>
+                    <option value="mei">Meio-Campo (MEI/VOL)</option>
+                    <option value="zag">Defesa (ZAG/LAT)</option>
+                    <option value="gk">Goleiro (GK)</option>
+                </select>
+                <select id="filtro-jogo" class="lfg-select">
+                    <option value="todas">Todas os jogos</option>
+                    <option value="eafc26">EAFC26</option>
+                    <option value="eafc25">EAFC25</option>
+                    <option value="eafc24">EAFC24</option>
+                    <option value="eafc23">EAFC23</option>
+                </select>
+              </div>
+        <h1 class="titulo-time">encontre seu clube </h1>
+        <div class="lfg-criador">
+            <h3>Anunciar Vaga no Seu Clube</h3>
+            <form id="form-lfg" class="form-lfg">
+                <div class="form-linha">
+                    <input type="text" id="post-clube" class="lfg-input" placeholder="Nome do Clube" required>
+                    <select id="post-plataforma" required class="lfg-input">
+                        <option value="" disabled selected>Plataforma do Clube</option>
+                      <option value="switch2">nintendo switch 2</option>
+                      <option value="switch">nintendo switch</option>
+                      <option value="xboxS">Xbox Series X/S</option>
+                      <option value="xboxO">Xbox one</option>
+                      <option value="ps5">PlayStation 5</option>
+                      <option value="ps4">PlayStation 4</option>
+                      <option value="pc">PC</option>
+                    </select>
+                </div>
+                <div class="form-linha">
+                    <select id="post-posicao" required class="lfg-input">
+                        <option value="" disabled selected>Posição Necessária</option>
+                        <option value="ata">Precisamos de ATA</option>
+                        <option value="mei">Precisamos de MEI</option>
+                        <option value="vol">Precisamos de VOL</option>
+                        <option value="zag">Precisamos de ZAG/LAT</option>
+                        <option value="gk">Precisamos de GK</option>
+                    </select>
+                    <select id="post-estilo" required class="lfg-input">
+                        <option value="" disabled selected>Estilo do Time</option>
+                        <option value="casual">Casual (Por diversão)</option>
+                        <option value="competitivo">Competitivo (Ligas/Campeonatos)</option>
+                    </select>
+                </div>
+                <textarea id="post-descricao" class="lfg-textarea" rows="3" placeholder="Ex: Nosso clube está na Divisão 2. Precisamos de um volante pegador para fechar o elenco titular. Jogamos todos os dias às 21h." required></textarea>
+                <button type="submit" class="btn-publicar">Publicar Vaga</button>
+            </form>
+        </div>
+        <h3 class="titulo-time">exemplos de post</h3>
+        <div class="lfg-feed" id="lfg-feed">
+            
+            <div class="lfg-card">
+                <div class="card-topo">
+                    <span class="badge badge-xbox">Xbox one </span>
+                    <span class="badge badge-vaga">VAGA: VOL</span>
+                </div>
+                <div class="card-corpo">
+                    <h4 class="nome-clube">Brazucas FC</h4>
+                    <p class="descricao">Clube focado em campeonatos. Precisamos de um volante (VOL) que saiba sair jogando e tenha microfone. Treinos terça e quinta às 20h.</p>
+                </div>
+                <div class="card-rodape">
+                    <span class="estilo-jogo">Competitivo</span>
+                    <button class="btn-chamar">Pedir Teste no Clube</button>
+                </div>
+            </div>
 
+             <div class="lfg-card">
+                <div class="card-topo">
+                    <span class="badge badge-ps5">PlayStation 4</span>
+                    <span class="badge badge-vaga">VAGA: ATA</span>
+                </div>
+                <div class="card-corpo">
+                    <h4 class="nome-clube">Resenha United</h4>
+                    <p class="descricao">Galera mais velha, jogamos só final de semana para dar risada. Precisamos de um atacante que não seja fominha.</p>
+                </div>
+                <div class="card-rodape">
+                    <span class="estilo-jogo">Casual</span>
+                    <button class="btn-chamar">Pedir Teste no Clube</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </div>
+</section>
     </main>
+    <script src="../js/times.js"></script>
 </body>
 </html>
