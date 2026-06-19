@@ -11,13 +11,17 @@ body.pagina-cadastro {
 
 /* ─── HEADER SIMPLES ─── */
 .cad-header {
-  padding: 20px 32px;
+  padding: 10px 20px;
   display: flex;
+  justify-content: center;
   align-items: center;
 }
 
 .cad-logo {
-  width: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
   height: auto;
   display: block;
 }
@@ -29,6 +33,7 @@ body.pagina-cadastro {
   align-items: center;
   flex-direction: column;
   gap: 10px;
+  
 }
 
 /* ─── LADO ESQUERDO ─── */
@@ -36,6 +41,7 @@ body.pagina-cadastro {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 20px;
   padding: 48px 56px;
   background: linear-gradient(145deg, #050B14 0%, #0a1a0f 100%);
   position: relative;
@@ -123,6 +129,7 @@ body.pagina-cadastro {
 
 .cad-card {
   width: 100%;
+  height: auto;
   max-width: 400px;
 }
 

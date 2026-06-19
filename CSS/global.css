@@ -12,18 +12,7 @@
   --cor-texto-claro: #FFFFFF;
   --cor-texto-cinza: #A0AAB5;
   /*------ABA-DE-TORNEIO-------*/
-  --bg-base:    #0D1117;
-  --bg-card:    #161B22;
-  --bg-card2:   #1C2330;
-  --accent:     #00FF87;
-  --accent-dim: #00cc6a;
-  --text-pri:   #E6EDF3;
-  --text-sec:   #8B949E;
-  --border:     #30363D;
-  --danger:     #F85149;
-  --warn:       #F0B429;
-  --radius:     10px;
-  --radius-lg:  16px;
+  
 }
 
 /* --- CONFIGURAÇÕES GERAIS --- */
@@ -36,7 +25,7 @@
 
 body {
   /* Usando a variável de fundo aqui! */
-  background: linear-gradient(135deg, #0D1117 60%, #0d2213 100%);
+  background: linear-gradient(135deg, #0D1117 60%, #194b27 100%);
   color: var(--cor-texto-claro);
   overflow-x: hidden; 
 }
