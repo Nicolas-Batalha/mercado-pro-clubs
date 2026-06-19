@@ -3,9 +3,6 @@
 // + login com e-mail e senha
 // =========================================================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyA6X9ExKAaNCDdpCr-4h8rUVDMFANRB7Ag",
   authDomain: "mercado-pro-clubs.firebaseapp.com",
