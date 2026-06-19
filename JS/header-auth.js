@@ -36,7 +36,7 @@ function criarWidgetUsuario() {
     </div>
     <div class="hu-info">
       <span class="hu-nome" id="hu-nome">Carregando...</span>
-      <span class="hu-email" id="hu-email"></span>
+      <span class="hu-EA" id="hu-ID da EA"></span>
     </div>
     <div class="hu-dropdown" id="hu-dropdown">
       <a href="../HTML/meu-perfil.html" class="hu-drop-item">👤 Meu Perfil</a>

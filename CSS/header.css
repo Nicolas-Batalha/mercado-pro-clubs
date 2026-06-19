@@ -4,12 +4,13 @@
     margin-bottom: 20px;
     
 }
+
 .logo {
-  width: 100% ;
-  max-width: 150px;
+  width: 100px ;
+  max-width: 100px;
   height: auto;
   display: block;
-  margin: 20px auto;
+  margin:  auto;
 }
 .menu-carrossel{
     width: 100%;
@@ -206,16 +207,18 @@
 .main-header {
   display: flex;
   flex-wrap: wrap;
+  flex-direction: column;  /* 👈 Muda de 'row' para 'column' para empilhar tudo ao centro */
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: center; /* 👈 Muda de 'space-between' para 'center' */
+  gap: 15px;               /* Espaçamento ideal entre logo, menu e perfil */
   padding: 10px 20px;
   position: relative;
+
 }
- 
 .header-usuario {
   position: relative;
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 10px;
   background: rgba(255,255,255,0.05);
@@ -299,7 +302,8 @@
   gap: 2px;
 }
  
-.hu-dropdown.aberto { display: flex; }
+.hu-dropdown.aberto { display: flex; 
+}
  
 .hu-drop-item {
   display: block;
