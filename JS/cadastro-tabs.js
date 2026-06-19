@@ -85,4 +85,4 @@ window.validarSenha = function(input) {
   if (senha !== undefined) {
     input.setCustomValidity(input.value !== senha ? 'As senhas não batem!' : '');
   }
-};  
+};
