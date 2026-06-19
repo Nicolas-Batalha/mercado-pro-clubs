@@ -1,0 +1,302 @@
+/* =============================================
+   CADASTRO.CSS — layout dividido de cadastro
+   ============================================= */
+
+/* Remove padding do body nessa página */
+body.pagina-cadastro {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── HEADER SIMPLES ─── */
+.cad-header {
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+}
+
+.cad-logo {
+  width: 120px;
+  height: auto;
+  display: block;
+}
+
+/* ─── LAYOUT PRINCIPAL ─── */
+.cad-main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ─── LADO ESQUERDO ─── */
+.cad-lado-esquerdo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 56px;
+  background: linear-gradient(145deg, #050B14 0%, #0a1a0f 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brilho decorativo de fundo */
+.cad-lado-esquerdo::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(18,224,108,0.12) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cad-esq-conteudo {
+  position: relative;
+  max-width: 420px;
+}
+
+.cad-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #12E06C;
+  margin-bottom: 16px;
+}
+
+.cad-titulo {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.15;
+  color: #fff;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+.cad-titulo em {
+  font-style: normal;
+  color: #12E06C;
+  text-shadow: 0 0 28px rgba(18,224,108,0.45);
+}
+
+.cad-subtitulo {
+  color: #A0AAB5;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.cad-beneficios {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cad-beneficios li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #E6EDF3;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 10px 16px;
+}
+
+/* ─── LADO DIREITO ─── */
+.cad-lado-direito {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  background: #0F1A2C;
+}
+
+.cad-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ─── ABAS ─── */
+.cad-tabs {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+
+.cad-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #A0AAB5;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cad-tab.active {
+  background: #12E06C;
+  color: #050B14;
+}
+
+/* ─── FORMULÁRIO ─── */
+.cad-form {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cad-form.active {
+  display: flex;
+}
+
+.cad-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cad-field label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #A0AAB5;
+}
+
+.cad-field input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+}
+
+.cad-field input:focus {
+  border-color: #12E06C;
+  background: rgba(18,224,108,0.05);
+}
+
+.cad-field input::placeholder {
+  color: #4a5568;
+}
+
+/* ─── BOTÃO PRINCIPAL ─── */
+.cad-btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: #12E06C;
+  color: #050B14;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(18,224,108,0.3);
+}
+
+.cad-btn-primary:hover {
+  background: #0fb357;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(18,224,108,0.4);
+}
+
+.cad-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* ─── DIVISOR ─── */
+.cad-divisor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.cad-divisor::before,
+.cad-divisor::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+.cad-divisor span {
+  font-size: 12px;
+  color: #A0AAB5;
+  white-space: nowrap;
+}
+
+/* ─── BOTÃO GOOGLE ─── */
+.cad-btn-google {
+  width: 100%;
+  padding: 12px 20px;
+  background: #fff;
+  color: #1f1f1f;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.cad-btn-google:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.cad-google-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* ─── RESPONSIVO ─── */
+@media (max-width: 768px) {
+  .cad-main {
+    grid-template-columns: 1fr;
+  }
+
+  .cad-lado-esquerdo {
+    padding: 40px 24px;
+    min-height: auto;
+  }
+
+  .cad-beneficios {
+    display: none; /* esconde em mobile para não poluir */
+  }
+
+  .cad-lado-direito {
+    padding: 32px 20px;
+  }
+}

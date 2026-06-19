@@ -1,67 +1,101 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../CSS/style.css">
-    <title>Mercado Pro Clubs - Conectar Conta</title>
-</head> 
-<body>
-  <header class="main-header">
-    <a class="logo" href="../index.html" title="voltar para a página inicial">
-        <img
-          src="../IMG/logo maior.svg"
-          class="logo"
-          alt="Pro Clubs Hub Brasil Logo"
-        />
-      </a>
-      <section class="conteiner-perfil">
-        <h2 class="conteiner-title">CRIE SEU PERFIL DE JOGADOR</h2>
-        <p class="conteiner-text">Preencha os dados abaixo para entrar no mercado <br> e ser contratado por grandes clubes.</p>
-      </section>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../CSS/style.css">
+  <title>Mercado Pro Clubs - Entrar / Cadastrar</title>
+</head>
+<body class="pagina-cadastro">
+
+  <!-- HEADER SIMPLES SEM MENU -->
+  <header class="cad-header">
+    <a href="../index.html" title="Voltar para a página inicial">
+      <img src="../IMG/logo maior.svg" class="cad-logo" alt="Pro Clubs Hub Brasil Logo" />
+    </a>
   </header>
-  <main class="form-container">
-  <form action="" class="cadastro-form" id="form-cadastro">
-    <div class="conteiner-info">
-      <h4 class="conteiner-info">cadastro no site</h4>
+
+  <!-- LAYOUT DIVIDIDO: esquerda = arte | direita = formulário -->
+  <main class="cad-main">
+
+    <!-- LADO ESQUERDO — apresentação -->
+    <div class="cad-lado-esquerdo">
+      <div class="cad-esq-conteudo">
+        <span class="cad-eyebrow">Mercado Pro Clubs</span>
+        <h1 class="cad-titulo">Sua carreira<br/>começa <em>aqui</em></h1>
+        <p class="cad-subtitulo">
+          Entre para o maior hub de Pro Clubs do Brasil.
+          Crie seu perfil, encontre clubes e dispute torneios.
+        </p>
+        <ul class="cad-beneficios">
+          <li>⚽ Perfil completo de jogador</li>
+          <li>🏪 Acesso ao mercado de transferências</li>
+          <li>🏆 Participe e crie torneios</li>
+          <li>☁️ Dados salvos na nuvem</li>
+        </ul>
+      </div>
     </div>
 
-    <div class="input-group">
-      <label for="nome">Nome Completo / usuário</label>
-      <input type="text" id="nome" placeholder="Digite seu nome ou usuario" required>
+    <!-- LADO DIREITO — formulário -->
+    <div class="cad-lado-direito">
+      <div class="cad-card">
+
+        <!-- ABAS: Cadastro / Login -->
+        <div class="cad-tabs">
+          <button class="cad-tab active" id="tabCadastro">Criar conta</button>
+          <button class="cad-tab" id="tabLogin">Já tenho conta</button>
+        </div>
+
+        <!-- FORMULÁRIO DE CADASTRO -->
+        <form id="form-cadastro" class="cad-form active">
+          <div class="cad-field">
+            <label for="nome">Nome / Usuário</label>
+            <input type="text" id="nome" placeholder="Ex: CraqueNeymar10" required />
+          </div>
+          <div class="cad-field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" placeholder="exemplo@email.com" required />
+          </div>
+          <div class="cad-field">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" placeholder="Mínimo 6 caracteres" required minlength="6" />
+          </div>
+          <div class="cad-field">
+            <label for="senha1">Repetir senha</label>
+            <input type="password" id="senha1" placeholder="Repita a senha" required oninput="validarSenha(this)" />
+          </div>
+          <button type="submit" class="cad-btn-primary">Criar minha conta</button>
+        </form>
+
+        <!-- FORMULÁRIO DE LOGIN -->
+        <form id="form-login" class="cad-form">
+          <div class="cad-field">
+            <label for="login-email">E-mail</label>
+            <input type="email" id="login-email" placeholder="exemplo@email.com" required />
+          </div>
+          <div class="cad-field">
+            <label for="login-senha">Senha</label>
+            <input type="password" id="login-senha" placeholder="Sua senha" required />
+          </div>
+          <button type="submit" class="cad-btn-primary">Entrar</button>
+        </form>
+
+        <!-- DIVISOR -->
+        <div class="cad-divisor">
+          <span>ou continue com</span>
+        </div>
+
+        <!-- BOTÃO GOOGLE -->
+        <button type="button" class="cad-btn-google" id="btn-google">
+          <img src="../IMG/pesquisa.png" class="cad-google-icon" alt="Google" />
+          Entrar com o Google
+        </button>
+
+      </div>
     </div>
 
-    <div class="input-group">
-      <label for="email">email</label>
-      <input type="email" name="email" id="email" placeholder="exemplo@email.com" required>
-    </div>
+  </main>
 
-    <div class="input-group">
-      <label for="senha">Senha:</label>
-      <input type="password" name="senha" id="senha" required size="10" maxlength="10" />
-    </div>
-
-    <div class="input-group">
-      <label for="senha1">Repetir Senha:</label>
-      <input oninput="validarSenha(this)" type="password" name="senha1" id="senha1" required size="10" maxlength="10" />  
-    </div>
-
-    <div class="form-actions">
-      <button type="submit" class="btn-submit">SALVAR E PUBLICAR PERFIL
-        <a href="../index.html"></a>
-      </button>
-    </div>
-    <p class="conteiner-text">ou</p>
-    <div class="contas-section">
-      <button type="button" class="btn-social google-btn" id="btn-google">
-        <img src="../IMG/pesquisa.png" class="logo_google" alt="logo da google">
-        <i class="fa-brands fa-google"></i> Criar com o Google
-      </button>
-
-    </div>
-  </form>
-</main>
-
-<script type="module" src="../js/auth.js"></script>
+  <script type="module" src="../js/cadastro-tabs.js"></script>
 </body>
 </html>

@@ -1,47 +1,30 @@
 // =========================================================================
-// MERCADO PRO CLUBS - PERFIL DO JOGADOR
+// MERCADO PRO CLUBS - PERFIL DO JOGADOR (com Firebase Firestore)
 // =========================================================================
 
-// --- 1. PRÉ-VISUALIZAÇÃO DA FOTO ---
-const inputUpload = document.getElementById('upload-foto');
-const fotoPreview = document.getElementById('foto-perfil-preview');
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// FIX: usa URL.createObjectURL para preview (sem estourar o LocalStorage)
-// A URL temporária dura enquanto a aba estiver aberta — ao recarregar,
-// carrega a foto salva em IndexedDB (veja seção 4).
-if (inputUpload) {
-  inputUpload.addEventListener('change', function(event) {
-    const arquivo = event.target.files[0];
-    if (!arquivo) return;
+// --- CONFIGURAÇÃO DO FIREBASE (mesmo do auth.js) ---
+const firebaseConfig = {
+  apiKey: "AIzaSyA6X9ExKAaNCDdpCr-4h8rUVDMFANRB7Ag",
+  authDomain: "mercado-pro-clubs.firebaseapp.com",
+  projectId: "mercado-pro-clubs",
+  storageBucket: "mercado-pro-clubs.firebasestorage.app",
+  messagingSenderId: "1018354864332",
+  appId: "1:1018354864332:web:8a60b4a80942c490c43269",
+  measurementId: "G-97YN402WJF"
+};
 
-    // Preview imediato sem Base64
-    const urlTemporaria = URL.createObjectURL(arquivo);
-    fotoPreview.src = urlTemporaria;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    // Salva o arquivo em IndexedDB para persistir entre sessões
-    salvarFotoIndexedDB(arquivo);
-  });
-}
+// Guarda o uid do usuário logado
+let uidAtual = null;
 
-// --- 2. LÓGICA DO AGENTE LIVRE ---
-const inputClube = document.getElementById('clube-atual');
-const checkAgenteLivre = document.getElementById('agente-livre');
-
-if (checkAgenteLivre && inputClube) {
-  checkAgenteLivre.addEventListener('change', function() {
-    if (this.checked) {
-      inputClube.value = 'Sem Clube (Free Agent)';
-      inputClube.disabled = true;
-      inputClube.style.opacity = '0.5';
-    } else {
-      inputClube.value = '';
-      inputClube.disabled = false;
-      inputClube.style.opacity = '1';
-    }
-  });
-}
-
-// --- 3. TOAST (substitui alert) ---
+// ─── TOAST ───────────────────────────────────────────
 function mostrarToast(mensagem, tipo = 'sucesso') {
   const toast = document.createElement('div');
   toast.textContent = mensagem;
@@ -50,7 +33,7 @@ function mostrarToast(mensagem, tipo = 'sucesso') {
     background: ${tipo === 'sucesso' ? '#12E06C' : '#d32f2f'};
     color: #000; font-weight: bold;
     padding: 14px 22px; border-radius: 8px;
-    font-family: 'Poppins', sans-serif; font-size: 0.9rem;
+    font-family: 'Montserrat', sans-serif; font-size: 0.9rem;
     box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     z-index: 9999; opacity: 0; transition: opacity 0.3s;
   `;
@@ -62,7 +45,7 @@ function mostrarToast(mensagem, tipo = 'sucesso') {
   }, 3000);
 }
 
-// --- 4. INDEXEDDB PARA A FOTO ---
+// ─── INDEXEDDB PARA A FOTO (fica local, foto é pesada para nuvem gratuita) ───
 const DB_NOME = 'mercadoProClubs';
 const DB_STORE = 'fotoPerfil';
 
@@ -87,9 +70,9 @@ async function salvarFotoIndexedDB(arquivo) {
 
 async function carregarFotoIndexedDB() {
   try {
-    const db = await abrirDB();
+    const dbLocal = await abrirDB();
     return new Promise((resolve) => {
-      const req = db.transaction(DB_STORE).objectStore(DB_STORE).get('foto');
+      const req = dbLocal.transaction(DB_STORE).objectStore(DB_STORE).get('foto');
       req.onsuccess = e => resolve(e.target.result || null);
       req.onerror = () => resolve(null);
     });
@@ -98,72 +81,156 @@ async function carregarFotoIndexedDB() {
   }
 }
 
-// --- 5. SALVAR E CARREGAR DADOS ---
-const formDados = document.getElementById('form-dados-jogador');
+// ─── PRÉ-VISUALIZAÇÃO DA FOTO ────────────────────────
+const inputUpload = document.getElementById('upload-foto');
+const fotoPreview = document.getElementById('foto-perfil-preview');
 
-// FIX: função auxiliar para carregar um campo com segurança (limite de tamanho)
-function carregarCampo(chave, idElemento, tamanhoMax = 100) {
-  const valor = localStorage.getItem(chave);
-  if (!valor) return;
-  const el = document.getElementById(idElemento);
-  if (el) el.value = valor.substring(0, tamanhoMax);
+if (inputUpload) {
+  inputUpload.addEventListener('change', function (event) {
+    const arquivo = event.target.files[0];
+    if (!arquivo) return;
+    fotoPreview.src = URL.createObjectURL(arquivo);
+    salvarFotoIndexedDB(arquivo);
+  });
 }
 
-// Carregar dados salvos ao abrir a página
-document.addEventListener('DOMContentLoaded', async () => {
-  carregarCampo('nickname',  'nickname',    50);
-  carregarCampo('eaId',      'ea-id',       50);
-  carregarCampo('altura',    'altura',       3);
-  carregarCampo('peso',      'peso',         3);
-  carregarCampo('clube',     'clube-atual', 60);
+// ─── AGENTE LIVRE ────────────────────────────────────
+const inputClube = document.getElementById('clube-atual');
+const checkAgenteLivre = document.getElementById('agente-livre');
 
-  // FIX: restaura estado do agente livre
-  const agenteLivreSalvo = localStorage.getItem('agenteLivre') === 'true';
-  if (agenteLivreSalvo && checkAgenteLivre && inputClube) {
+if (checkAgenteLivre && inputClube) {
+  checkAgenteLivre.addEventListener('change', function () {
+    if (this.checked) {
+      inputClube.value = 'Sem Clube (Free Agent)';
+      inputClube.disabled = true;
+      inputClube.style.opacity = '0.5';
+    } else {
+      inputClube.value = '';
+      inputClube.disabled = false;
+      inputClube.style.opacity = '1';
+    }
+  });
+}
+
+// ─── PREENCHER FORMULÁRIO COM OS DADOS SALVOS ────────
+function preencherFormulario(dados) {
+  if (!dados) return;
+
+  const campos = [
+    ['nickname', 'nickname'],
+    ['eaId', 'ea-id'],
+    ['altura', 'altura'],
+    ['peso', 'peso'],
+    ['clube', 'clube-atual'],
+  ];
+
+  campos.forEach(([chave, id]) => {
+    const el = document.getElementById(id);
+    if (el && dados[chave]) el.value = dados[chave];
+  });
+
+  // Agente livre
+  if (dados.agenteLivre && checkAgenteLivre && inputClube) {
     checkAgenteLivre.checked = true;
     inputClube.value = 'Sem Clube (Free Agent)';
     inputClube.disabled = true;
     inputClube.style.opacity = '0.5';
   }
 
-  // Carregar rádio da Posição
-  const posSalva = localStorage.getItem('posicao');
-  if (posSalva) {
-    const radioPos = document.querySelector(`input[name="posicao"][value="${posSalva}"]`);
+  // Posição
+  if (dados.posicao) {
+    const radioPos = document.querySelector(`input[name="posicao"][value="${dados.posicao}"]`);
     if (radioPos) radioPos.checked = true;
   }
 
-  // Carregar rádio da Plataforma
-  const platSalva = localStorage.getItem('plataforma');
-  if (platSalva) {
-    const radioPlat = document.querySelector(`input[name="plataforma"][value="${platSalva}"]`);
+  // Plataforma
+  if (dados.plataforma) {
+    const radioPlat = document.querySelector(`input[name="plataforma"][value="${dados.plataforma}"]`);
     if (radioPlat) radioPlat.checked = true;
   }
+}
 
-  // FIX: carrega foto do IndexedDB
-  const fotoSalva = await carregarFotoIndexedDB();
-  if (fotoSalva && fotoPreview) {
-    fotoPreview.src = URL.createObjectURL(fotoSalva);
+// ─── CARREGAR PERFIL DO FIRESTORE ────────────────────
+async function carregarPerfil(uid) {
+  try {
+    // Busca o documento do usuário na coleção "jogadores"
+    const ref = doc(db, 'jogadores', uid);
+    const snap = await getDoc(ref);
+
+    if (snap.exists()) {
+      preencherFormulario(snap.data());
+      mostrarToast('Perfil carregado! 👋', 'sucesso');
+    }
+    // Se não existir ainda, o formulário fica vazio para o usuário preencher
+  } catch (e) {
+    console.error('Erro ao carregar perfil:', e);
   }
-});
+}
 
-// Salvar dados no Submit
+// ─── SALVAR PERFIL NO FIRESTORE ──────────────────────
+const formDados = document.getElementById('form-dados-jogador');
+
 if (formDados) {
-  formDados.addEventListener('submit', function(event) {
+  formDados.addEventListener('submit', async function (event) {
     event.preventDefault();
 
-    const posicaoSelecionada   = document.querySelector('input[name="posicao"]:checked');
+    if (!uidAtual) {
+      mostrarToast('Você precisa estar logado para salvar.', 'erro');
+      return;
+    }
+
+    const posicaoSelecionada    = document.querySelector('input[name="posicao"]:checked');
     const plataformaSelecionada = document.querySelector('input[name="plataforma"]:checked');
 
-    localStorage.setItem('nickname',    document.getElementById('nickname').value.trim());
-    localStorage.setItem('eaId',        document.getElementById('ea-id').value.trim());
-    localStorage.setItem('altura',      document.getElementById('altura').value);
-    localStorage.setItem('peso',        document.getElementById('peso').value);
-    localStorage.setItem('clube',       document.getElementById('clube-atual').value.trim());
-    localStorage.setItem('agenteLivre', checkAgenteLivre ? checkAgenteLivre.checked : false); // FIX
-    if (posicaoSelecionada)    localStorage.setItem('posicao',   posicaoSelecionada.value);
-    if (plataformaSelecionada) localStorage.setItem('plataforma', plataformaSelecionada.value);
+    // Monta o objeto com os dados do jogador
+    const dadosJogador = {
+      nickname:    document.getElementById('nickname').value.trim(),
+      eaId:        document.getElementById('ea-id').value.trim(),
+      altura:      document.getElementById('altura').value,
+      peso:        document.getElementById('peso').value,
+      clube:       document.getElementById('clube-atual').value.trim(),
+      agenteLivre: checkAgenteLivre ? checkAgenteLivre.checked : false,
+      posicao:     posicaoSelecionada    ? posicaoSelecionada.value    : '',
+      plataforma:  plataformaSelecionada ? plataformaSelecionada.value : '',
+      atualizadoEm: new Date().toISOString(),
+    };
 
-    mostrarToast('Perfil atualizado com sucesso!'); // FIX: toast no lugar de alert
+    try {
+      // Salva (ou sobrescreve) o documento do usuário no Firestore
+      // Caminho: coleção "jogadores" → documento com o uid do usuário
+      await setDoc(doc(db, 'jogadores', uidAtual), dadosJogador);
+      mostrarToast('Perfil salvo na nuvem com sucesso! ☁️');
+    } catch (e) {
+      console.error('Erro ao salvar perfil:', e);
+      mostrarToast('Erro ao salvar. Tente novamente.', 'erro');
+    }
   });
 }
+
+// ─── DETECTAR LOGIN E INICIAR ────────────────────────
+// Fica escutando se o usuário está logado ou não
+onAuthStateChanged(auth, async (usuario) => {
+  if (usuario) {
+    // Usuário logado: guarda o uid e carrega o perfil dele
+    uidAtual = usuario.uid;
+
+    // Mostra o email no header se houver um elemento para isso
+    const elEmail = document.getElementById('usuario-email');
+    if (elEmail) elEmail.textContent = usuario.email;
+
+    await carregarPerfil(usuario.uid);
+
+    // Carrega foto local (IndexedDB)
+    const fotoSalva = await carregarFotoIndexedDB();
+    if (fotoSalva && fotoPreview) {
+      fotoPreview.src = URL.createObjectURL(fotoSalva);
+    }
+
+  } else {
+    // Usuário NÃO logado: redireciona para o cadastro
+    mostrarToast('Faça login para acessar seu perfil.', 'erro');
+    setTimeout(() => {
+      window.location.href = '../HTML/cadastrar-se.html';
+    }, 2000);
+  }
+});
