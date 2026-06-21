@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../CSS/style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../CSS/style.css" />
     <title>torneio</title>
-</head>
-<body>
+  </head>
+  <body>
     <header class="main-header">
       <a class="logo" href="../index.html" title="voltar para a página inicial">
         <img
@@ -15,259 +15,338 @@
           alt="Pro Clubs Hub Brasil Logo"
         />
       </a>
+      <div class="menu-carrossel">
+        <nav>
+          <ul class="lista-links">
+            <li><a href="../HTML/meu-perfil.html">meu perfil</a></li>
+            <li><a href="../HTML/mercado.html">mercado</a></li>
+            <li><a href="../HTML/torneio.html">torneio</a></li>
+          </ul>
+        </nav>
+      </div>
     </header>
-        <h2 class="titulo">torneios</h2>
-     <!-- HERO -->
-     <section class="torneio-hero">
-    <div class="hero-bracket" aria-hidden="true">
-      <svg class="bracket-svg" viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Round 1 -->
-        <rect class="b-match" x="4" y="20" width="80" height="28" rx="4"/>
-        <rect class="b-match" x="4" y="60" width="80" height="28" rx="4"/>
-        <rect class="b-match" x="4" y="112" width="80" height="28" rx="4"/>
-        <rect class="b-match" x="4" y="152" width="80" height="28" rx="4"/>
-        <!-- connectors R1 -->
-        <line class="b-line" x1="84" y1="34" x2="100" y2="34"/>
-        <line class="b-line" x1="84" y1="74" x2="100" y2="74"/>
-        <line class="b-line" x1="100" y1="34" x2="100" y2="74"/>
-        <line class="b-line" x1="84" y1="126" x2="100" y2="126"/>
-        <line class="b-line" x1="84" y1="166" x2="100" y2="166"/>
-        <line class="b-line" x1="100" y1="126" x2="100" y2="166"/>
-        <!-- Round 2 -->
-        <rect class="b-match b-match--2" x="100" y="40" width="80" height="28" rx="4"/>
-        <rect class="b-match b-match--2" x="100" y="132" width="80" height="28" rx="4"/>
-        <!-- connectors R2 -->
-        <line class="b-line" x1="180" y1="54" x2="196" y2="54"/>
-        <line class="b-line" x1="180" y1="146" x2="196" y2="146"/>
-        <line class="b-line" x1="196" y1="54" x2="196" y2="146"/>
-        <!-- Final -->
-        <rect class="b-match b-match--final" x="196" y="86" width="80" height="28" rx="4"/>
-        <!-- trophy dot -->
-        <circle class="b-trophy" cx="316" cy="100" r="12"/>
-        <line class="b-line" x1="276" y1="100" x2="304" y2="100"/>
-        <text class="b-trophy-icon" x="316" y="105" text-anchor="middle">🏆</text>
-      </svg>
-    </div>
-    <div class="hero-text">
-      <span class="hero-eyebrow">Mercado Pro Clubs</span>
-      <h1 class="hero-title">Arena de<br/><em>Torneios</em></h1>
-      <p class="hero-sub">Dispute ligas, mata-matas e torneios mistos com clubes registrados na plataforma.</p>
-      <button class="btn-primary" id="btnCriarTorneio">+ Criar Torneio</button>
-    </div>
-  </section>
-   <!-- ABAS -->    
-<main class="torneio-main">
-    <div class="tabs-wrapper">
-      <button class="tab-btn active" data-tab="listar">Torneios Disponíveis</button>
-      <button class="tab-btn" data-tab="meus">Meus Torneios</button>
-    </div>
-<!-- LISTAGEM -->
-    <section class="tab-content active" id="tab-listar">
-      <div class="filters-bar">
-        <input class="search-input" type="text" id="searchInput" placeholder="Buscar torneio..." />
-        <select class="filter-select" id="filterFormato">
-          <option value="">Todos os formatos</option>
-          <option value="liga">Liga</option>
-          <option value="mata-mata">Mata-mata</option>
-          <option value="misto">Misto</option>
-        </select>
-        <select class="filter-select" id="filterStatus">
-          <option value="">Todos os status</option>
-          <option value="aberto">Aberto</option>
-          <option value="em-andamento">Em andamento</option>
-          <option value="finalizado">Finalizado</option>
-        </select>
+    <h2 class="titulo">torneios</h2>
+    <!-- HERO -->
+    <section class="torneio-hero">
+      <div class="hero-bracket" aria-hidden="true">
+        <svg
+          class="bracket-svg"
+          viewBox="0 0 340 200"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <!-- Round 1 -->
+          <rect class="b-match" x="4" y="20" width="80" height="28" rx="4" />
+          <rect class="b-match" x="4" y="60" width="80" height="28" rx="4" />
+          <rect class="b-match" x="4" y="112" width="80" height="28" rx="4" />
+          <rect class="b-match" x="4" y="152" width="80" height="28" rx="4" />
+          <!-- connectors R1 -->
+          <line class="b-line" x1="84" y1="34" x2="100" y2="34" />
+          <line class="b-line" x1="84" y1="74" x2="100" y2="74" />
+          <line class="b-line" x1="100" y1="34" x2="100" y2="74" />
+          <line class="b-line" x1="84" y1="126" x2="100" y2="126" />
+          <line class="b-line" x1="84" y1="166" x2="100" y2="166" />
+          <line class="b-line" x1="100" y1="126" x2="100" y2="166" />
+          <!-- Round 2 -->
+          <rect
+            class="b-match b-match--2"
+            x="100"
+            y="40"
+            width="80"
+            height="28"
+            rx="4"
+          />
+          <rect
+            class="b-match b-match--2"
+            x="100"
+            y="132"
+            width="80"
+            height="28"
+            rx="4"
+          />
+          <!-- connectors R2 -->
+          <line class="b-line" x1="180" y1="54" x2="196" y2="54" />
+          <line class="b-line" x1="180" y1="146" x2="196" y2="146" />
+          <line class="b-line" x1="196" y1="54" x2="196" y2="146" />
+          <!-- Final -->
+          <rect
+            class="b-match b-match--final"
+            x="196"
+            y="86"
+            width="80"
+            height="28"
+            rx="4"
+          />
+          <!-- trophy dot -->
+          <circle class="b-trophy" cx="316" cy="100" r="12" />
+          <line class="b-line" x1="276" y1="100" x2="304" y2="100" />
+          <text class="b-trophy-icon" x="316" y="105" text-anchor="middle">
+            🏆
+          </text>
+        </svg>
       </div>
-      <div class="torneio-grid" id="torneioGrid">
-        <!-- cards injetados via JS -->
+      <div class="hero-text">
+        <span class="hero-eyebrow">Mercado Pro Clubs</span>
+        <h1 class="hero-title">Arena de<br /><em>Torneios</em></h1>
+        <p class="hero-sub">
+          Dispute ligas, mata-matas e torneios mistos com clubes registrados na
+          plataforma.
+        </p>
+        <button class="btn-primary" id="btnCriarTorneio">
+          + Criar Torneio
+        </button>
       </div>
-      <p class="empty-state" id="emptyState" hidden>Nenhum torneio encontrado.</p>
     </section>
- 
-    <!-- MEUS TORNEIOS -->
-    <section class="tab-content" id="tab-meus">
-      <div class="torneio-grid" id="meusTorneiosGrid"></div>
-      <p class="empty-state" id="meusEmpty" hidden>Você ainda não criou nenhum torneio. <button class="link-btn" id="btnCriarMeus">Criar agora</button></p>
-    </section>
-  </main>
- 
-  <!-- MODAL CRIAR TORNEIO -->
-  <div class="modal-overlay" id="modalOverlay" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <button class="modal-close" id="modalClose" aria-label="Fechar">&times;</button>
- 
-      <!-- STEPS INDICATOR -->
-      <div class="steps-indicator">
-        <div class="step active" data-step="1"><span>1</span><small>Básico</small></div>
-        <div class="step-line"></div>
-        <div class="step" data-step="2"><span>2</span><small>Formato</small></div>
-        <div class="step-line"></div>
-        <div class="step" data-step="3"><span>3</span><small>Clubes</small></div>
-        <div class="step-line"></div>
-        <div class="step" data-step="4"><span>4</span><small>Confirmar</small></div>
+    <!-- ABAS -->
+    <main class="torneio-main">
+      <div class="tabs-wrapper">
+        <button class="tab-btn active" data-tab="listar">
+          Torneios Disponíveis
+        </button>
+        <button class="tab-btn" data-tab="meus">Meus Torneios</button>
       </div>
- 
-      <h2 class="modal-title" id="modalTitle">Criar Torneio</h2>
- 
-      <!-- STEP 1 - Básico -->
-      <div class="step-panel active" id="step1">
-        <div class="form-group">
-          <label for="nomeTorneio">Nome do torneio</label>
-          <input type="text" id="nomeTorneio" placeholder="Ex: Copa Hub Brasil" maxlength="60" />
+      <!-- LISTAGEM -->
+      <section class="tab-content active" id="tab-listar">
+        <div class="filters-bar">
+          <input
+            class="search-input"
+            type="text"
+            id="searchInput"
+            placeholder="Buscar torneio..."
+          />
+          <select class="filter-select" id="filterFormato">
+            <option value="">Todos os formatos</option>
+            <option value="liga">Liga</option>
+            <option value="mata-mata">Mata-mata</option>
+            <option value="misto">Misto</option>
+          </select>
+          <select class="filter-select" id="filterStatus">
+            <option value="">Todos os status</option>
+            <option value="aberto">Aberto</option>
+            <option value="em-andamento">Em andamento</option>
+            <option value="finalizado">Finalizado</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label for="descTorneio">Descrição (opcional)</label>
-          <textarea id="descTorneio" rows="3" placeholder="Fale um pouco sobre o torneio..."></textarea>
+        <div class="torneio-grid" id="torneioGrid">
+          <!-- cards injetados via JS -->
         </div>
-        <div class="form-row">
+        <p class="empty-state" id="emptyState" hidden>
+          Nenhum torneio encontrado.
+        </p>
+      </section>
+
+      <!-- MEUS TORNEIOS -->
+      <section class="tab-content" id="tab-meus">
+        <div class="torneio-grid" id="meusTorneiosGrid"></div>
+        <p class="empty-state" id="meusEmpty" hidden>
+          Você ainda não criou nenhum torneio.
+          <button class="link-btn" id="btnCriarMeus">Criar agora</button>
+        </p>
+      </section>
+    </main>
+
+    <!-- MODAL CRIAR TORNEIO -->
+    <div class="modal-overlay" id="modalOverlay" hidden>
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <button class="modal-close" id="modalClose" aria-label="Fechar">
+          &times;
+        </button>
+
+        <!-- STEPS INDICATOR -->
+        <div class="steps-indicator">
+          <div class="step active" data-step="1">
+            <span>1</span><small>Básico</small>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="2">
+            <span>2</span><small>Formato</small>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="3">
+            <span>3</span><small>Clubes</small>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="4">
+            <span>4</span><small>Confirmar</small>
+          </div>
+        </div>
+
+        <h2 class="modal-title" id="modalTitle">Criar Torneio</h2>
+
+        <!-- STEP 1 - Básico -->
+        <div class="step-panel active" id="step1">
           <div class="form-group">
-            <label for="dataInicio">Data de início</label>
-            <input type="date" id="dataInicio" />
+            <label for="nomeTorneio">Nome do torneio</label>
+            <input
+              type="text"
+              id="nomeTorneio"
+              placeholder="Ex: Copa Hub Brasil"
+              maxlength="60"
+            />
           </div>
           <div class="form-group">
-            <label for="maxClubes">Máx. de clubes</label>
-            <select id="maxClubes">
-              <option value="4">4</option>
-              <option value="8" selected>8</option>
-              <option value="16">16</option>
-              <option value="32">32</option>
-            </select>
+            <label for="descTorneio">Descrição (opcional)</label>
+            <textarea
+              id="descTorneio"
+              rows="3"
+              placeholder="Fale um pouco sobre o torneio..."
+            ></textarea>
           </div>
-        </div>
-        <div class="step-nav">
-          <span></span>
-          <button class="btn-primary" id="step1Next">Próximo →</button>
-        </div>
-      </div>
- 
-      <!-- STEP 2 - Formato -->
-      <div class="step-panel" id="step2">
-        <p class="step-desc">Escolha como o torneio será disputado.</p>
-        <div class="formato-cards">
-          <label class="formato-card">
-            <input type="radio" name="formato" value="liga" />
-            <div class="formato-card-inner">
-              <span class="formato-icon">📋</span>
-              <strong>Liga</strong>
-              <small>Todos contra todos, pontos corridos</small>
-            </div>
-          </label>
-          <label class="formato-card">
-            <input type="radio" name="formato" value="mata-mata" />
-            <div class="formato-card-inner">
-              <span class="formato-icon">⚡</span>
-              <strong>Mata-mata</strong>
-              <small>Eliminação direta por chaveamento</small>
-            </div>
-          </label>
-          <label class="formato-card">
-            <input type="radio" name="formato" value="misto" />
-            <div class="formato-card-inner">
-              <span class="formato-icon">🔀</span>
-              <strong>Misto</strong>
-              <small>Fase de grupos + mata-mata</small>
-            </div>
-          </label>
-        </div>
- 
-        <!-- opções extra liga -->
-        <div class="formato-opts" id="optsLiga" hidden>
           <div class="form-row">
             <div class="form-group">
-              <label for="idaVolta">Jogos</label>
-              <select id="idaVolta">
-                <option value="ida">Só ida</option>
-                <option value="idavolta">Ida e volta</option>
-              </select>
+              <label for="dataInicio">Data de início</label>
+              <input type="date" id="dataInicio" />
             </div>
             <div class="form-group">
-              <label for="pontosPorVitoria">Pts por vitória</label>
-              <select id="pontosPorVitoria">
-                <option value="3" selected>3</option>
-                <option value="2">2</option>
+              <label for="maxClubes">Máx. de clubes</label>
+              <select id="maxClubes">
+                <option value="4">4</option>
+                <option value="8" selected>8</option>
+                <option value="16">16</option>
+                <option value="32">32</option>
               </select>
             </div>
           </div>
-        </div>
- 
-        <!-- opções extra mata-mata -->
-        <div class="formato-opts" id="optsMata" hidden>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="jogosMataMata">Duelos</label>
-              <select id="jogosMataMata">
-                <option value="unico">Jogo único</option>
-                <option value="idavolta">Ida e volta</option>
-              </select>
-            </div>
+          <div class="step-nav">
+            <span></span>
+            <button class="btn-primary" id="step1Next">Próximo →</button>
           </div>
         </div>
- 
-        <!-- opções extra misto -->
-        <div class="formato-opts" id="optsMisto" hidden>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="numGrupos">Nº de grupos</label>
-              <select id="numGrupos">
-                <option value="2">2</option>
-                <option value="4" selected>4</option>
-                <option value="8">8</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="classificados">Classificados/grupo</label>
-              <select id="classificados">
-                <option value="1">1</option>
-                <option value="2" selected>2</option>
-                <option value="3">3</option>
-              </select>
+
+        <!-- STEP 2 - Formato -->
+        <div class="step-panel" id="step2">
+          <p class="step-desc">Escolha como o torneio será disputado.</p>
+          <div class="formato-cards">
+            <label class="formato-card">
+              <input type="radio" name="formato" value="liga" />
+              <div class="formato-card-inner">
+                <span class="formato-icon">📋</span>
+                <strong>Liga</strong>
+                <small>Todos contra todos, pontos corridos</small>
+              </div>
+            </label>
+            <label class="formato-card">
+              <input type="radio" name="formato" value="mata-mata" />
+              <div class="formato-card-inner">
+                <span class="formato-icon">⚡</span>
+                <strong>Mata-mata</strong>
+                <small>Eliminação direta por chaveamento</small>
+              </div>
+            </label>
+            <label class="formato-card">
+              <input type="radio" name="formato" value="misto" />
+              <div class="formato-card-inner">
+                <span class="formato-icon">🔀</span>
+                <strong>Misto</strong>
+                <small>Fase de grupos + mata-mata</small>
+              </div>
+            </label>
+          </div>
+
+          <!-- opções extra liga -->
+          <div class="formato-opts" id="optsLiga" hidden>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="idaVolta">Jogos</label>
+                <select id="idaVolta">
+                  <option value="ida">Só ida</option>
+                  <option value="idavolta">Ida e volta</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="pontosPorVitoria">Pts por vitória</label>
+                <select id="pontosPorVitoria">
+                  <option value="3" selected>3</option>
+                  <option value="2">2</option>
+                </select>
+              </div>
             </div>
           </div>
+
+          <!-- opções extra mata-mata -->
+          <div class="formato-opts" id="optsMata" hidden>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="jogosMataMata">Duelos</label>
+                <select id="jogosMataMata">
+                  <option value="unico">Jogo único</option>
+                  <option value="idavolta">Ida e volta</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- opções extra misto -->
+          <div class="formato-opts" id="optsMisto" hidden>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="numGrupos">Nº de grupos</label>
+                <select id="numGrupos">
+                  <option value="2">2</option>
+                  <option value="4" selected>4</option>
+                  <option value="8">8</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="classificados">Classificados/grupo</label>
+                <select id="classificados">
+                  <option value="1">1</option>
+                  <option value="2" selected>2</option>
+                  <option value="3">3</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button class="btn-ghost" id="step2Prev">← Voltar</button>
+            <button class="btn-primary" id="step2Next">Próximo →</button>
+          </div>
         </div>
- 
-        <div class="step-nav">
-          <button class="btn-ghost" id="step2Prev">← Voltar</button>
-          <button class="btn-primary" id="step2Next">Próximo →</button>
+
+        <!-- STEP 3 - Clubes -->
+        <div class="step-panel" id="step3">
+          <p class="step-desc">Adicione clubes registrados na plataforma.</p>
+          <div class="clube-search-wrap">
+            <input type="text" id="clubeSearch" placeholder="Buscar clube..." />
+            <div class="clube-suggestions" id="clubeSuggestions"></div>
+          </div>
+          <div class="clubes-selecionados" id="clubesSelecionados">
+            <p class="empty-clubes">Nenhum clube adicionado ainda.</p>
+          </div>
+          <div class="step-nav">
+            <button class="btn-ghost" id="step3Prev">← Voltar</button>
+            <button class="btn-primary" id="step3Next">Próximo →</button>
+          </div>
+        </div>
+
+        <!-- STEP 4 - Confirmar -->
+        <div class="step-panel" id="step4">
+          <div class="resumo-box" id="resumoBox"></div>
+          <div class="step-nav">
+            <button class="btn-ghost" id="step4Prev">← Voltar</button>
+            <button class="btn-primary" id="btnPublicar">
+              🏆 Publicar Torneio
+            </button>
+          </div>
         </div>
       </div>
- 
-      <!-- STEP 3 - Clubes -->
-      <div class="step-panel" id="step3">
-        <p class="step-desc">Adicione clubes registrados na plataforma.</p>
-        <div class="clube-search-wrap">
-          <input type="text" id="clubeSearch" placeholder="Buscar clube..." />
-          <div class="clube-suggestions" id="clubeSuggestions"></div>
-        </div>
-        <div class="clubes-selecionados" id="clubesSelecionados">
-          <p class="empty-clubes">Nenhum clube adicionado ainda.</p>
-        </div>
-        <div class="step-nav">
-          <button class="btn-ghost" id="step3Prev">← Voltar</button>
-          <button class="btn-primary" id="step3Next">Próximo →</button>
-        </div>
-      </div>
- 
-      <!-- STEP 4 - Confirmar -->
-      <div class="step-panel" id="step4">
-        <div class="resumo-box" id="resumoBox"></div>
-        <div class="step-nav">
-          <button class="btn-ghost" id="step4Prev">← Voltar</button>
-          <button class="btn-primary" id="btnPublicar">🏆 Publicar Torneio</button>
-        </div>
-      </div>
- 
     </div>
-  </div>
- 
-  <!-- MODAL DETALHE TORNEIO -->
-  <div class="modal-overlay" id="detalheOverlay" hidden>
-    <div class="modal modal--detalhe" role="dialog" aria-modal="true">
-      <button class="modal-close" id="detalheClose">&times;</button>
-      <div id="detalheContent"></div>
+
+    <!-- MODAL DETALHE TORNEIO -->
+    <div class="modal-overlay" id="detalheOverlay" hidden>
+      <div class="modal modal--detalhe" role="dialog" aria-modal="true">
+        <button class="modal-close" id="detalheClose">&times;</button>
+        <div id="detalheContent"></div>
+      </div>
     </div>
-  </div>
- 
-  <script type="module" src="../JS/torneio.js"></script>
-<script type="module" src="../JS/header-auth.js" ></script>
-</body>
+
+    <script type="module" src="../JS/torneio.js"></script>
+    <script type="module" src="../JS/header-auth.js"></script>
+  </body>
 </html>

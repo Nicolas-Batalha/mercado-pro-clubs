@@ -6,7 +6,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// --- CONFIGURAÇÃO DO FIREBASE (mesmo do auth.js) ---
+// ─── 1. CONFIGURAÇÃO DO FIREBASE ─────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyA6X9ExKAaNCDdpCr-4h8rUVDMFANRB7Ag",
   authDomain: "mercado-pro-clubs.firebaseapp.com",
@@ -21,10 +21,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Guarda o uid do usuário logado
-let uidAtual = null;
+let uidAtual = null; // Guarda o ID do usuário logado
 
-// ─── TOAST ───────────────────────────────────────────
+// ─── 2. FUNÇÕES DE INTERFACE (UI) ────────────────────
 function mostrarToast(mensagem, tipo = 'sucesso') {
   const toast = document.createElement('div');
   toast.textContent = mensagem;
@@ -45,7 +44,7 @@ function mostrarToast(mensagem, tipo = 'sucesso') {
   }, 3000);
 }
 
-// ─── INDEXEDDB PARA A FOTO (fica local, foto é pesada para nuvem gratuita) ───
+// ─── 3. LÓGICA DE FOTO LOCAL (IndexedDB) ─────────────
 const DB_NOME = 'mercadoProClubs';
 const DB_STORE = 'fotoPerfil';
 
@@ -60,8 +59,8 @@ function abrirDB() {
 
 async function salvarFotoIndexedDB(arquivo) {
   try {
-    const db = await abrirDB();
-    const tx = db.transaction(DB_STORE, 'readwrite');
+    const dbLocal = await abrirDB();
+    const tx = dbLocal.transaction(DB_STORE, 'readwrite');
     tx.objectStore(DB_STORE).put(arquivo, 'foto');
   } catch (e) {
     console.warn('Não foi possível salvar a foto:', e);
@@ -81,38 +80,26 @@ async function carregarFotoIndexedDB() {
   }
 }
 
-// ─── PRÉ-VISUALIZAÇÃO DA FOTO ────────────────────────
-const inputUpload = document.getElementById('upload-foto');
-const fotoPreview = document.getElementById('foto-perfil-preview');
+// ─── 4. LÓGICA DO BANCO DE DADOS (Firestore) ─────────
 
-if (inputUpload) {
-  inputUpload.addEventListener('change', function (event) {
-    const arquivo = event.target.files[0];
-    if (!arquivo) return;
-    fotoPreview.src = URL.createObjectURL(arquivo);
-    salvarFotoIndexedDB(arquivo);
-  });
-}
+// NOVO: Função que busca os dados no Firestore e preenche a tela
+async function carregarPerfil(uid) {
+  try {
+    const docRef = doc(db, 'jogadores', uid);
+    const docSnap = await getDoc(docRef);
 
-// ─── AGENTE LIVRE ────────────────────────────────────
-const inputClube = document.getElementById('clube-atual');
-const checkAgenteLivre = document.getElementById('agente-livre');
-
-if (checkAgenteLivre && inputClube) {
-  checkAgenteLivre.addEventListener('change', function () {
-    if (this.checked) {
-      inputClube.value = 'Sem Clube (Free Agent)';
-      inputClube.disabled = true;
-      inputClube.style.opacity = '0.5';
+    if (docSnap.exists()) {
+      const dadosJogador = docSnap.data();
+      preencherFormulario(dadosJogador);
     } else {
-      inputClube.value = '';
-      inputClube.disabled = false;
-      inputClube.style.opacity = '1';
+      console.log("Nenhum perfil encontrado. O usuário precisa preencher e salvar pela primeira vez.");
     }
-  });
+  } catch (erro) {
+    console.error("Erro ao buscar dados do perfil:", erro);
+    mostrarToast("Erro ao carregar seu perfil.", "erro");
+  }
 }
 
-// ─── PREENCHER FORMULÁRIO COM OS DADOS SALVOS ────────
 function preencherFormulario(dados) {
   if (!dados) return;
 
@@ -122,14 +109,18 @@ function preencherFormulario(dados) {
     ['altura', 'altura'],
     ['peso', 'peso'],
     ['clube', 'clube-atual'],
+    ['overall', 'overall'], 
+    ['nivel', 'nivel']       
   ];
 
   campos.forEach(([chave, id]) => {
     const el = document.getElementById(id);
-    if (el && dados[chave]) el.value = dados[chave];
+    if (el && dados[chave] !== undefined) el.value = dados[chave];
   });
 
   // Agente livre
+  const inputClube = document.getElementById('clube-atual');
+  const checkAgenteLivre = document.getElementById('agente-livre');
   if (dados.agenteLivre && checkAgenteLivre && inputClube) {
     checkAgenteLivre.checked = true;
     inputClube.value = 'Sem Clube (Free Agent)';
@@ -137,39 +128,50 @@ function preencherFormulario(dados) {
     inputClube.style.opacity = '0.5';
   }
 
-  // Posição
+  // Posição e Plataforma (Radios)
   if (dados.posicao) {
     const radioPos = document.querySelector(`input[name="posicao"][value="${dados.posicao}"]`);
     if (radioPos) radioPos.checked = true;
   }
-
-  // Plataforma
   if (dados.plataforma) {
     const radioPlat = document.querySelector(`input[name="plataforma"][value="${dados.plataforma}"]`);
     if (radioPlat) radioPlat.checked = true;
   }
 }
 
-// ─── CARREGAR PERFIL DO FIRESTORE ────────────────────
-async function carregarPerfil(uid) {
-  try {
-    // Busca o documento do usuário na coleção "jogadores"
-    const ref = doc(db, 'jogadores', uid);
-    const snap = await getDoc(ref);
+// ─── 5. EVENTOS DOS ELEMENTOS DA TELA ────────────────
 
-    if (snap.exists()) {
-      preencherFormulario(snap.data());
-      mostrarToast('Perfil carregado! 👋', 'sucesso');
-    }
-    // Se não existir ainda, o formulário fica vazio para o usuário preencher
-  } catch (e) {
-    console.error('Erro ao carregar perfil:', e);
-  }
+// Preview e Upload da Foto
+const inputUpload = document.getElementById('upload-foto');
+const fotoPreview = document.getElementById('foto-perfil-preview');
+if (inputUpload) {
+  inputUpload.addEventListener('change', function (event) {
+    const arquivo = event.target.files[0];
+    if (!arquivo) return;
+    fotoPreview.src = URL.createObjectURL(arquivo);
+    salvarFotoIndexedDB(arquivo);
+  });
 }
 
-// ─── SALVAR PERFIL NO FIRESTORE ──────────────────────
-const formDados = document.getElementById('form-dados-jogador');
+// Checkbox Agente Livre
+const inputClubeEl = document.getElementById('clube-atual');
+const checkAgenteLivreEl = document.getElementById('agente-livre');
+if (checkAgenteLivreEl && inputClubeEl) {
+  checkAgenteLivreEl.addEventListener('change', function () {
+    if (this.checked) {
+      inputClubeEl.value = 'Sem Clube (Free Agent)';
+      inputClubeEl.disabled = true;
+      inputClubeEl.style.opacity = '0.5';
+    } else {
+      inputClubeEl.value = '';
+      inputClubeEl.disabled = false;
+      inputClubeEl.style.opacity = '1';
+    }
+  });
+}
 
+// Botão de Salvar Perfil
+const formDados = document.getElementById('form-dados-jogador');
 if (formDados) {
   formDados.addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -181,14 +183,17 @@ if (formDados) {
 
     const posicaoSelecionada    = document.querySelector('input[name="posicao"]:checked');
     const plataformaSelecionada = document.querySelector('input[name="plataforma"]:checked');
+    const checkAgenteLivre      = document.getElementById('agente-livre');
 
-    // Monta o objeto com os dados do jogador
+    // Monta o objeto com proteção (?.) para evitar o erro de 'null'
     const dadosJogador = {
-      nickname:    document.getElementById('nickname').value.trim(),
-      eaId:        document.getElementById('ea-id').value.trim(),
-      altura:      document.getElementById('altura').value,
-      peso:        document.getElementById('peso').value,
-      clube:       document.getElementById('clube-atual').value.trim(),
+      nickname:    document.getElementById('nickname')?.value.trim() || '',
+      eaId:        document.getElementById('ea-id')?.value.trim() || '',
+      overall:     parseInt(document.getElementById('overall')?.value) || 80,
+      nivel:       parseInt(document.getElementById('nivel')?.value) || 1,
+      altura:      document.getElementById('altura')?.value || '', 
+      peso:        document.getElementById('peso')?.value || '',
+      clube:       document.getElementById('clube-atual')?.value.trim() || '',
       agenteLivre: checkAgenteLivre ? checkAgenteLivre.checked : false,
       posicao:     posicaoSelecionada    ? posicaoSelecionada.value    : '',
       plataforma:  plataformaSelecionada ? plataformaSelecionada.value : '',
@@ -196,10 +201,19 @@ if (formDados) {
     };
 
     try {
-      // Salva (ou sobrescreve) o documento do usuário no Firestore
-      // Caminho: coleção "jogadores" → documento com o uid do usuário
+      // Cria um estilo visual no botão enquanto salva
+      const btnSalvar = formDados.querySelector('button[type="submit"]');
+      const textoOriginal = btnSalvar.textContent;
+      btnSalvar.textContent = "Salvando...";
+      btnSalvar.disabled = true;
+
       await setDoc(doc(db, 'jogadores', uidAtual), dadosJogador);
       mostrarToast('Perfil salvo na nuvem com sucesso! ☁️');
+
+      // Restaura o botão
+      btnSalvar.textContent = textoOriginal;
+      btnSalvar.disabled = false;
+
     } catch (e) {
       console.error('Erro ao salvar perfil:', e);
       mostrarToast('Erro ao salvar. Tente novamente.', 'erro');
@@ -207,27 +221,27 @@ if (formDados) {
   });
 }
 
-// ─── DETECTAR LOGIN E INICIAR ────────────────────────
-// Fica escutando se o usuário está logado ou não
+// ─── 6. DETECTAR LOGIN E INICIAR TUDO ────────────────
 onAuthStateChanged(auth, async (usuario) => {
   if (usuario) {
-    // Usuário logado: guarda o uid e carrega o perfil dele
+    // 1. Salva o ID
     uidAtual = usuario.uid;
 
-    // Mostra o email no header se houver um elemento para isso
+    // 2. Coloca o email no topo (se houver)
     const elEmail = document.getElementById('usuario-email');
     if (elEmail) elEmail.textContent = usuario.email;
 
+    // 3. Busca os dados no Banco e preenche a tela
     await carregarPerfil(usuario.uid);
 
-    // Carrega foto local (IndexedDB)
+    // 4. Carrega a foto local salva
     const fotoSalva = await carregarFotoIndexedDB();
     if (fotoSalva && fotoPreview) {
       fotoPreview.src = URL.createObjectURL(fotoSalva);
     }
 
   } else {
-    // Usuário NÃO logado: redireciona para o cadastro
+    // Se não estiver logado, chuta pra página de login
     mostrarToast('Faça login para acessar seu perfil.', 'erro');
     setTimeout(() => {
       window.location.href = '../HTML/cadastrar-se.html';

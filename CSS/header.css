@@ -1,348 +1,69 @@
 
 .main-header{
-    margin: auto;
-    margin-bottom: 20px;
-    
-}
-
-.logo {
-  width: 100px ;
-  max-width: 100px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
   height: auto;
-  display: block;
-  margin:  auto;
+  
 }
-.menu-carrossel{
-    width: 100%;
-  overflow-x: auto; /* Habilita a rolagem horizontal */
-  -webkit-overflow-scrolling: touch; /* Deixa o deslizar suave no celular */
+.logo{
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  margin: 10px 10px;
+  width: 220px;
+  height: 150px;
 }
-.menu-carrossel::-webkit-scrollbar {
-  display: none; 
+.menu-carrossel  nav{
+   display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .lista-links{
-  display: flex; 
-  list-style: none; 
-  padding: 0 20px; /* Espaço inicial e final do carrossel */
-  margin: 0;
-  gap: 10px; /* Espaço entre um botão e outro */
-  
-
-}
-.lista-links li {
-  white-space: nowrap; /* Impede que o texto quebre de linha */
-  
-}
-/* Estilo dos "botões" do menu */
-.lista-links a { 
-  color: #A0AAB5; /* Cinza Claro */
-  text-decoration: none; 
-  font-size: 15px;
-  padding: 8px 18px;
-  
-  border-radius: 20px; /* Deixa com formato arredondado */
-  display: block;
- transition: transform 0.3s ease, background 0.3s, color 0.3s;
-  font-size: 24px;
-  align-items: center;
-} 
-.lista-links a.ativo, 
-.lista-links a:hover {
-  background: #12E06C; /* Verde Neon */
-  color: var(--cor-fundo-secundario); /* Texto escuro para dar contraste com o verde */
-  font-weight: bold;
-  transform: scale(1.1);
-}
-.conteiner-perfil{
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 10px;
-}
-.conteiner-title{
-  font-size: 24px;
-  text-transform: uppercase;
-}
-.conteiner-text{
-  text-align: center;
-  font-size: 18px;
-  margin: 20px;
-}
-.conteiner-info{
-  font-size: 20px;
-  text-transform: uppercase;
-}
-@media screen and (min-width:320px){
-  .lista-links{
-    display: flex;
-    justify-content: center; 
-    width: auto;
-    height: auto;
-    margin: auto;
-  }
-  
-}
-@media screen and (min-width:768px){
-  .lista-links{
-    display: flex;
-    justify-content: center;
-    width: auto;
-    height: auto;
-    margin: auto;
-  }
-  
-}
-@media screen and (min-width:1024px) {
-  .menu-carrossel{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-  }
-  
-}
-.main-header{
-    margin: auto;
-    margin-bottom: 20px;
-    
-}
-.logo {
-  width: auto;
-  max-width: 150px;
-  height: auto;
-  display: block;
-  margin: 20px auto;
-}
-.menu-carrossel{
-    width: 100%;
-  overflow-x: auto; /* Habilita a rolagem horizontal */
-  -webkit-overflow-scrolling: touch; /* Deixa o deslizar suave no celular */
-}
-.menu-carrossel::-webkit-scrollbar {
-  display: none; 
-}
-.lista-links{
-  display: flex; 
-  list-style: none; 
-  padding: 0 20px; /* Espaço inicial e final do carrossel */
-  margin: 0;
-  gap: 10px; /* Espaço entre um botão e outro */
-  
-
-}
-.lista-links li {
-  white-space: nowrap; /* Impede que o texto quebre de linha */
-  
-}
-/* Estilo dos "botões" do menu */
-.lista-links a { 
-  color: #A0AAB5; /* Cinza Claro */
-  text-decoration: none; 
-  font-size: 15px;
-  padding: 8px 18px;
-  
-  border-radius: 20px; /* Deixa com formato arredondado */
-  display: block;
- transition: transform 0.3s ease, background 0.3s, color 0.3s;
-  font-size: 24px;
-  align-items: center;
-} 
-.lista-links a.ativo, 
-.lista-links a:hover {
-  background: #12E06C; /* Verde Neon */
-  color: var(--cor-fundo-secundario); /* Texto escuro para dar contraste com o verde */
-  font-weight: bold;
-  transform: scale(1.1);
-}
-.conteiner-perfil{
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 10px;
-}
-.conteiner-title{
-  font-size: 24px;
-  text-transform: uppercase;
-}
-.conteiner-text{
-  text-align: center;
-  font-size: 18px;
-  margin: 20px;
-}
-.conteiner-info{
-  font-size: 20px;
-  text-transform: uppercase;
-}
-@media screen and (min-width:320px){
-  .lista-links{
-    display: flex;
-    justify-content: center; 
-    width: auto;
-    height: auto;
-    margin: auto;
-  }
-  
-}
-@media screen and (min-width:768px){
-  .lista-links{
-    display: flex;
-    justify-content: center;
-    width: auto;
-    height: auto;
-    margin: auto;
-  }
-  
-}
-@media screen and (min-width:1024px) {
-  .menu-carrossel{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-  }
-  
-}
- 
-/* ─── WIDGET DE USUÁRIO NO HEADER ─── */
-.main-header {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;  /* 👈 Muda de 'row' para 'column' para empilhar tudo ao centro */
-  align-items: center;
-  justify-content: center; /* 👈 Muda de 'space-between' para 'center' */
-  gap: 15px;               /* Espaçamento ideal entre logo, menu e perfil */
-  padding: 10px 20px;
-  position: relative;
-
-}
-.header-usuario {
-  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 40px;
-  padding: 6px 14px 6px 6px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-  user-select: none;
-  margin: 8px auto 0;
+  gap: 20px;
+  list-style: none;
 }
- 
-.header-usuario:hover {
-  background: rgba(18, 224, 108, 0.08);
-  border-color: rgba(18, 224, 108, 0.35);
-}
- 
-.hu-avatar-wrap {
-  position: relative;
-  flex-shrink: 0;
-}
- 
-.hu-foto {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #12E06C;
-  display: block;
-}
- 
-.hu-status-dot {
-  position: absolute;
-  bottom: 1px;
-  right: 1px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #12E06C;
-  border: 2px solid var(--cor-fundo-principal, #050B14);
-}
- 
-.hu-info {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
- 
-.hu-nome {
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
- 
-.hu-email {
-  font-size: 10px;
-  color: #A0AAB5;
-  max-width: 140px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
- 
-.hu-dropdown {
-  display: none;
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  background: #0F1A2C;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  padding: 8px;
-  min-width: 180px;
-  z-index: 500;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-  flex-direction: column;
-  gap: 2px;
-}
- 
-.hu-dropdown.aberto { display: flex; 
-}
- 
-.hu-drop-item {
-  display: block;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #A0AAB5;
+.lista-links a{
+  color: var(--cor-texto-claro);
   text-decoration: none;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 500;
-  text-align: left;
-  width: 100%;
-  transition: background 0.15s, color 0.15s;
+  margin: 10px;
+  font-size: 20px;
 }
- 
-.hu-drop-item:hover {
-  background: rgba(18, 224, 108, 0.1);
-  color: #12E06C;
+.login-header {
+  display: flex;
+  gap: 30px;
+margin: 20px;
 }
- 
-.hu-sair:hover {
-  background: rgba(248, 81, 73, 0.1);
-  color: #F85149;
+.login{
+  background-color:var(--cor-texto-claro);
+  color: #050B14;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 10px 10px;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */
 }
- 
-.hu-drop-divider {
-  height: 1px;
-  background: rgba(255,255,255,0.08);
-  margin: 4px 0;
+.cadastra-se{
+  
+  background-color: #12E06C;
+  color: #050B14;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 10px 20px;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */
 }
- 
-@media screen and (min-width: 768px) {
-  .main-header {
-    justify-content: space-between;
-    padding: 10px 32px;
-  }
-  .header-usuario { margin: 0; }
+.login-header button:hover{
+   transform: translateY(-5px); /* Sobe um pouquinho ao passar o mouse */
+  box-shadow: 0 0 25px rgba(18, 224, 108, 0.7); /* Aumenta o brilho */
 }
- 

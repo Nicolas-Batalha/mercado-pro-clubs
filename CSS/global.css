@@ -7,6 +7,7 @@
 /* --- PAINEL DE CORES (VARIÁVEIS) --- */
 :root {
   --cor-verde-neon: #12E06C;
+  --cor-verde-escuro: #15e450d5;
   --cor-fundo-principal: #050B14;
   --cor-fundo-secundario: #0F1A2C;
   --cor-texto-claro: #FFFFFF;
@@ -24,8 +25,15 @@
 }
 
 body {
-  /* Usando a variável de fundo aqui! */
-  background: linear-gradient(135deg, #0D1117 60%, #194b27 100%);
+  /* Para colocar uma imagem de fundo depois, usaremos background-image aqui */
+  background: linear-gradient(180deg, #0F1A2C 0%, #050B14 100%);
+  background-image: 
+    linear-gradient(to bottom, rgba(5, 11, 20, 0.7), rgba(5, 11, 20, 0.95)), 
+    url('../IMG/foto-do-jogo.jpg');
+     background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
   color: var(--cor-texto-claro);
   overflow-x: hidden; 
 }
+
