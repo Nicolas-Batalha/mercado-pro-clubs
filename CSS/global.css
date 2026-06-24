@@ -36,4 +36,104 @@ body {
   color: var(--cor-texto-claro);
   overflow-x: hidden; 
 }
+/* Wrapper que o JS injeta dentro de #login-header */
+.header-usuario {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+ 
+/* Foto redonda */
+.hu-foto {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #12E06C;
+  transition: border-color 0.2s;
+}
+.header-usuario:hover .hu-foto {
+  border-color: #fff;
+}
+ 
+/* Bolinha verde de "online" */
+.hu-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.hu-status-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #12E06C;
+  border: 2px solid #0d0d0d;   /* combine com a cor de fundo do header */
+}
+ 
+/* Nome ao lado da foto */
+.hu-nome {
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+ 
+/* ── Dropdown ── */
+.hu-dropdown {
+  display: none;          /* escondido por padrão */
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  min-width: 180px;
+  padding: 6px 0;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 999;
+  flex-direction: column;
+}
+.hu-dropdown.aberto {
+  display: flex;
+}
+ 
+.hu-drop-item {
+  display: block;
+  padding: 10px 16px;
+  color: #ddd;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-family: 'Montserrat', sans-serif;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.hu-drop-item:hover {
+  background: #252525;
+  color: #12E06C;
+}
+ 
+.hu-drop-divider {
+  height: 1px;
+  background: #2a2a2a;
+  margin: 4px 0;
+}
+ 
+.hu-sair {
+  color: #e06612 !important;
+}
+.hu-sair:hover {
+  color: #ff8040 !important;
+}
 

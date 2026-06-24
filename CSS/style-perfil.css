@@ -1,142 +1,515 @@
+.body-perfil {
+  /* Para colocar uma imagem de fundo depois, usaremos background-image aqui */
+  background-image: url("../IMG/foto-do-jogo.jpg");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  color: var(--cor-texto-claro);
+  overflow-x: hidden;
+}
+/* =====================================================
+   Aba Superior do Perfil (Card de Destaque)
+   ===================================================== */
 
-/* --- Menu de navegação --- */
-.meuperfil {
-    display: flex;
-    justify-content: center;
-    list-style: none;
-    padding: 0 20px;
-    margin: 0;
-    gap: 10px;
+.perfil-container-main {
+  display: grid;
+  justify-content: space-around;
+  grid-template-columns: 1fr 2fr 1fr;
+  background: radial-gradient(  
+    circle,
+    rgba(0, 0, 92, 0.41) 0%,
+    rgba(4, 21, 46, 0.82) 100%
+  );
+  box-shadow: 0 0 10px #5085d9;
+  border-radius: 30px;
+  margin: 30px;
+  padding: 20px;
 }
- 
-.meuperfil li {
-    white-space: nowrap;
-}
- 
-.meuperfil a {
-    color: #A0AAB5;
-    text-decoration: none;
-    font-size: 20px;
-    padding: 8px 18px;
-    background: var(--cor-fundo-secundario);
-    border-radius: 20px;
-    display: block;
-    transition: transform 0.3s ease, background 0.3s, color 0.3s;
-    align-items: center;
-}
- 
-.meuperfil a.ativo,
-.meuperfil a:hover {
-    background: #12E06C;
-    color: var(--cor-fundo-secundario);
-    font-weight: bold;
-    transform: scale(1.1);
-}
- 
-/* --- Títulos --- */
-.titulo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
-    text-transform: uppercase;
-    margin: 20px;
-}
- 
-/* --- Foto de perfil --- */
-.user-icon {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-}
- 
-.perfil-container {
-    margin-top: 10px;
-}
- 
 .perfil-imagem-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    background-color: #1a1a1a;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 300px;
-    margin: 0 auto;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+  grid-area: perfil;
+  position: relative;
 }
- 
 .img-icon {
-    width: 250px;
-    height: 250px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #12E06C;
-    box-shadow: 0 0 10px rgba(18, 224, 108, 0.3);
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  margin: 20px 30px 20px 60px;
+  object-fit: cover;
+  border: 3px solid #5085d9;
+  box-shadow: 0 0 10px #5085d9;
 }
- 
-.acoes-perfil {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.btn-upload-foto {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    circle,
+    rgba(83, 87, 85, 0.41) 75%,
+    rgba(83, 87, 85, 0) 100%
+  );
+  border-radius: 7px;
+  position: relative;
+  width: 35px;
+  height: 35px;
+  filter: invert(1);
+  margin: -50px -90px 0 -50px;
+  padding: 5px;
+  transition: all 0.3s ease;
+  bottom: 10px;
+  right: 10px;
 }
- 
-/* --- Formulário --- */
-.perfil-dados-form {
+.btn-upload-foto span {
+  filter: invert(1);
+}
+.btn-upload-foto:hover {
+  background-color: #535755;
+  transform: translateY(-5px);
+}
+/*mundando overral*/
+.status-badge {
+  background: #050b14;
+  border: 1px solid #1f2d44;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+  /* Centraliza conteúdo interno */
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+} /* Mantém suas classes específicas */
+.status-badge.ovr {
+  border-color: #12e06c;
+}
+
+.badge-label {
+  font-size: 0.7rem;
+  color: #8a99ad;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.badge-valor {
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.status-badge.ovr .badge-valor {
+  color: #12e06c;
+  text-shadow: 0 0 10px rgba(18, 224, 108, 0.3);
+}
+
+/* Ajuste de responsividade com Grid */
+@media (max-width: 768px) {
+  .perfil-status-badges {
+    grid-template-columns: repeat(
+      2,
+      1fr
+    ); /* Força 2 colunas em telas menores */
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  }
 }
- 
+.perfil-email-topo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.perfil-infos-rapidas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.perfil-identificacao {
+  display: grid;
+  gap: 10px;
+}
+.filter {
+  filter: invert(1);
+}
+.info {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  margin: 20px 0 0 0px;
+  padding: 10px;
+  gap: 20px;
+  border-radius: 5px;
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 92, 0.41) 0%,
+    rgba(4, 21, 46, 0.82) 100%
+  );
+  box-shadow: 0 0 10px #5085d9;
+}
+.detalhe {
+  width: 2px;
+  height: 50px;
+  background-color: aliceblue;
+  box-shadow: 0 0 10px #5085d9;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+.position {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+.club {
+  width: 45px;
+  height: 45px;
+}
+
+.static {
+  display: grid;
+  grid-template-rows: auto auto;
+  border-radius: 30px;
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 92, 0.41) 0%,
+    rgba(4, 21, 46, 0.82) 100%
+  );
+  box-shadow: 0 0 10px #5085d9;
+}
+.static-titulo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+}
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 20px;
+  justify-content: center;
+}
+.static-filho {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/*=================================
+        DETALHES DO JOGADOR 
+===============================*/
+
 .detalhes-jogador {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  border-radius: 30px;
+  margin: 30px;
+  padding: 30px;
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 92, 0.41) 0%,
+    rgba(4, 21, 46, 0.82) 100%
+  );
+  box-shadow: 0 0 10px #5085d9;
+}
+.detalhes-jogador h3 {
+  display: flex;
+  margin-left: 10px;
+  text-transform: uppercase;
+}
+.icon-text {
+  display: flex;
+  align-items: center;
+}
+.icon-text-img {
+  margin-left: 2px;
+  border-radius: 4px;
+  background-color: #333;
+  width: 30px;
+  height: 30px;
+}
+.linha-um {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 100px 10px 0px;
+  width: 90%;
+}
+.modifcação {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin: 0px 10px;
+  border-radius: 5px;
+  border: 1px solid #333;
+  background-color: #222;
+  color: white;
+  font-size: 16px;
+  outline: none;
+  border: #12e06c;
+  transition: border-color 0.3s;
+  width: 100%;
+}
+.modifcação-name {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 5px;
+  margin: 0px 10px;
+  border: 1px solid #333;
+  background-color: #222;
+  color: white;
+  font-size: 16px;
+  outline: none;
+  border: #12e06c;
+  transition: border-color 0.3s;
+  width: 100%;
+}
+.text-static {
+  margin: 0px 10px;
+}
+.campo-grupo {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  border-radius: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #333;
+  background-color: #222;
+}
+
+.campo-static {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  border-radius: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #333;
+  background-color: #222;
+}
+.linha-dois {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 10px;
+  margin: 50px 100px 10px 0px;
+  width: 90%;
+}
+.img-static {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.icon-static {
+  width: 30px;
+  height: 30px;
+}
+
+.checkbox-grupo {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+  gap: 10px;
+  margin-top: 10px;
+}
+.checkbox-grupo input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #12e06c;
+}
+
+.checkbox-grupo label {
+  font-size: 14px;
+  color: #aaa;
+  cursor: pointer;
+  font-weight: normal;
+}
+.detalhe-vertical {
+  display: flex;
+  align-items: center;
+  width: 23%;
+  height: 2px;
+  background-color: aliceblue;
+  box-shadow: 0 0 10px #5085d9;
+  margin-top: 5px;
+  margin-left: 10px;
+}
+.club-text {
+  margin-bottom: 5px;
+}
+.escudo-clube {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.clube-escudo {
+  width: 150px;
+  height: 150px;
+}
+
+/*=======================================
+          POSIÇÃO DE JOGADOR 
+=======================================*/
+
+.posicoes {
+  border-radius: 30px;
+  margin: 30px;
+  padding: 30px;
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 92, 0.41) 0%,
+    rgba(4, 21, 46, 0.82) 100%
+  );
+  box-shadow: 0 0 10px #5085d9;
+}
+.icon-text {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  text-align: center;
+  align-items: center;
+  margin-left: 10px;
+  text-transform: uppercase;
+  margin: 10px;
+}
+.icon-text h3 {
+  margin-left: 10px;
+}
+.grid-position {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  width: 100%;
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 5px solid #5085d9;
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 92, 0.41) 0%,
+    rgba(4, 21, 46, 0.82) 100%
+  );
+  box-shadow: 0 0 10px #5085d9;
+}
+.pos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 10px;
+}
+.pos-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 10px;
+}
+.text-categoria {
+  margin-top: 20px;
+}
+.btn-posicao {
+  background-color: #252323a4;
+  display: flex;
+  align-items: center;
+  padding: 10px 100px;
+  width: 100%;
+  border-radius: 15px;
+  margin-bottom: 10px;
+  justify-content: center;
+  flex-direction: column;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+.btn-posd:hover {
+  border-color: #2f00ff;
+  color: #2f00ff;
+}
+.btn-posd input[type="radio"]:checked + .btn-posicao {
+  background-color: #2f00ff;
+  width: 100%;
+  color: #fff;
+  border-color: #2f00ff;
+  box-shadow: 0 0 20px rgba(10, 7, 206, 0.705);
+}
+.pos-geral {
+  display: none;
+}
+
+/*===================================================
+                PLATAFORMAS
+===================================================*/
+
+.plataforma {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 10px;
+}
+.text-plataforma {
+  text-transform: uppercase;
+  margin: 10px;
+}
+.antiga-nintendo{
+  margin-top: -35px;
+}
+.mis-plataforma {
+  background-color: #252323a4;
+  display: flex;
+  align-items: center;
+  padding: 10px 100px;
+  width: 100%;
+  max-width: 350px;
+  border-radius: 15px;
+  margin-bottom: 10px;
+  justify-content: center;
+  flex-direction: column;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+.pos-geral{
+  display: none;
+}
+.btn-plataforma:hover{
+  border-color: #2f00ff;
+  color: #2f00ff;
+}
+.btn-plataforma input[type="radio"]:checked + .mis-plataforma {
+  background-color: #2f00ff;
+  color: #fff;
+  border-color: #2f00ff;
+  box-shadow: 0 0 20px rgba(18, 224, 108, 0.4);
+}
+.logo-empresa{
+  width: 30px;
+  height: 30px;
+  filter: invert();
+}
+.flex{
+  display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.btn-salvar {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    width: 100%;
-}
- 
-.campo-grupo {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    width: 100%;
-}
- 
-.linha-dupla {
-    display: flex;
-    gap: 15px;
-}
- 
-.campo-grupo label {
-    font-size: 14px;
-    color: #ccc;
-    font-weight: bold;
-}
- 
-.campo-grupo input {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #333;
-    background-color: #222;
-    color: white;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.3s;
-}
- 
-.campo-grupo input:focus {
-    border-color: #12E06C;
-}
- 
-.btn-salvar {
     background-color: #12E06C;
     color: #111;
     padding: 12px;
     border: none;
-    border-radius: 5px;
+    border-radius: 20px;
     cursor: pointer;
     font-weight: bold;
     font-size: 16px;
@@ -146,198 +519,4 @@
  
 .btn-salvar:hover {
     background-color: #0fb356;
-}
- 
-/* --- Checkbox agente livre --- */
-.checkbox-grupo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 5px;
-}
- 
-.checkbox-grupo input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    accent-color: #12E06C;
-}
- 
-.checkbox-grupo label {
-    font-size: 14px;
-    color: #aaa;
-    cursor: pointer;
-    font-weight: normal;
-}
- 
-/* --- Seção de posições --- */
-.posicoes {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    width: 100%;
-}
- 
-.grid-posicoes {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
-    gap: 30px;
-    margin: 10px;
-}
- 
-.por-posicao {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 100%;
-}
- 
-.text-categoria {
-    text-align: center;
-    font-size: 25px;
-    margin: 20px;
-}
- 
-.img-posicao {
-    height: 100px;
-    width: 100%;
-}
- 
-/* FIX: escopo restrito — só esconde radios dentro do grid de posições */
-.grid-posicoes input[type="radio"] {
-    display: none;
-}
- 
-.btn-posicao {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-    background-color: #222;
-    color: #fff;
-    border: 1px solid #333;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 15px;
-    transition: all 0.3s ease;
-}
- 
-.btn-posicao:hover {
-    border-color: #12E06C;
-    color: #12E06C;
-}
- 
-.grid-posicoes input[type="radio"]:checked + .btn-posicao {
-    background-color: #12E06C;
-    color: #111;
-    border-color: #12E06C;
-    box-shadow: 0 0 10px rgba(18, 224, 108, 0.4);
-}
- 
-/* --- Seção de plataformas --- */
-.plataforma {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
- 
-.container-plataformas {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap; /* FIX: evita overflow em telas pequenas */
-    gap: 30px;
-}
- 
-.coluna-plataforma {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
- 
-/* FIX: escopo restrito — só esconde radios dentro do container de plataformas */
-.container-plataformas input[type="radio"] {
-    display: none;
-}
- 
-.btn-plataforma {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-    background-color: #222;
-    color: #fff;
-    border: 1px solid #333;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 15px;
-    transition: all 0.3s ease;
-    width: 150px;
-    text-align: center;
-}
- 
-.btn-plataforma:hover {
-    border-color: #12E06C;
-    color: #12E06C;
-}
- 
-.color-hover input[type="radio"]:checked + .btn-plataforma {
-    background-color: #12E06C;
-    color: #111;
-    border-color: #12E06C;
-    box-shadow: 0 0 10px rgba(18, 224, 108, 0.4);
-}
- 
-.color-hover input[type="radio"]:checked + .nintendo {
-    background-color: #e00000;
-    color: #ffffff;
-}
- 
-.color-hover input[type="radio"]:checked + .playstation {
-    background-color: #003791;
-    color: #ffffff;
-}
- 
-.color-hover input[type="radio"]:checked + .xbox {
-    background-color: #12E06C;
-    color: #111;
-}
- 
-.color-hover input[type="radio"]:checked + .pc {
-    background-color: #ffffff;
-    color: #111;
-}
- 
-/* --- Responsividade --- */
-@media screen and (max-width: 600px) {
-    .detalhes-jogador {
-        width: 100%;
-        padding: 0 16px;
-    }
- 
-    .container-plataformas {
-        gap: 20px;
-    }
- 
-    .btn-plataforma {
-        width: 130px;
-    }
- 
-    .linha-dupla {
-        flex-direction: column;
-    }
-}
- 
-@media screen and (min-width: 1024px) {
-    .perfil-dados-form {
-        max-width: 700px;
-        margin: 0 auto;
-    }
- 
-    .posicoes {
-        max-width: 900px;
-        margin: 0 auto;
-    }
 }

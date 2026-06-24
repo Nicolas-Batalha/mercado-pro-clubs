@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="CSS/style.css" />
     <link
       rel="shortcut icon"
-      href="IMG/logo maior.svg.svg"
+      href="IMG/logo.svg"
       type="image/x-icon"
     />
   </head>
@@ -17,16 +17,15 @@
       <div class="logo animar-scroll">
         <a href="index.html" title="voltar para a página inicial">
           <img
-            src="IMG/logo maior.svg"
+            src="IMG/logo.svg"
             class="logo"
             alt="Pro Clubs Hub Brasil Logo"
           />
         </a>
       </div>
       <div class="menu-carrossel">
-        <nav>
+        <nav >
           <ul class="lista-links animar-scroll">
-            <li><a href="./HTML/meu-perfil.html">meu perfil</a></li>
             <li><a href="./HTML/mercado.html">mercado</a></li>
             <li><a href="./HTML/torneio.html">torneio</a></li>
             <li><a href="#">ranking</a></li>
@@ -35,8 +34,19 @@
         </nav>
       </div>
       <div class="login-header animar-scroll">
-        <a href="HTML/cadastrar-se.html" class="login">login</a>
-        <a href="HTML/cadastrar-se.html" class="cadastra-se">cria conta</a>
+        <div class="login-header animar-scroll">
+      <div class="notification-icon" onclick="adicionarNotificacao()">
+        <span class="bell-icon">🔔</span>
+        <span id="badge" class="notification-badge hidden">0</span>
+      </div>
+      <div class="email-container" id="emailIcon">
+        <svg viewBox="0 0 24 24" class="email-icon">
+          <path
+            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+        </svg>
+      </div>
+           <div class="login-header animar-scroll" id="login-header">
+  </a>
       </div>
     </header>
     <main>
@@ -97,7 +107,10 @@
           </div>
           </div>
         </section>
-      </section>   
+      </section>  
+
+
+      </section>
     </main>
     <footer class="main-footer">
   <div class="footer-inner">
@@ -108,9 +121,10 @@
       Não possuímos qualquer ligação oficial com a EA Sports FC ou qualquer de suas subsidiárias.<br />
       Todas as marcas registradas pertencem a seus respectivos proprietários.
     </p>
-    <p class="footer-texto">desenvolvedor Nicolas Batalha</p>
+    <p class="footer-texto">desenvolvedores Nicolas Batalha <br> colaboradores  Mateus Portes , Kauan Taconi </p>
   </div>
 </footer>
     <script src="./JS/script.js" defer></script>
+    <script type="module" src="./JS/header-auth.js"></script>
   </body>
 </html>

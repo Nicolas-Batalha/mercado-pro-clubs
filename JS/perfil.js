@@ -227,9 +227,9 @@ onAuthStateChanged(auth, async (usuario) => {
     // 1. Salva o ID
     uidAtual = usuario.uid;
 
-    // 2. Coloca o email no topo (se houver)
-    const elEmail = document.getElementById('usuario-email');
-    if (elEmail) elEmail.textContent = usuario.email;
+    // 2. Coloca o  eaid no topo (se houver)
+    const eaId = document.getElementById('eaId');
+    if (eaId) eaId.textContent = usuario.eaId;
 
     // 3. Busca os dados no Banco e preenche a tela
     await carregarPerfil(usuario.uid);
