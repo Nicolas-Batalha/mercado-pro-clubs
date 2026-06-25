@@ -3,28 +3,18 @@
 // Detecta login e troca botões "Entrar/Cadastrar" pelo avatar do usuário
 // =========================================================================
 
-import { initializeApp }            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc }            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { firebaseConfig }                       from "./firebase-config.js";
 
-const firebaseConfig = {
-  apiKey:            "AIzaSyA6X9ExKAaNCDdpCr-4h8rUVDMFANRB7Ag",
-  authDomain:        "mercado-pro-clubs.firebaseapp.com",
-  projectId:         "mercado-pro-clubs",
-  storageBucket:     "mercado-pro-clubs.firebasestorage.app",
-  messagingSenderId: "1018354864332",
-  appId:             "1:1018354864332:web:8a60b4a80942c490c43269",
-  measurementId:     "G-97YN402WJF"
-};
-
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
+const auth = getAuth(initializeApp(firebaseConfig));
+const db   = getFirestore();
 
 // Detecta se está na raiz (index.html) ou dentro de HTML/
 const base = window.location.pathname.includes('/HTML/') ? '../' : './';
 
-// ─── LÊ FOTO DO INDEXEDDB (salva na página de perfil) ──────────────────────
+// ─── Foto do IndexedDB (salva na página de perfil) ────────────────────────────
 function carregarFotoIndexedDB() {
   return new Promise((resolve) => {
     const req = indexedDB.open('mercadoProClubs', 1);
@@ -39,7 +29,7 @@ function carregarFotoIndexedDB() {
   });
 }
 
-// ─── ESTADO: DESLOGADO → botões Entrar + Cria Conta ────────────────────────
+// ─── Render: deslogado ────────────────────────────────────────────────────────
 function renderDeslogado(container) {
   container.innerHTML = `
     <a href="${base}HTML/cadastrar-se.html" class="login">Entrar</a>
@@ -47,22 +37,16 @@ function renderDeslogado(container) {
   `;
 }
 
-// ─── ESTADO: LOGADO → avatar com dropdown ──────────────────────────────────
+// ─── Render: logado ───────────────────────────────────────────────────────────
 function renderLogado(container) {
   container.innerHTML = `
     <div class="header-usuario" id="header-usuario">
       <div class="hu-avatar-wrap">
-        <img
-          id="hu-foto"
-          src="${base}IMG/user-icon.svg"
-          class="hu-foto"
-          alt="foto do usuário"
-          onerror="this.src='${base}IMG/user-icon.svg'"
-        />
+        <img id="hu-foto" src="${base}IMG/user-icon.svg" class="hu-foto" alt="foto do usuário"
+             onerror="this.src='${base}IMG/user-icon.svg'" />
         <span class="hu-status-dot"></span>
       </div>
       <span class="hu-nome" id="hu-nome">...</span>
-
       <div class="hu-dropdown" id="hu-dropdown">
         <a href="${base}HTML/meu-perfil.html" class="hu-drop-item">👤 Meu Perfil</a>
         <a href="${base}HTML/mercado.html"    class="hu-drop-item">🏪 Mercado</a>
@@ -70,11 +54,9 @@ function renderLogado(container) {
         <div class="hu-drop-divider"></div>
         <button class="hu-drop-item hu-sair" id="hu-btn-sair">🚪 Sair</button>
       </div>
-      <div>
     </div>
   `;
 
-  // Abre/fecha dropdown
   const widget = document.getElementById('header-usuario');
   widget.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -84,32 +66,27 @@ function renderLogado(container) {
     document.getElementById('hu-dropdown')?.classList.remove('aberto');
   });
 
-  // Botão Sair
   document.getElementById('hu-btn-sair').addEventListener('click', async (e) => {
     e.stopPropagation();
     await signOut(auth);
-    // Volta para index ou página de login
     window.location.href = `${base}HTML/cadastrar-se.html`;
   });
 }
 
-// ─── PREENCHE FOTO E NOME ───────────────────────────────────────────────────
+// ─── Preenche foto e nome ─────────────────────────────────────────────────────
 async function preencherWidget(usuario) {
   const elFoto = document.getElementById('hu-foto');
   const elNome = document.getElementById('hu-nome');
 
-  // 1. Foto do Google primeiro
-  if (usuario.photoURL && elFoto) {
-    elFoto.src = usuario.photoURL;
-  }
+  if (usuario.photoURL && elFoto) elFoto.src = usuario.photoURL;
 
-  // 2. Foto local do IndexedDB (sobrescreve se existir, pois é a escolhida pelo usuário)
+  // Foto local sobrescreve a do Google (escolhida pelo usuário)
   try {
     const blob = await carregarFotoIndexedDB();
     if (blob && elFoto) elFoto.src = URL.createObjectURL(blob);
   } catch (_) {}
 
-  // 3. Nickname do Firestore
+  // Nickname do Firestore
   try {
     const snap = await getDoc(doc(db, 'jogadores', usuario.uid));
     const nome = snap.exists()
@@ -121,9 +98,8 @@ async function preencherWidget(usuario) {
   }
 }
 
-// ─── LISTENER PRINCIPAL ─────────────────────────────────────────────────────
+// ─── Listener principal ───────────────────────────────────────────────────────
 onAuthStateChanged(auth, (usuario) => {
-  // Funciona no #login-header (index) e também no .main-header direto (outras páginas)
   const container = document.getElementById('login-header')
                  || document.querySelector('.main-header');
   if (!container) return;

@@ -1,5 +1,8 @@
 /* --- SEÇÃO LFG (Looking For Group) --- */
 .lfg-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 40px 20px;
     background-color: #0f0f0f;
     color: #fff;
