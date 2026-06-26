@@ -14,7 +14,7 @@ const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-const TEMPO_EXPIRACAO = 5 * 60 * 60 * 1000; // 5 horas
+const TEMPO_EXPIRACAO = 2 * 60 * 60 * 1000; // 2 horas
 
 const filtroPlataforma = document.getElementById('filtro-plataforma');
 const filtroPosicao    = document.getElementById('filtro-posicao');

@@ -7,6 +7,7 @@
   height: auto;
   
 }
+
 .logo{
   display: flex;
   align-items: center;
@@ -16,12 +17,14 @@
   height: 150px;
 }
 .menu-carrossel {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   
 }
 .lista-links{
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -29,6 +32,7 @@
   list-style: none;
 }
 .lista-links a{
+  
   color: var(--cor-texto-claro);
   text-decoration: none;
   margin: 10px;

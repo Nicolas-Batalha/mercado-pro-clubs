@@ -1,5 +1,6 @@
 .body-perfil {
   /* Para colocar uma imagem de fundo depois, usaremos background-image aqui */
+  background: linear-gradient(180deg, #0F1A2C 0%, #050B14 100%);
   background-image: url("../IMG/foto-do-jogo.jpg");
   background-size: cover;
   background-position: center top;

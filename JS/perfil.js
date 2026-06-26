@@ -1,200 +1,380 @@
-// =========================================================================
-// MERCADO PRO CLUBS — PERFIL DO JOGADOR
-// =========================================================================
+/**
+ * perfil.js — Mercado Pro Clubs
+ * Responsabilidades:
+ *  1. animar-scroll  → Intersection Observer para elementos .animar-scroll
+ *  2. Topo do perfil → resume as configurações salvas
+ *  3. Formulário     → carrega dados salvos e persiste ao salvar
+ *  4. Upload de foto → preview + armazenamento em base64
+ */
+function iniciarAnimarScroll() {
+  const elementos = document.querySelectorAll(".animar-scroll");
 
-import { initializeApp }                    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged }      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { firebaseConfig }                   from "./firebase-config.js";
+  if (!elementos.length) return;
 
-const auth = getAuth(initializeApp(firebaseConfig));
-const db   = getFirestore();
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visivel");
+          // Para de observar depois de animar (performance)
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.15 }
+  );
 
-let uidAtual = null;
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
-function mostrarToast(mensagem, tipo = 'sucesso') {
-  const toast = document.createElement('div');
-  toast.textContent = mensagem;
-  toast.style.cssText = `
-    position:fixed;bottom:24px;right:24px;
-    background:${tipo === 'sucesso' ? '#12E06C' : '#d32f2f'};
-    color:#000;font-weight:bold;padding:14px 22px;border-radius:8px;
-    font-family:'Montserrat',sans-serif;font-size:0.9rem;
-    box-shadow:0 4px 16px rgba(0,0,0,0.4);z-index:9999;
-    opacity:0;transition:opacity 0.3s;
-  `;
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => (toast.style.opacity = '1'));
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  elementos.forEach((el) => observer.observe(el));
 }
 
-// ─── IndexedDB (foto local) ───────────────────────────────────────────────────
-const DB_NOME  = 'mercadoProClubs';
-const DB_STORE = 'fotoPerfil';
+// ─────────────────────────────────────────────
+// 2. CHAVE DE ARMAZENAMENTO
+// ─────────────────────────────────────────────
 
-function abrirDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NOME, 1);
-    req.onupgradeneeded = (e) => e.target.result.createObjectStore(DB_STORE);
-    req.onsuccess = (e) => resolve(e.target.result);
-    req.onerror   = () => reject('Erro ao abrir IndexedDB');
-  });
-}
+const STORAGE_KEY = "perfil_jogador_v1";
 
-async function salvarFotoIndexedDB(arquivo) {
+/** Lê o objeto de perfil do localStorage (ou retorna objeto vazio). */
+function lerPerfil() {
   try {
-    const idb = await abrirDB();
-    idb.transaction(DB_STORE, 'readwrite').objectStore(DB_STORE).put(arquivo, 'foto');
-  } catch (e) {
-    console.warn('Não foi possível salvar a foto:', e);
-  }
-}
-
-async function carregarFotoIndexedDB() {
-  try {
-    const idb = await abrirDB();
-    return new Promise((resolve) => {
-      const req = idb.transaction(DB_STORE).objectStore(DB_STORE).get('foto');
-      req.onsuccess = (e) => resolve(e.target.result || null);
-      req.onerror   = () => resolve(null);
-    });
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
   } catch {
-    return null;
+    return {};
   }
 }
 
-// ─── Firestore ────────────────────────────────────────────────────────────────
-async function carregarPerfil(uid) {
-  try {
-    const snap = await getDoc(doc(db, 'jogadores', uid));
-    if (snap.exists()) preencherFormulario(snap.data());
-  } catch (err) {
-    console.error("Erro ao buscar perfil:", err);
-    mostrarToast("Erro ao carregar seu perfil.", "erro");
+/** Grava o objeto de perfil no localStorage. */
+function salvarPerfil(dados) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+}
+
+// ─────────────────────────────────────────────
+// 3. SEÇÃO TOPO — resumo do perfil salvo
+// ─────────────────────────────────────────────
+
+/** Mapeia o value do radio de plataforma para um ícone legível. */
+const ICONE_PLATAFORMA = {
+  playstation5: "../IMG/logo-ps.svg",
+  playstation4: "../IMG/logo-ps.svg",
+  "xbox serie": "../IMG/logo-xbox.svg",
+  "xbox one": "../IMG/logo-xbox.svg",
+  pc: "../IMG/logo-pc.svg",
+  switch2: "../IMG/logo-switch.svg",
+  switch1: "../IMG/logo-switch.svg",
+};
+
+/** Mapeia posições para labels curtos de ícone de luvas/jogador. */
+
+function atualizarTopoDosPerfil(dados) {
+  // — Foto de perfil —
+  const fotoPrev = document.getElementById("foto-perfil-preview");
+  if (fotoPrev && dados.foto) {
+    fotoPrev.src = dados.foto;
+  }
+
+  // — Nickname (h2 de destaque) —
+  const elNick = document.getElementById("usuario-nickname");
+  if (elNick) {
+    elNick.textContent = dados.nickname || "Jogador Pro Clubs";
+  }
+
+  // — ID da EA (subtítulo / email-topo) —
+  const elEmail = document.getElementById("usuario-email");
+  if (elEmail) {
+    elEmail.textContent = dados.eaId
+      ? `EA ID: ${dados.eaId}`
+      : "carregando Nick EA...";
+  }
+
+  // — Clube —
+  const elClube = document.getElementById("inputClube");
+  if (elClube) {
+    elClube.textContent =
+      dados.agenteLivre
+        ? "Free Agent "
+        : dados.clube || "clube fc";
+  }
+
+  // — Posição —
+  const elPos = document.getElementById("radioPos");
+  if (elPos) {
+    elPos.textContent = dados.posicao || "posição";
+  }
+
+  // — Plataforma: atualiza ícone e texto —
+  const elPlat = document.getElementById("radioPlat");
+  if (elPlat) {
+    elPlat.textContent = dados.plataforma || "plataforma";
+  }
+
+  // Troca o ícone de plataforma (img ao lado do texto)
+  const plat = elPlat?.previousElementSibling;
+  if (imgPlat && imgPlat.tagName === "IMG" && dados.plataforma) {
+    const novoSrc = ICONE_PLATAFORMA[dados.plataforma];
+    if (novoSrc) imgPlat.src = novoSrc;
+  }
+
+  // — Overall —
+  const elOverall = document.getElementById("topo-overall");
+  if (elOverall) {
+    elOverall.textContent = dados.overall || "—";
   }
 }
+
+// ─────────────────────────────────────────────
+// 4. PREENCHER O FORMULÁRIO COM DADOS SALVOS
+// ─────────────────────────────────────────────
 
 function preencherFormulario(dados) {
-  if (!dados) return;
+  // Campos de texto / número
+  const campos = {
+    nickname: dados.nickname || "",
+    "ea-id": dados.eaId || "",
+    altura: dados.altura || "",
+    peso: dados.peso || "",
+    overall: dados.overall || "",
+    nivel: dados.nivel || "",
+    "clube-atual": dados.clube || "",
+  };
 
-  [
-    ['nickname',  'nickname'],
-    ['eaId',      'ea-id'],
-    ['altura',    'altura'],
-    ['peso',      'peso'],
-    ['clube',     'clube-atual'],
-    ['overall',   'overall'],
-    ['nivel',     'nivel'],
-  ].forEach(([chave, id]) => {
+  Object.entries(campos).forEach(([id, valor]) => {
     const el = document.getElementById(id);
-    if (el && dados[chave] !== undefined) el.value = dados[chave];
+    if (el) el.value = valor;
   });
 
-  const inputClube       = document.getElementById('clube-atual');
-  const checkAgenteLivre = document.getElementById('agente-livre');
-  if (dados.agenteLivre && checkAgenteLivre && inputClube) {
-    checkAgenteLivre.checked = true;
-    inputClube.value    = 'Sem Clube (Free Agent)';
-    inputClube.disabled = true;
-    inputClube.style.opacity = '0.5';
-  }
+  // Checkbox free agent
+  const chkFA = document.getElementById("agente-livre");
+  if (chkFA) chkFA.checked = !!dados.agenteLivre;
 
+  // Radio posição
   if (dados.posicao) {
-    const radio = document.querySelector(`input[name="posicao"][value="${dados.posicao}"]`);
-    if (radio) radio.checked = true;
+    const rPos = document.querySelector(
+      `input[name="posicao"][value="${dados.posicao}"]`
+    );
+    if (rPos) rPos.checked = true;
   }
+
+  // Radio plataforma
   if (dados.plataforma) {
-    const radio = document.querySelector(`input[name="plataforma"][value="${dados.plataforma}"]`);
-    if (radio) radio.checked = true;
+    const rPlat = document.querySelector(
+      `input[name="plataforma"][value="${dados.plataforma}"]`
+    );
+    if (rPlat) rPlat.checked = true;
   }
 }
 
-// ─── Foto (upload) ────────────────────────────────────────────────────────────
-const inputUpload = document.getElementById('upload-foto');
-const fotoPreview = document.getElementById('foto-perfil-preview');
+// ─────────────────────────────────────────────
+// 5. SALVAR FORMULÁRIO
+// ─────────────────────────────────────────────
 
-if (inputUpload) {
-  inputUpload.addEventListener('change', (e) => {
-    const arquivo = e.target.files[0];
-    if (!arquivo) return;
-    fotoPreview.src = URL.createObjectURL(arquivo);
-    salvarFotoIndexedDB(arquivo);
-  });
-}
+function configurarFormulario() {
+  const form = document.getElementById("form-dados-jogador");
+  if (!form) return;
 
-// ─── Agente Livre ─────────────────────────────────────────────────────────────
-const inputClubeEl      = document.getElementById('clube-atual');
-const checkAgenteLivreEl = document.getElementById('agente-livre');
-
-if (checkAgenteLivreEl && inputClubeEl) {
-  checkAgenteLivreEl.addEventListener('change', function () {
-    if (this.checked) {
-      inputClubeEl.value   = 'Sem Clube (Free Agent)';
-      inputClubeEl.disabled = true;
-      inputClubeEl.style.opacity = '0.5';
-    } else {
-      inputClubeEl.value   = '';
-      inputClubeEl.disabled = false;
-      inputClubeEl.style.opacity = '1';
-    }
-  });
-}
-
-// ─── Salvar perfil ────────────────────────────────────────────────────────────
-const formDados = document.getElementById('form-dados-jogador');
-
-if (formDados) {
-  formDados.addEventListener('submit', async (e) => {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (!uidAtual) { mostrarToast('Você precisa estar logado para salvar.', 'erro'); return; }
 
-    const dadosJogador = {
-      nickname:    document.getElementById('nickname')?.value.trim()    || '',
-      eaId:        document.getElementById('ea-id')?.value.trim()       || '',
-      overall:     parseInt(document.getElementById('overall')?.value)  || 80,
-      nivel:       parseInt(document.getElementById('nivel')?.value)    || 1,
-      altura:      document.getElementById('altura')?.value             || '',
-      peso:        document.getElementById('peso')?.value               || '',
-      clube:       document.getElementById('clube-atual')?.value.trim() || '',
-      agenteLivre: document.getElementById('agente-livre')?.checked     || false,
-      posicao:     document.querySelector('input[name="posicao"]:checked')?.value    || '',
-      plataforma:  document.querySelector('input[name="plataforma"]:checked')?.value || '',
-      atualizadoEm: new Date().toISOString(),
+    const posicaoEl = document.querySelector('input[name="posicao"]:checked');
+    const plataformaEl = document.querySelector(
+      'input[name="plataforma"]:checked'
+    );
+
+    const dadosAtuais = lerPerfil(); // preserva a foto já salva
+
+    const novosDados = {
+      ...dadosAtuais,
+      nickname: document.getElementById("nickname")?.value.trim() || "",
+      eaId: document.getElementById("ea-id")?.value.trim() || "",
+      altura: document.getElementById("altura")?.value || "",
+      peso: document.getElementById("peso")?.value || "",
+      overall: document.getElementById("overall")?.value || "",
+      nivel: document.getElementById("nivel")?.value || "",
+      clube: document.getElementById("clube-atual")?.value.trim() || "",
+      agenteLivre: document.getElementById("agente-livre")?.checked || false,
+      posicao: posicaoEl?.value || "",
+      plataforma: plataformaEl?.value || "",
     };
 
-    const btn = formDados.querySelector('button[type="submit"]');
-    const textoOriginal = btn.textContent;
-    btn.textContent = "Salvando...";
-    btn.disabled = true;
+    salvarPerfil(novosDados);
+    atualizarTopoDosPerfil(novosDados);
 
-    try {
-      await setDoc(doc(db, 'jogadores', uidAtual), dadosJogador);
-      mostrarToast('Perfil salvo na nuvem com sucesso! ☁️');
-    } catch (err) {
-      console.error('Erro ao salvar perfil:', err);
-      mostrarToast('Erro ao salvar. Tente novamente.', 'erro');
-    } finally {
-      btn.textContent = textoOriginal;
-      btn.disabled = false;
-    }
+    mostrarFeedback("✅ Perfil salvo com sucesso!");
   });
 }
 
-// ─── Init: detectar login ─────────────────────────────────────────────────────
-onAuthStateChanged(auth, async (usuario) => {
-  if (!usuario) {
-    mostrarToast('Faça login para acessar seu perfil.', 'erro');
-    setTimeout(() => { window.location.href = '../HTML/cadastrar-se.html'; }, 2000);
-    return;
+/** Exibe um toast temporário de feedback. */
+function mostrarFeedback(msg) {
+  // Remove toast anterior se existir
+  document.getElementById("toast-perfil")?.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "toast-perfil";
+  toast.textContent = msg;
+  Object.assign(toast.style, {
+    position: "fixed",
+    bottom: "30px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: "#12E06C",
+    color: "#050B14",
+    padding: "12px 28px",
+    borderRadius: "30px",
+    fontWeight: "bold",
+    fontSize: "15px",
+    zIndex: "9999",
+    boxShadow: "0 0 20px rgba(18,224,108,0.5)",
+    transition: "opacity 0.5s ease",
+    opacity: "1",
+  });
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 500);
+  }, 2500);
+}
+
+// ─────────────────────────────────────────────
+// 6. UPLOAD & PREVIEW DE FOTO
+// ─────────────────────────────────────────────
+
+function configurarUploadFoto() {
+  const inputFoto = document.getElementById("upload-foto");
+  const preview = document.getElementById("foto-perfil-preview");
+  if (!inputFoto || !preview) return;
+
+  inputFoto.addEventListener("change", () => {
+    const arquivo = inputFoto.files[0];
+    if (!arquivo) return;
+
+    // Valida tamanho (máx 2 MB para caber no localStorage)
+    if (arquivo.size > 2 * 1024 * 1024) {
+      mostrarFeedback("⚠️ Imagem muito grande. Use até 2 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target.result;
+      preview.src = base64;
+
+      // Salva a foto junto com os demais dados
+      const dados = lerPerfil();
+      dados.foto = base64;
+      salvarPerfil(dados);
+    };
+    reader.readAsDataURL(arquivo);
+  });
+}
+
+// ─────────────────────────────────────────────
+// 7. FREE AGENT — desabilita campo de clube
+// ─────────────────────────────────────────────
+
+function configurarFreeAgent() {
+  const chk = document.getElementById("agente-livre");
+  const inputClube = document.getElementById("clube-atual");
+  if (!chk || !inputClube) return;
+
+  function toggleClube() {
+    if (chk.checked) {
+      inputClube.disabled = true;
+      inputClube.style.opacity = "0.4";
+      inputClube.value = "";
+    } else {
+      inputClube.disabled = false;
+      inputClube.style.opacity = "1";
+    }
   }
 
-  uidAtual = usuario.uid;
-  await carregarPerfil(usuario.uid);
+  chk.addEventListener("change", toggleClube);
+  toggleClube(); // aplica estado inicial
+}
 
-  const fotoSalva = await carregarFotoIndexedDB();
-  if (fotoSalva && fotoPreview) fotoPreview.src = URL.createObjectURL(fotoSalva);
+// ─────────────────────────────────────────────
+// 8. SINCRONIZAÇÃO DINÂMICA (live preview no topo)
+// ─────────────────────────────────────────────
+
+/**
+ * Atualiza o topo enquanto o usuário digita / seleciona,
+ * sem precisar salvar primeiro.
+ */
+function configurarLivePreview() {
+  // Campos de texto → topo
+  const mapCampos = {
+    nickname: "usuario-nickname",
+    overall: "topo-overall",
+    "clube-atual": "inputClube",
+    "ea-id": "usuario-email",
+  };
+
+  Object.entries(mapCampos).forEach(([inputId, topoId]) => {
+    const el = document.getElementById(inputId);
+    const alvo = document.getElementById(topoId);
+    if (!el || !alvo) return;
+
+    el.addEventListener("input", () => {
+      if (inputId === "ea-id") {
+        alvo.textContent = el.value ? `EA ID: ${el.value}` : "carregando Nick EA...";
+      } else if (inputId === "nickname") {
+        alvo.textContent = el.value || "Jogador Pro Clubs";
+      } else {
+        alvo.textContent = el.value || alvo.dataset.placeholder || "—";
+      }
+    });
+  });
+
+  // Radios de posição → topo
+  document.querySelectorAll('input[name="posicao"]').forEach((r) => {
+    r.addEventListener("change", () => {
+      const elPos = document.getElementById("radioPos");
+      if (elPos) elPos.textContent = r.value;
+    });
+  });
+
+  // Radios de plataforma → topo
+  document.querySelectorAll('input[name="plataforma"]').forEach((r) => {
+    r.addEventListener("change", () => {
+      const elPlat = document.getElementById("radioPlat");
+      if (elPlat) elPlat.textContent = r.value;
+    });
+  });
+
+  // Free agent → clube no topo
+  const chk = document.getElementById("agente-livre");
+  if (chk) {
+    chk.addEventListener("change", () => {
+      const elClube = document.getElementById("inputClube");
+      if (elClube) {
+        elClube.textContent = chk.checked
+          ? "Free Agent"
+          : document.getElementById("clube-atual")?.value || "clube fc";
+      }
+    });
+  }
+}
+
+// ─────────────────────────────────────────────
+// 9. INICIALIZAÇÃO
+// ─────────────────────────────────────────────
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Animação de scroll
+  iniciarAnimarScroll();
+
+  // Carrega dados salvos
+  const dados = lerPerfil();
+
+  // Atualiza seção de topo (resumo)
+  atualizarTopoDosPerfil(dados);
+
+  // Preenche o formulário
+  preencherFormulario(dados);
+
+  // Configura eventos
+  configurarFormulario();
+  configurarUploadFoto();
+  configurarFreeAgent();
+  configurarLivePreview();
 });

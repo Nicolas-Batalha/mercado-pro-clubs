@@ -8,37 +8,51 @@
   </head>
   <body>
     <header class="main-header">
-      <a class="logo" href="../index.html" title="voltar para a página inicial">
-        <img
-          src="../IMG/logo maior.svg"
-          class="logo"
-          alt="Pro Clubs Hub Brasil Logo"
-        />
+    <div class="logo animar-scroll">
+      <a href="../index.html" title="voltar para a página inicial">
+        <img src="../IMG/logo.svg" class="logo" alt="Pro Clubs Hub Brasil Logo" />
       </a>
-      <div class="menu-carrossel">
-        <nav>
-          <ul class="lista-links">
-            <li><a href="../HTML/meu-perfil.html">meu perfil</a></li>
-            <li><a href="../HTML/mercado.html">mercado</a></li>
-            <li><a href="../HTML/torneio.html">torneio</a></li>
-          </ul>
-        </nav>
+    </div>
+    <div class="menu-carrossel">
+      <nav>
+        <ul class="lista-links animar-scroll">
+          <li><a href="../HTML/torneio.html">torneio</a></li>
+          <li><a href="#">ranking</a></li>
+          <li><a href="#">suporte</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="login-header animar-scroll">
+        <div class="login-header animar-scroll">
+      <div class="notification-icon" onclick="adicionarNotificacao()">
+        <span class="bell-icon">🔔</span>
+        <span id="badge" class="notification-badge hidden">0</span>
       </div>
-    </header>
-    <main>
+      <div class="email-container" id="emailIcon">
+        <svg viewBox="0 0 24 24" class="email-icon">
+          <path
+            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+        </svg>
+      </div>
+           <div class="login-header animar-scroll" id="login-header">
+  </a>
+      </div>
+  </header>
+     <main class="main-main">
       <section class="lfg-section">
         <div class="lfg-container">
           <div class="lfg-header">
             <h2>Mercado de Transferências</h2>
             <p>Encontre o seu esquadrão ou recrute para o seu clube.</p>
 
+            <!-- FILTROS -->
             <div class="lfg-filtros">
               <select id="filtro-plataforma" class="lfg-select">
                 <option value="todas">Todas as Plataformas</option>
-                <option value="switch2">nintendo switch 2</option>
-                <option value="switch">nintendo switch</option>
+                <option value="switch2">Nintendo Switch 2</option>
+                <option value="switch">Nintendo Switch</option>
                 <option value="xboxS">Xbox Series X/S</option>
-                <option value="xboxO">Xbox one</option>
+                <option value="xboxO">Xbox One</option>
                 <option value="ps5">PlayStation 5</option>
                 <option value="ps4">PlayStation 4</option>
                 <option value="pc">PC</option>
@@ -51,33 +65,28 @@
                 <option value="gk">Goleiro (GK)</option>
               </select>
               <select id="filtro-jogo" class="lfg-select">
-                <option value="todas">Todas os jogos</option>
+                <option value="todas">Todos os jogos</option>
                 <option value="eafc26">EAFC26</option>
                 <option value="eafc25">EAFC25</option>
                 <option value="eafc24">EAFC24</option>
                 <option value="eafc23">EAFC23</option>
               </select>
             </div>
+
             <h1 class="titulo-time">encontre seu clube</h1>
+
+            <!-- FORMULÁRIO DE PUBLICAR VAGA -->
             <div class="lfg-criador">
               <h3>Anunciar Vaga no Seu Clube</h3>
               <form id="form-lfg" class="form-lfg">
                 <div class="form-linha">
-                  <input
-                    type="text"
-                    id="post-clube"
-                    class="lfg-input"
-                    placeholder="Nome do Clube"
-                    required
-                  />
+                  <input type="text" id="post-clube" class="lfg-input" placeholder="Nome do Clube" required />
                   <select id="post-plataforma" required class="lfg-input">
-                    <option value="" disabled selected>
-                      Plataforma do Clube
-                    </option>
-                    <option value="switch2">nintendo switch 2</option>
-                    <option value="switch">nintendo switch</option>
+                    <option value="" disabled selected>Plataforma do Clube</option>
+                    <option value="switch2">Nintendo Switch 2</option>
+                    <option value="switch">Nintendo Switch</option>
                     <option value="xboxS">Xbox Series X/S</option>
-                    <option value="xboxO">Xbox one</option>
+                    <option value="xboxO">Xbox One</option>
                     <option value="ps5">PlayStation 5</option>
                     <option value="ps4">PlayStation 4</option>
                     <option value="pc">PC</option>
@@ -85,10 +94,8 @@
                 </div>
                 <div class="form-linha">
                   <select id="post-posicao" required class="lfg-input">
-                    <option value="" disabled selected>
-                      Posição Necessária
-                    </option>
-                    <option value="tds">Todas as Posições</option>
+                    <option value="" disabled selected>Posição Necessária</option>
+                    <option value="psd">todas as posições</option>
                     <option value="ata">Precisamos de ATA</option>
                     <option value="mei">Precisamos de MEI</option>
                     <option value="vol">Precisamos de VOL</option>
@@ -98,9 +105,7 @@
                   <select id="post-estilo" required class="lfg-input">
                     <option value="" disabled selected>Estilo do Time</option>
                     <option value="casual">Casual (Por diversão)</option>
-                    <option value="competitivo">
-                      Competitivo (Ligas/Campeonatos)
-                    </option>
+                    <option value="competitivo">Competitivo (Ligas/Campeonatos)</option>
                   </select>
                 </div>
                 <div class="form-linha">
@@ -112,13 +117,38 @@
                     <option value="eafc23">EA FC 23</option>
                   </select>
                 </div>
-              </div>
+                <textarea id="post-descricao" class="lfg-textarea" rows="3"
+                  placeholder="Ex: Nosso clube está na Divisão 2. Precisamos de um volante pegador. Jogamos todos os dias às 21h."
+                  required></textarea>
+                <button type="submit" class="btn-publicar">Publicar Vaga</button>
+              </form>
+            </div>
+
+            <!-- FEED DE VAGAS — onde os cards aparecem -->
+            <h3 class="titulo-time">vagas publicadas</h3>
+            <div class="lfg-feed" id="lfg-feed">
+              <!-- cards injetados via JS -->
+            </div>
+
+          
+        
+
+        <!-- PAINEL DO CAPITÃO -->
+          <div class="lfg-header">
+            <h2 class="titulo-time">Painel do Capitão</h2>
+            <p style="color:#aaa;font-size:0.9rem;margin-bottom:20px;">
+              Os jogadores que pedirem teste nas vagas do seu clube aparecerão aqui.
+            </p>
+            <div id="painel-notificacoes">
+              <!-- pedidos de teste injetados via JS -->
             </div>
           </div>
         </div>
+
       </section>
     </main>
-    <script src="../JS/times.js"></script>
+    <script src="../JS/script.js" defer></script>
+    <script    src="../JS/times.js"></script>
     <script type="module" src="../JS/header-auth.js"></script>
   </body>
 </html>
