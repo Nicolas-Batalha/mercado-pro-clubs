@@ -364,22 +364,104 @@ function garantirPainel() {
   painel = document.createElement("div");
   painel.id = "notif-painel";
   painel.style.cssText = `
-    position:fixed; top:80px; right:20px; width:320px; max-height:80vh;
+    position:fixed; top:80px; right:20px; width:340px; max-height:82vh;
     overflow-y:auto; background:#0F1A2C; border:1px solid #1e3a1e;
     border-radius:14px; padding:16px; z-index:9999;
     box-shadow:0 8px 32px rgba(0,0,0,0.6); display:none; flex-direction:column; gap:10px;
   `;
   painel.innerHTML = `
-    <h3 style="color:#12E06C;margin:0 0 8px 0;font-size:0.95rem">🔔 Notificações</h3>
+    <!-- Abas -->
+    <div style="display:flex;gap:6px;margin-bottom:4px">
+      <button id="aba-notif" style="
+        flex:1;padding:8px;border:none;border-radius:8px;font-weight:700;
+        font-family:'Montserrat',sans-serif;font-size:0.8rem;cursor:pointer;
+        background:#12E06C;color:#050B14;">
+        🔔 Notificações
+      </button>
+      <button id="aba-chats" style="
+        flex:1;padding:8px;border:none;border-radius:8px;font-weight:700;
+        font-family:'Montserrat',sans-serif;font-size:0.8rem;cursor:pointer;
+        background:#1a2a1a;color:#A0AAB5;">
+        💬 Meus Chats
+      </button>
+    </div>
     <div id="notif-lista"></div>
+    <div id="chats-lista" style="display:none"></div>
   `;
   document.body.appendChild(painel);
 
+  // Troca de abas
+  painel.querySelector("#aba-notif").addEventListener("click", () => {
+    document.getElementById("notif-lista").style.display = "block";
+    document.getElementById("chats-lista").style.display = "none";
+    painel.querySelector("#aba-notif").style.background = "#12E06C";
+    painel.querySelector("#aba-notif").style.color = "#050B14";
+    painel.querySelector("#aba-chats").style.background = "#1a2a1a";
+    painel.querySelector("#aba-chats").style.color = "#A0AAB5";
+  });
+
+  painel.querySelector("#aba-chats").addEventListener("click", () => {
+    document.getElementById("notif-lista").style.display = "none";
+    document.getElementById("chats-lista").style.display = "block";
+    painel.querySelector("#aba-chats").style.background = "#12E06C";
+    painel.querySelector("#aba-chats").style.color = "#050B14";
+    painel.querySelector("#aba-notif").style.background = "#1a2a1a";
+    painel.querySelector("#aba-notif").style.color = "#A0AAB5";
+    if (usuarioAtual) carregarMeusChats(usuarioAtual.uid);
+  });
+
+  // Sino abre/fecha
   document.getElementById("sino-btn")?.addEventListener("click", () => {
     painel.style.display = painel.style.display === "flex" ? "none" : "flex";
   });
 
+  // Ícone de email abre direto na aba de chats
+  document.getElementById("emailIcon")?.addEventListener("click", () => {
+    painel.style.display = "flex";
+    painel.querySelector("#aba-chats").click();
+  });
+
   return painel;
+}
+
+// ─── Meus Chats ───────────────────────────────────────────────────────────────
+async function carregarMeusChats(uid) {
+  const lista = document.getElementById("chats-lista");
+  if (!lista) return;
+  lista.innerHTML = `<p style="color:#A0AAB5;font-size:0.85rem;text-align:center">Carregando chats...</p>`;
+
+  try {
+    const q    = query(collection(db, "chats"), where("participantes", "array-contains", uid));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      lista.innerHTML = `<p style="color:#A0AAB5;font-size:0.85rem;text-align:center">Nenhum chat ainda.</p>`;
+      return;
+    }
+
+    lista.innerHTML = snap.docs.map(d => {
+      const chat = d.data();
+      return `
+        <a href="../HTML/chat.html?chatId=${d.id}"
+          style="display:flex;align-items:center;gap:10px;
+                 background:#1a2a1a;border:1px solid #1e3a1e;border-radius:10px;
+                 padding:12px;margin-bottom:8px;text-decoration:none;
+                 transition:border-color 0.2s"
+          onmouseover="this.style.borderColor='#12E06C'"
+          onmouseout="this.style.borderColor='#1e3a1e'">
+          <span style="font-size:1.4rem">⚽</span>
+          <div>
+            <p style="margin:0;font-weight:700;color:#fff;font-size:0.9rem">${chat.clube || "Clube"}</p>
+            <p style="margin:0;color:#A0AAB5;font-size:0.75rem">Clique para abrir o chat</p>
+          </div>
+          <span style="margin-left:auto;color:#12E06C;font-size:1rem">›</span>
+        </a>`;
+    }).join("");
+
+  } catch (err) {
+    lista.innerHTML = `<p style="color:#d32f2f;font-size:0.85rem;text-align:center">Erro ao carregar chats.</p>`;
+    console.error(err);
+  }
 }
 
 function mostrarNotificacaoCapitao(docSnap) {
