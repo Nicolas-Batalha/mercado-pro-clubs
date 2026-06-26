@@ -1,67 +1,90 @@
 // =========================================================================
-// MERCADO PRO CLUBS — CADASTRO / LOGIN (abas)
+// MERCADO PRO CLUBS — header-auth.js
+// Responsabilidade: detectar login e renderizar avatar ou botões no header.
+// NÃO chama initializeApp — importa auth e db de firebase-config.js.
 // =========================================================================
 
-import { initializeApp }                    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { firebaseConfig }                   from "./firebase-config.js";
+import { auth, db }                             from "./firebase-config.js";
+import { onAuthStateChanged, signOut }          from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc }                          from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const auth = getAuth(initializeApp(firebaseConfig));
+// Detecta se está na raiz ou dentro de HTML/
+const base = window.location.pathname.includes("/HTML/") ? "../" : "./";
 
-// ─── Toast ────────────────────────────────────────────────────────────────────
-function mostrarToast(mensagem, tipo = 'sucesso') {
-  const toast = document.createElement('div');
-  toast.textContent = mensagem;
-  toast.style.cssText = `
-    position:fixed;bottom:24px;right:24px;
-    background:${tipo === 'sucesso' ? '#12E06C' : '#d32f2f'};
-    color:#000;font-weight:bold;padding:14px 22px;border-radius:8px;
-    font-family:'Montserrat',sans-serif;font-size:0.9rem;
-    box-shadow:0 4px 16px rgba(0,0,0,0.4);z-index:9999;
-    opacity:0;transition:opacity 0.3s;
+// ─── Render: deslogado ────────────────────────────────────────────────────────
+function renderDeslogado(container) {
+  container.innerHTML = `
+    <a href="${base}HTML/cadastrar-se.html" class="login">Entrar</a>
+    <a href="${base}HTML/cadastrar-se.html" class="cadastra-se">Criar conta</a>
   `;
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => (toast.style.opacity = '1'));
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
 }
 
-// ─── Troca de abas ────────────────────────────────────────────────────────────
-const tabCadastro  = document.getElementById('tabCadastro');
-const tabLogin     = document.getElementById('tabLogin');
-const formCadastro = document.getElementById('form-cadastro');
-const formLogin    = document.getElementById('form-login');
+// ─── Render: logado ───────────────────────────────────────────────────────────
+function renderLogado(container) {
+  container.innerHTML = `
+    <div class="header-usuario" id="header-usuario">
+      <div class="hu-avatar-wrap">
+        <img id="hu-foto" src="${base}IMG/user-icon.svg" class="hu-foto" alt="foto do usuário"
+             onerror="this.src='${base}IMG/user-icon.svg'" />
+        <span class="hu-status-dot"></span>
+      </div>
+      <span class="hu-nome" id="hu-nome">...</span>
+      <div class="hu-dropdown" id="hu-dropdown">
+        <a href="${base}HTML/meu-perfil.html" class="hu-drop-item">👤 Meu Perfil</a>
+        <a href="${base}HTML/mercado.html"    class="hu-drop-item">🏪 Mercado</a>
+        <a href="${base}HTML/torneio.html"    class="hu-drop-item">🏆 Torneios</a>
+        <div class="hu-drop-divider"></div>
+        <button class="hu-drop-item hu-sair" id="hu-btn-sair">🚪 Sair</button>
+      </div>
+    </div>
+  `;
 
-tabCadastro.addEventListener('click', () => {
-  tabCadastro.classList.add('active');    tabLogin.classList.remove('active');
-  formCadastro.classList.add('active');   formLogin.classList.remove('active');
-});
+  document.getElementById("header-usuario").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("hu-dropdown").classList.toggle("aberto");
+  });
+  document.addEventListener("click", () => {
+    document.getElementById("hu-dropdown")?.classList.remove("aberto");
+  });
+  document.getElementById("hu-btn-sair").addEventListener("click", async (e) => {
+    e.stopPropagation();
+    await signOut(auth);
+    window.location.href = `${base}HTML/cadastrar-se.html`;
+  });
+}
 
-tabLogin.addEventListener('click', () => {
-  tabLogin.classList.add('active');       tabCadastro.classList.remove('active');
-  formLogin.classList.add('active');      formCadastro.classList.remove('active');
-});
+// ─── Preenche foto e nome após login ─────────────────────────────────────────
+async function preencherWidget(usuario) {
+  const elFoto = document.getElementById("hu-foto");
+  const elNome = document.getElementById("hu-nome");
 
-// ─── Login com e-mail ─────────────────────────────────────────────────────────
-formLogin.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('login-email').value;
-  const senha = document.getElementById('login-senha').value;
+  // Foto do Google como ponto de partida
+  if (usuario.photoURL && elFoto) elFoto.src = usuario.photoURL;
+
+  // Tenta pegar nickname e foto do Firestore
   try {
-    await signInWithEmailAndPassword(auth, email, senha);
-    mostrarToast('Login feito! Redirecionando...');
-    setTimeout(() => { window.location.href = '../HTML/meu-perfil.html'; }, 1200);
+    const snap = await getDoc(doc(db, "jogadores", usuario.uid));
+    if (snap.exists()) {
+      const dados = snap.data();
+      if (elNome) elNome.textContent = dados.nickname || usuario.displayName || "Jogador";
+      if (elFoto && dados.fotoURL) elFoto.src = dados.fotoURL;
+    } else {
+      if (elNome) elNome.textContent = usuario.displayName || "Jogador";
+    }
   } catch {
-    mostrarToast('E-mail ou senha incorretos.', 'erro');
+    if (elNome) elNome.textContent = usuario.displayName || "Jogador";
+  }
+}
+
+// ─── Listener principal ───────────────────────────────────────────────────────
+onAuthStateChanged(auth, (usuario) => {
+  const container = document.getElementById("login-header");
+  if (!container) return;
+
+  if (usuario) {
+    renderLogado(container);
+    preencherWidget(usuario);
+  } else {
+    renderDeslogado(container);
   }
 });
-
-// ─── Validação de senha em tempo real (chamada pelo oninput do HTML) ──────────
-window.validarSenha = function (input) {
-  const senha = document.getElementById('senha')?.value;
-  if (senha !== undefined) {
-    input.setCustomValidity(input.value !== senha ? 'As senhas não batem!' : '');
-  }
-};

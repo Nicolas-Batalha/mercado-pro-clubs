@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="shortcut icon" href="../IMG/logo.svg" type="image/x-icon">
+  <link rel="stylesheet" href="../CSS/style.css" />
+  <title>Chat do Clube — Mercado Pro Clubs</title>
+  <style>
+    /* ── Layout do chat ── */
+    .chat-page {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .chat-main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 16px;
+      flex-direction: column;
+      gap: 0;
+    }
+    .chat-titulo {
+      text-align: center;
+      padding: 16px 0 8px 0;
+      color: #12E06C;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .chat-mensagens {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px 0;
+      scrollbar-width: thin;
+      scrollbar-color: #1e3a1e transparent;
+    }
+    /* Bolha de mensagem */
+    .msg-bolha {
+      max-width: 70%;
+      padding: 10px 16px;
+      border-radius: 18px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .msg-minha {
+      align-self: flex-end;
+      background: #12E06C;
+      color: #050B14;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-outro {
+      align-self: flex-start;
+      background: #0F1A2C;
+      border: 1px solid #1e3a1e;
+      color: #E6EDF3;
+      border-bottom-left-radius: 4px;
+    }
+    .msg-nome {
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+      opacity: 0.7;
+    }
+    .msg-hora {
+      font-size: 0.68rem;
+      opacity: 0.5;
+      text-align: right;
+      margin-top: 4px;
+    }
+    /* Input de envio */
+    .chat-form {
+      display: flex;
+      gap: 10px;
+      padding: 12px 0 20px 0;
+      border-top: 1px solid #1e3a1e;
+    }
+    .chat-input {
+      flex: 1;
+      background: #0F1A2C;
+      border: 1px solid #1e3a1e;
+      border-radius: 24px;
+      padding: 12px 18px;
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .chat-input:focus { border-color: #12E06C; }
+    .chat-input::placeholder { color: #4a5568; }
+    .chat-enviar {
+      background: #12E06C;
+      color: #050B14;
+      border: none;
+      border-radius: 50%;
+      width: 46px;
+      height: 46px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .chat-enviar:hover { background: #0fb357; transform: scale(1.08); }
+    /* Acesso negado */
+    .chat-negado {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60vh;
+      gap: 16px;
+      color: #A0AAB5;
+    }
+    .chat-negado h2 { color: #d32f2f; }
+  </style>
+</head>
+<body class="chat-page">
+
+  <!-- HEADER -->
+  <header class="main-header">
+    <div class="logo">
+      <a href="../index.html">
+        <img src="../IMG/logo.svg" class="logo" alt="Logo" />
+      </a>
+    </div>
+    <div class="menu-carrossel">
+      <nav>
+        <ul class="lista-links">
+          <li><a href="../HTML/mercado.html">mercado</a></li>
+          <li><a href="../HTML/torneio.html">torneio</a></li>
+          <li><a href="#">ranking</a></li>
+          <li><a href="#">suporte</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="login-header" id="login-header"></div>
+  </header>
+
+  <!-- CORPO DO CHAT -->
+  <main class="chat-main">
+    <p class="chat-titulo" id="chat-titulo">💬 Carregando chat...</p>
+    <div class="chat-mensagens" id="chat-mensagens">
+      <p style="color:#A0AAB5;text-align:center;margin:auto">Carregando mensagens...</p>
+    </div>
+    <form class="chat-form" id="chat-form" style="display:none">
+      <input
+        type="text"
+        id="chat-input"
+        class="chat-input"
+        placeholder="Digite sua mensagem..."
+        autocomplete="off"
+        maxlength="500"
+      />
+      <button type="submit" class="chat-enviar" title="Enviar">➤</button>
+    </form>
+  </main>
+
+  <script type="module" src="../JS/chat.js"></script>
+  <script type="module" src="../JS/header-auth.js"></script>
+</body>
+</html>

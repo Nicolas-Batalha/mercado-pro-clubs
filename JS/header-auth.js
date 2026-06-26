@@ -1,39 +1,21 @@
 // =========================================================================
-// MERCADO PRO CLUBS — HEADER AUTH
-// Detecta login e troca botões "Entrar/Cadastrar" pelo avatar do usuário
+// MERCADO PRO CLUBS — header-auth.js
+// Responsabilidade: detectar login e renderizar avatar ou botões no header.
+// NÃO chama initializeApp — importa auth e db de firebase-config.js.
 // =========================================================================
 
-import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc }            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { firebaseConfig }                       from "./firebase-config.js";
+import { auth, db }                             from "./firebase-config.js";
+import { onAuthStateChanged, signOut }          from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc }                          from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const auth = getAuth(initializeApp(firebaseConfig));
-const db   = getFirestore();
-
-// Detecta se está na raiz (index.html) ou dentro de HTML/
-const base = window.location.pathname.includes('/HTML/') ? '../' : './';
-
-// ─── Foto do IndexedDB (salva na página de perfil) ────────────────────────────
-function carregarFotoIndexedDB() {
-  return new Promise((resolve) => {
-    const req = indexedDB.open('mercadoProClubs', 1);
-    req.onsuccess = (e) => {
-      const idb = e.target.result;
-      if (!idb.objectStoreNames.contains('fotoPerfil')) return resolve(null);
-      const get = idb.transaction('fotoPerfil').objectStore('fotoPerfil').get('foto');
-      get.onsuccess = (e) => resolve(e.target.result || null);
-      get.onerror   = () => resolve(null);
-    };
-    req.onerror = () => resolve(null);
-  });
-}
+// Detecta se está na raiz ou dentro de HTML/
+const base = window.location.pathname.includes("/HTML/") ? "../" : "./";
 
 // ─── Render: deslogado ────────────────────────────────────────────────────────
 function renderDeslogado(container) {
   container.innerHTML = `
     <a href="${base}HTML/cadastrar-se.html" class="login">Entrar</a>
-    <a href="${base}HTML/cadastrar-se.html" class="cadastra-se">Cria conta</a>
+    <a href="${base}HTML/cadastrar-se.html" class="cadastra-se">Criar conta</a>
   `;
 }
 
@@ -50,58 +32,53 @@ function renderLogado(container) {
       <div class="hu-dropdown" id="hu-dropdown">
         <a href="${base}HTML/meu-perfil.html" class="hu-drop-item">👤 Meu Perfil</a>
         <a href="${base}HTML/mercado.html"    class="hu-drop-item">🏪 Mercado</a>
-        <a href="${base}HTML/torneio.html"    class="hu-drop-item">🏆 Torneios</a>
+        <a href="${base}HTML/torneio.html"    class="hu-drop-item"></a>
         <div class="hu-drop-divider"></div>
         <button class="hu-drop-item hu-sair" id="hu-btn-sair">🚪 Sair</button>
       </div>
     </div>
   `;
 
-  const widget = document.getElementById('header-usuario');
-  widget.addEventListener('click', (e) => {
+  document.getElementById("header-usuario").addEventListener("click", (e) => {
     e.stopPropagation();
-    document.getElementById('hu-dropdown').classList.toggle('aberto');
+    document.getElementById("hu-dropdown").classList.toggle("aberto");
   });
-  document.addEventListener('click', () => {
-    document.getElementById('hu-dropdown')?.classList.remove('aberto');
+  document.addEventListener("click", () => {
+    document.getElementById("hu-dropdown")?.classList.remove("aberto");
   });
-
-  document.getElementById('hu-btn-sair').addEventListener('click', async (e) => {
+  document.getElementById("hu-btn-sair").addEventListener("click", async (e) => {
     e.stopPropagation();
     await signOut(auth);
     window.location.href = `${base}HTML/cadastrar-se.html`;
   });
 }
 
-// ─── Preenche foto e nome ─────────────────────────────────────────────────────
+// ─── Preenche foto e nome após login ─────────────────────────────────────────
 async function preencherWidget(usuario) {
-  const elFoto = document.getElementById('hu-foto');
-  const elNome = document.getElementById('hu-nome');
+  const elFoto = document.getElementById("hu-foto");
+  const elNome = document.getElementById("hu-nome");
 
+  // Foto do Google como ponto de partida
   if (usuario.photoURL && elFoto) elFoto.src = usuario.photoURL;
 
-  // Foto local sobrescreve a do Google (escolhida pelo usuário)
+  // Tenta pegar nickname e foto do Firestore
   try {
-    const blob = await carregarFotoIndexedDB();
-    if (blob && elFoto) elFoto.src = URL.createObjectURL(blob);
-  } catch (_) {}
-
-  // Nickname do Firestore
-  try {
-    const snap = await getDoc(doc(db, 'jogadores', usuario.uid));
-    const nome = snap.exists()
-      ? (snap.data().nickname || usuario.displayName || 'Jogador')
-      : (usuario.displayName || 'Jogador');
-    if (elNome) elNome.textContent = nome;
-  } catch (_) {
-    if (elNome) elNome.textContent = usuario.displayName || 'Jogador';
+    const snap = await getDoc(doc(db, "jogadores", usuario.uid));
+    if (snap.exists()) {
+      const dados = snap.data();
+      if (elNome) elNome.textContent = dados.nickname || usuario.displayName || "Jogador";
+      if (elFoto && dados.fotoURL) elFoto.src = dados.fotoURL;
+    } else {
+      if (elNome) elNome.textContent = usuario.displayName || "Jogador";
+    }
+  } catch {
+    if (elNome) elNome.textContent = usuario.displayName || "Jogador";
   }
 }
 
 // ─── Listener principal ───────────────────────────────────────────────────────
 onAuthStateChanged(auth, (usuario) => {
-  const container = document.getElementById('login-header')
-                 || document.querySelector('.main-header');
+  const container = document.getElementById("login-header");
   if (!container) return;
 
   if (usuario) {

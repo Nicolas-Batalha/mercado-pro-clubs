@@ -8,37 +8,38 @@
   </head>
   <body>
     <header class="main-header">
-    <div class="logo animar-scroll">
-      <a href="../index.html" title="voltar para a página inicial">
-        <img src="../IMG/logo.svg" class="logo" alt="Pro Clubs Hub Brasil Logo" />
-      </a>
-    </div>
-    <div class="menu-carrossel">
-      <nav>
-        <ul class="lista-links animar-scroll">
-          <li><a href="../HTML/torneio.html">torneio</a></li>
-          <li><a href="#">ranking</a></li>
-          <li><a href="#">suporte</a></li>
-        </ul>
-      </nav>
-    </div>
-    <div class="login-header animar-scroll">
-        <div class="login-header animar-scroll">
-      <div class="notification-icon" onclick="adicionarNotificacao()">
-        <span class="bell-icon">🔔</span>
-        <span id="badge" class="notification-badge hidden">0</span>
+      <div class="logo animar-scroll">
+        <a href="../index.html" title="voltar para a página inicial">
+          <img src="../IMG/logo.svg" class="logo" alt="Pro Clubs Hub Brasil Logo" />
+        </a>
       </div>
-      <div class="email-container" id="emailIcon">
-        <svg viewBox="0 0 24 24" class="email-icon">
-          <path
-            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-        </svg>
+      <div class="menu-carrossel">
+        <nav>
+          <ul class="lista-links animar-scroll">
+            <li><a href="#">torneio</a></li>
+            <li><a href="#">ranking</a></li>
+            <li><a href="#">suporte</a></li>
+          </ul>
+        </nav>
       </div>
-           <div class="login-header animar-scroll" id="login-header">
-  </a>
+      <div class="login-header animar-scroll">
+        <!-- Sino de notificações -->
+        <div class="notification-icon" id="sino-btn" style="position:relative;cursor:pointer">
+          <span class="bell-icon">🔔</span>
+          <span id="badge" class="notification-badge hidden">0</span>
+        </div>
+        <!-- Ícone de mensagens → vai para o chat mais recente -->
+        <div class="email-container" id="emailIcon">
+          <svg viewBox="0 0 24 24" class="email-icon">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+          </svg>
+        </div>
+        <!-- Avatar / botões de login injetados pelo header-auth.js -->
+        <div id="login-header"></div>
       </div>
-  </header>
-     <main class="main-main">
+    </header>
+
+    <main class="main-main">
       <section class="lfg-section">
         <div class="lfg-container">
           <div class="lfg-header">
@@ -95,7 +96,7 @@
                 <div class="form-linha">
                   <select id="post-posicao" required class="lfg-input">
                     <option value="" disabled selected>Posição Necessária</option>
-                    <option value="psd">todas as posições</option>
+                    <option value="psd">Todas as posições</option>
                     <option value="ata">Precisamos de ATA</option>
                     <option value="mei">Precisamos de MEI</option>
                     <option value="vol">Precisamos de VOL</option>
@@ -124,31 +125,18 @@
               </form>
             </div>
 
-            <!-- FEED DE VAGAS — onde os cards aparecem -->
+            <!-- FEED DE VAGAS -->
             <h3 class="titulo-time">vagas publicadas</h3>
             <div class="lfg-feed" id="lfg-feed">
               <!-- cards injetados via JS -->
             </div>
-
-          
-        
-
-        <!-- PAINEL DO CAPITÃO -->
-          <div class="lfg-header">
-            <h2 class="titulo-time">Painel do Capitão</h2>
-            <p style="color:#aaa;font-size:0.9rem;margin-bottom:20px;">
-              Os jogadores que pedirem teste nas vagas do seu clube aparecerão aqui.
-            </p>
-            <div id="painel-notificacoes">
-              <!-- pedidos de teste injetados via JS -->
-            </div>
           </div>
         </div>
-
       </section>
     </main>
+
     <script src="../JS/script.js" defer></script>
-    <script    src="../JS/times.js"></script>
+    <script type="module" src="../JS/times.js"></script>
     <script type="module" src="../JS/header-auth.js"></script>
   </body>
 </html>
