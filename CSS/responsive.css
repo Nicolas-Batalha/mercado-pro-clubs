@@ -1,0 +1,498 @@
+ /* =========================================================================
+   MERCADO PRO CLUBS — responsive.css
+   Breakpoints:
+     Mobile pequeno : max-width: 480px
+     Mobile         : max-width: 768px
+     Tablet         : max-width: 1024px
+========================================================================= */
+
+/* =========================================================================
+   HEADER GLOBAL
+========================================================================= */
+@media (max-width: 768px) {
+  .main-header {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 8px 16px;
+    gap: 8px;
+  }
+
+  .logo {
+    width: 120px;
+    height: 80px;
+    margin: 0;
+  }
+
+  /* Esconde o menu de navegação em mobile — pode virar hamburguer futuramente */
+  .menu-carrossel {
+    display: none;
+  }
+
+  .login-header {
+    gap: 10px;
+    align-items: center;
+  }
+
+  /* Botões Entrar / Criar conta menores */
+  .login,
+  .cadastra-se {
+    font-size: 13px;
+    padding: 7px 12px;
+  }
+
+  /* Nome do usuário logado: esconde em telas pequenas */
+  .hu-nome {
+    display: none;
+  }
+
+  /* Dropdown do usuário: alinha à direita */
+  .hu-dropdown {
+    right: 0;
+    left: auto;
+    min-width: 160px;
+  }
+
+  /* Painel de notificações e mensagens */
+  #painel-sino,
+  #painel-msg {
+    width: calc(100vw - 24px);
+    right: 12px;
+    top: 70px;
+    max-height: 75vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .login { display: none; } /* só "Criar conta" em telas muito pequenas */
+
+  #painel-sino,
+  #painel-msg {
+    width: 100vw;
+    right: 0;
+    border-radius: 0 0 14px 14px;
+  }
+}
+
+/* =========================================================================
+   HERO (index.html)
+========================================================================= */
+@media (max-width: 768px) {
+  .hero {
+    padding: 48px 16px;
+  }
+
+  .hero h1 {
+    font-size: 38px;
+    letter-spacing: 1px;
+  }
+
+  .hero h2 {
+    font-size: 13px;
+    width: auto;
+    padding: 6px 18px;
+  }
+
+  .hero p {
+    font-size: 15px;
+  }
+
+  .btn-neon {
+    font-size: 15px;
+    padding: 12px 28px;
+  }
+
+  /* Cards de features: empilha em coluna */
+  .card-grid {
+    grid-template-columns: 1fr;
+    padding: 0 16px 32px;
+  }
+
+  /* Seção "Sua Carreira" */
+  .ia {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 48px 20px;
+    text-align: center;
+  }
+
+  .ia-lado-direito {
+    justify-content: center;
+  }
+
+  .features-lista {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 28px;
+  }
+
+  .texto-brilante h2 {
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* =========================================================================
+   MERCADO (mercado.html)
+========================================================================= */
+@media (max-width: 768px) {
+  .main-main {
+    padding: 20px 0;
+  }
+
+  .lfg-section {
+    padding: 12px 0;
+    width: 100%;
+  }
+
+  .lfg-container {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .lfg-header {
+    padding: 0 12px;
+  }
+
+  .lfg-header h2 {
+    font-size: 1.5rem;
+  }
+
+  /* Filtros em coluna */
+  .lfg-filtros {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .lfg-select {
+    width: 100%;
+  }
+
+  /* Formulário de publicar vaga */
+  .form-linha {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .lfg-criador {
+    padding: 16px;
+    margin: 0 0 24px 0;
+  }
+
+  /* Cards de vagas */
+  .lfg-feed {
+    gap: 14px;
+  }
+
+  .lfg-card {
+    padding: 14px;
+  }
+
+  .card-topo {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .card-rodape {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .card-rodape > div {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Cronômetro não some */
+  .card-topo span[id^="timer-"] {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .lfg-header h2 { font-size: 1.2rem; }
+
+  .btn-publicar {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  /* Badge de plataforma/posição menor */
+  .badge { font-size: 0.7rem; padding: 3px 8px; }
+}
+
+/* =========================================================================
+   PERFIL (meu-perfil.html)
+========================================================================= */
+@media (max-width: 1024px) {
+  /* Topo do perfil: empilha */
+  .perfil-container-main {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 16px;
+    margin: 16px;
+    padding: 16px;
+  }
+
+  .static {
+    width: 100%;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Info bar */
+  .info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .detalhe {
+    display: none; /* esconde separadores verticais em tablet */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Foto de perfil menor */
+  .img-icon {
+    width: 160px;
+    height: 160px;
+    margin: 10px auto;
+  }
+
+  .btn-upload-foto {
+    margin: -40px -60px 0 -30px;
+  }
+
+  /* Formulário de detalhes */
+  .detalhes-jogador {
+    grid-template-columns: 1fr;
+    margin: 12px;
+    padding: 16px;
+  }
+
+  .escudo-clube {
+    display: none; /* esconde escudo em mobile */
+  }
+
+  .linha-um,
+  .linha-dois {
+    margin: 10px 0;
+    width: 100%;
+  }
+
+  /* Posições e plataformas */
+  .posicoes {
+    margin: 12px;
+    padding: 16px;
+  }
+
+  .grid-position {
+    grid-template-columns: 1fr;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    gap: 8px;
+  }
+
+  .pos {
+    background: radial-gradient(circle, rgba(0,0,92,0.41) 0%, rgba(4,21,46,0.82) 100%);
+    border-radius: 14px;
+    padding: 12px;
+    border: 2px solid #5085d9;
+  }
+
+  .btn-posicao {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .mis-plataforma {
+    padding: 10px 20px;
+    font-size: 13px;
+    max-width: 100%;
+  }
+
+  /* Estatísticas rápidas */
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 8px;
+  }
+
+  /* Info badges */
+  .info {
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .detalhe { display: none; }
+
+  .antiga-nintendo {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .img-icon {
+    width: 120px;
+    height: 120px;
+  }
+
+  .perfil-nick-topo {
+    font-size: 1.2rem;
+  }
+
+  .btn-salvar {
+    width: 90%;
+    font-size: 14px;
+  }
+}
+
+/* =========================================================================
+   CADASTRO / LOGIN (cadastrar-se.html)
+========================================================================= */
+@media (max-width: 768px) {
+  .cad-main {
+    padding: 16px;
+  }
+
+  .cad-lado-direito {
+    padding: 24px 16px;
+    width: 100%;
+  }
+
+  .cad-card {
+    max-width: 100%;
+  }
+
+  .cad-tab {
+    font-size: 12px;
+    padding: 8px 4px;
+  }
+
+  .cad-btn-primary,
+  .cad-btn-google {
+    font-size: 14px;
+    padding: 12px;
+  }
+}
+
+/* =========================================================================
+   TORNEIO (torneio.html)
+========================================================================= */
+@media (max-width: 768px) {
+  .torneio-hero {
+    grid-template-columns: 1fr;
+    padding: 32px 16px;
+    text-align: center;
+  }
+
+  .hero-bracket { order: -1; }
+  .hero-sub { margin: 0 auto 20px; }
+
+  .torneio-main {
+    padding: 20px 12px 60px;
+  }
+
+  /* Abas */
+  .tabs-wrapper {
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tab-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  /* Grid de torneios: 1 coluna */
+  .torneio-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Filtros */
+  .filters-bar {
+    flex-direction: column;
+  }
+
+  .search-input,
+  .filter-select {
+    width: 100%;
+  }
+
+  /* Modal */
+  .modal {
+    padding: 20px 16px;
+    max-height: 95vh;
+  }
+
+  .formato-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-indicator .step small {
+    display: none;
+  }
+}
+
+/* =========================================================================
+   FOOTER
+========================================================================= */
+@media (max-width: 768px) {
+  .main-footer {
+    padding: 32px 16px 24px;
+  }
+
+  .footer-titulo {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .footer-texto {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+}
+
+/* =========================================================================
+   UTILITÁRIOS GERAIS
+========================================================================= */
+@media (max-width: 768px) {
+  /* Remove animações pesadas em mobile para performance */
+  .animar-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Inputs e selects: evita zoom automático no iOS */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
