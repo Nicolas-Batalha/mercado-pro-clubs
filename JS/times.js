@@ -39,7 +39,7 @@ onAuthStateChanged(auth, async (user) => {
 // =========================================================================
 document.getElementById("form-lfg")?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (!usuarioAtual) { toastMercado("Você precisa estar logado.", "erro"); return; }
+  if (!usuarioAtual) { toast("Você precisa estar logado.", "erro"); return; }
 
   const clube      = document.getElementById("post-clube").value.trim();
   const plataforma = document.getElementById("post-plataforma").value;
@@ -57,10 +57,10 @@ document.getElementById("form-lfg")?.addEventListener("submit", async (e) => {
     });
     await setDoc(doc(db, "jogadores", usuarioAtual.uid),
       { clubeId: docRef.id, ehCapitao: true, clube }, { merge: true });
-    toastMercado("✅ Vaga publicada! Expira em 1 hora.");
+    toast("✅ Vaga publicada! Expira em 1 hora.");
     document.getElementById("form-lfg").reset();
     await carregarVagas();
-  } catch (err) { toastMercado("Erro ao publicar: " + err.message, "erro"); }
+  } catch (err) { toast("Erro ao publicar: " + err.message, "erro"); }
 });
 
 // =========================================================================
@@ -189,11 +189,11 @@ async function excluirVaga(vagaId) {
     clearInterval(timersAtivos[vagaId]); delete timersAtivos[vagaId];
     await deleteDoc(doc(db, "vagas", vagaId));
     document.getElementById(`card-${vagaId}`)?.remove();
-    toastMercado("🗑 Vaga excluída.");
+    toast("🗑 Vaga excluída.");
     const feed = document.getElementById("lfg-feed");
     if (feed && !feed.querySelector(".lfg-card"))
       feed.innerHTML = `<p style="color:#A0AAB5;text-align:center">Nenhuma vaga encontrada.</p>`;
-  } catch (err) { toastMercado("Erro ao excluir: " + err.message, "erro"); }
+  } catch (err) { toast("Erro ao excluir: " + err.message, "erro"); }
 }
 
 ["filtro-plataforma","filtro-posicao","filtro-jogo"].forEach(id =>
@@ -204,15 +204,15 @@ async function excluirVaga(vagaId) {
 // 3. CANDIDATAR-SE
 // =========================================================================
 async function candidatar(vagaId, capitaoUid, clube) {
-  if (!usuarioAtual) { toastMercado("Faça login para se candidatar.", "erro"); return; }
-  if (usuarioAtual.uid === capitaoUid) { toastMercado("Você é o capitão desse clube!", "erro"); return; }
+  if (!usuarioAtual) { toast("Faça login para se candidatar.", "erro"); return; }
+  if (usuarioAtual.uid === capitaoUid) { toast("Você é o capitão desse clube!", "erro"); return; }
   try {
     const existSnap = await getDocs(query(
       collection(db, "candidaturas"),
       where("jogadorUid","==",usuarioAtual.uid),
       where("vagaId","==",vagaId)
     ));
-    if (!existSnap.empty) { toastMercado("Você já se candidatou a esse clube.", "erro"); return; }
+    if (!existSnap.empty) { toast("Você já se candidatou a esse clube.", "erro"); return; }
     await addDoc(collection(db, "candidaturas"), {
       vagaId, clube,
       jogadorUid:  usuarioAtual.uid,
@@ -222,8 +222,8 @@ async function candidatar(vagaId, capitaoUid, clube) {
       overall:     perfilAtual.overall  || "—",
       capitaoUid, status: "pendente", criadoEm: serverTimestamp(),
     });
-    toastMercado("✅ Candidatura enviada! Aguarde o capitão.");
-  } catch (err) { toastMercado("Erro ao candidatar: " + err.message, "erro"); }
+    toast("✅ Candidatura enviada! Aguarde o capitão.");
+  } catch (err) { toast("Erro ao candidatar: " + err.message, "erro"); }
 }
 
 // =========================================================================
@@ -373,16 +373,18 @@ async function aceitarCandidatura(candidaturaId, jogadorUid, clube, card) {
         style="width:100%;padding:8px;background:#12E06C;color:#050B14;border:none;
                border-radius:8px;font-weight:bold;cursor:pointer">💬 Abrir chat com o jogador</button>`;
     card.querySelector(".btn-abrir-chat-notif").addEventListener("click", (e) => {
-      abrirChat(e.currentTarget.dataset.chat);
       document.getElementById("painel-sino").style.display = "none";
+      // Abre o painel de mensagens direto no chat criado
+      garantirPainelMsg();
+      document.getElementById("painel-msg").style.display = "flex";
+      abrirChat(e.currentTarget.dataset.chat);
     });
-    // Atualiza a lista de chats se o painel de msg estiver aberto
-    if (document.getElementById("painel-msg")?.style.display === "flex")
-      carregarListaChats(usuarioAtual.uid);
+    // Recarrega lista de chats em background
+    carregarListaChats(usuarioAtual.uid);
   } catch (err) {
     card.style.opacity = "1";
     card.querySelectorAll("button").forEach(b => b.disabled = false);
-    toastMercado("Erro ao aceitar: " + err.message, "erro");
+    toast("Erro ao aceitar: " + err.message, "erro");
   }
 }
 
@@ -391,7 +393,7 @@ async function recusarCandidatura(candidaturaId, card) {
     await updateDoc(doc(db,"candidaturas",candidaturaId), { status:"recusado" });
     card.style.opacity = "0.4";
     card.innerHTML = `<p style="color:#666;margin:0;text-align:center">Candidatura recusada.</p>`;
-  } catch (err) { toastMercado("Erro ao recusar: " + err.message, "erro"); }
+  } catch (err) { toast("Erro ao recusar: " + err.message, "erro"); }
 }
 
 // =========================================================================
@@ -490,8 +492,8 @@ async function carregarListaChats(uid) {
       const chat = d.data();
       const item = document.createElement("div");
       item.style.cssText = `display:flex;align-items:center;gap:12px;padding:12px;
-        border-radius:10px;cursor:pointer;transition:background 0.15s;margin-bottom:6px;
-        background:#1a2a1a;border:1px solid #1e3a1e`;
+        border-radius:10px;cursor:pointer;transition:border-color 0.15s;margin-bottom:6px;
+        background:#1a2a1a;border:1px solid #1e3a1e;position:relative`;
       item.innerHTML = `
         <div style="width:40px;height:40px;background:#12E06C22;border-radius:50%;
           display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">⚽</div>
@@ -500,10 +502,38 @@ async function carregarListaChats(uid) {
             overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${chat.clube || "Clube"}</p>
           <p style="margin:0;color:#A0AAB5;font-size:0.75rem">Toque para abrir</p>
         </div>
-        <span style="color:#12E06C;font-size:1.1rem">›</span>`;
+        <span class="chat-seta" style="color:#12E06C;font-size:1.1rem;margin-right:4px">›</span>
+        <button class="btn-excluir-chat" data-chat-id="${d.id}"
+          title="Excluir conversa"
+          style="background:transparent;border:none;color:#555;font-size:1rem;
+                 cursor:pointer;padding:4px;border-radius:6px;flex-shrink:0;
+                 transition:color 0.2s,background 0.2s"
+          onmouseover="this.style.color='#d32f2f';this.style.background='rgba(211,47,47,0.1)'"
+          onmouseout="this.style.color='#555';this.style.background='transparent'">🗑</button>`;
+
       item.addEventListener("mouseenter", () => item.style.borderColor = "#12E06C");
       item.addEventListener("mouseleave", () => item.style.borderColor = "#1e3a1e");
-      item.addEventListener("click", () => abrirChat(d.id, chat.clube));
+
+      // Clique na área principal abre o chat
+      item.addEventListener("click", (e) => {
+        if (e.target.closest(".btn-excluir-chat")) return;
+        abrirChat(d.id, chat.clube);
+      });
+
+      // Botão excluir
+      item.querySelector(".btn-excluir-chat").addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm(`Excluir a conversa "${chat.clube || "Clube"}"? Isso não pode ser desfeito.`)) return;
+        try {
+          await deleteDoc(doc(db, "chats", d.id));
+          item.remove();
+          if (!lista.querySelector("div"))
+            lista.innerHTML = `<p style="color:#A0AAB5;font-size:0.85rem;text-align:center;margin-top:20px">
+              Nenhuma conversa ainda.</p>`;
+          toastMercado("🗑 Conversa excluída.");
+        } catch (err) { toastMercado("Erro ao excluir: " + err.message, "erro"); }
+      });
+
       lista.appendChild(item);
     });
   } catch (err) {
@@ -531,11 +561,11 @@ async function abrirChat(chatId, clubeNome) {
   try {
     const chatSnap = await getDoc(doc(db,"chats",chatId));
     if (!chatSnap.exists() || !chatSnap.data().participantes.includes(usuarioAtual.uid)) {
-      toastMercado("Sem acesso a este chat.", "erro"); return;
+      toast("Sem acesso a este chat.", "erro"); return;
     }
     const nome = clubeNome || chatSnap.data().clube || "Chat";
     document.getElementById("msg-titulo").textContent = `⚽ ${nome}`;
-  } catch (err) { toastMercado("Erro ao abrir chat.", "erro"); return; }
+  } catch (err) { toast("Erro ao abrir chat.", "erro"); return; }
 
   // Mostra área de chat, esconde lista
   document.getElementById("msg-lista").style.display = "none";
@@ -614,7 +644,7 @@ function escHtml(str) {
 // =========================================================================
 // TOAST
 // =========================================================================
-function toastMercado(msg, tipo="sucesso") {
+function toast(msg, tipo="sucesso") {
   document.getElementById("toast-mercado")?.remove();
   const el = Object.assign(document.createElement("div"),{id:"toast-mercado",textContent:msg});
   Object.assign(el.style,{
