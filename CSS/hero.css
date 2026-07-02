@@ -1,3 +1,6 @@
+html{
+  scroll-behavior: smooth;
+}
 .hero {
   text-align: center;
    display: flex;
@@ -65,6 +68,7 @@
   transition: all 0.3s ease;
   display: inline-block;
   box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */
+  margin: 10px;
 }
 
 .btn-neon:hover {
@@ -239,6 +243,7 @@
   align-items: center;
   flex-direction: column;
   gap: 10px;
+  scroll-behavior: smooth;
 }
 .funciona-text{
   text-align: center;
@@ -295,5 +300,20 @@
   height: 60px;
   border-radius: 50px;
   background-color:#12E06C;
+}
+.btn-mercado{
+  background-color: #5cda93;
+  color: #050B14;
+  text-decoration: none;
+  list-style: none;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 15px 40px;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */
+  margin: 10px;
+  text-transform: uppercase;
 }
  
