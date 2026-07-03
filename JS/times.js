@@ -348,6 +348,10 @@ function cardNotifJogador(docSnap) {
     document.getElementById("painel-sino").style.display = "none";
   });
   updateDoc(docSnap.ref, { jogadorViu: true });
+  // Aqui quem está logado é o próprio jogador (auth.uid === usuarioAtual.uid),
+  // então essa escrita é permitida pelas regras do Firestore.
+  setDoc(doc(db, "jogadores", usuarioAtual.uid), { clubeId: d.chatId, clube: d.clube }, { merge: true })
+    .catch(err => console.error("Erro ao atualizar perfil do jogador:", err));
   lista.prepend(card);
 }
 
@@ -364,7 +368,11 @@ async function aceitarCandidatura(candidaturaId, jogadorUid, clube, card) {
     await updateDoc(doc(db,"candidaturas",candidaturaId), {
       status:"aceito", chatId:chatRef.id, jogadorViu:false,
     });
-    await setDoc(doc(db,"jogadores",jogadorUid), { clubeId:chatRef.id, clube }, { merge:true });
+    // OBS: a atualização do perfil do jogador (jogadores/{jogadorUid}) NÃO é feita
+    // aqui, porque quem está rodando esse código é o capitão, e as regras do
+    // Firestore só permitem que cada usuário escreva no próprio documento
+    // (allow write: if request.auth.uid == uid). Isso é feito pelo próprio
+    // jogador em cardNotifJogador(), quando ele visualiza a notificação de aceite.
 
     card.style.opacity = "1";
     card.innerHTML = `
