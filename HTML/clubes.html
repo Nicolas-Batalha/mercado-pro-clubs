@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Procure jogadores e clubes de Pro Clubs por posição, plataforma e versão do jogo (EAFC23 a 26). Encontre seu próximo time ou reforço para o elenco.">
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <link rel="icon" href="./IMG/favicon.svg" type="image/svg+xml">
+    <title>meu-clube / gerenciar seu clube </title>
+    <meta name="description" content="Veja vagas abertas em clubes de Pro Clubs, filtre por posição e plataforma, e candidate-se direto pela plataforma.">
+</head>
+<body>
+    <header class="main-header">
+      <div class="logo animar-scroll">
+        <a href="../index.html" title="voltar para a página inicial">
+          <img src="../IMG/logo.svg" class="logo" alt="Pro Clubs Hub Brasil Logo" />
+        </a>
+      </div>
+      <div class="menu-carrossel">
+        <nav>
+          <ul class="lista-links animar-scroll">
+            <li><a href="./meu-perfil.html">meu perfil</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="login-header animar-scroll">
+        <!-- Sino de notificações -->
+        <div class="notification-icon" id="sino-btn" style="position:relative;cursor:pointer">
+          <span class="bell-icon">🔔</span>
+          <span id="badge" class="notification-badge hidden">0</span>
+        </div>
+        <!-- Ícone de mensagens → vai para o chat mais recente -->
+        <div class="email-container" id="emailIcon">
+          <svg viewBox="0 0 24 24" class="email-icon">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+          </svg>
+        </div>
+        <!-- Avatar / botões de login injetados pelo header-auth.js -->
+        <div id="login-header"></div>
+      </div>
+    </header>
+</body>
+</html>

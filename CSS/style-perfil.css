@@ -1,13 +1,4 @@
-.body-perfil {
-  /* Para colocar uma imagem de fundo depois, usaremos background-image aqui */
-  background:linear-gradient(to bottom, rgba(5, 11, 20, 0.7), rgba(5, 11, 20, 0.95)),;
-  background-image: url("../IMG/foto-do-jogo.jpg");
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  color: var(--cor-texto-claro);
-  overflow-x: hidden;
-}
+
 /* =====================================================
    Aba Superior do Perfil (Card de Destaque)
    ===================================================== */
