@@ -3,7 +3,7 @@
 // Fluxo:
 //  - 🔔 Sino → painel de notificações (candidaturas pendentes + aceites)
 //  - ✉️ Email → painel de mensagens (lista de chats + chat inline)
-//  - Vagas expiram em 1h, chat é permanente
+//  - Vagas expiram em 30 dias, chat é permanente
 // =========================================================================
 
 import { auth, db } from "./firebase-config.js";
@@ -14,13 +14,112 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-const EXPIRACAO_MS = 60 * 60 * 1000; // vagas: 1h
+const EXPIRACAO_MS = 30 * 24 * 60 * 60 * 1000; // vagas: 30 dias
 
 let usuarioAtual = null;
 let perfilAtual  = {};
-const timersAtivos = {};
 let chatAbertoId   = null; // chat atualmente aberto no painel
 let unsubChat      = null; // listener de mensagens ativo
+let fotosClubeBase64 = []; // até 3 imagens selecionadas no formulário de vaga (opcional)
+let vagaEditandoId  = null; // id da vaga em edição (null = criando nova)
+const MAX_FOTOS_VAGA = 3;
+
+// ─── Comprime imagem no navegador antes de salvar (reduz tamanho no Firestore) ─
+function comprimirImagem(arquivo, maxLargura = 900, qualidade = 0.72) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const escala = Math.min(1, maxLargura / img.width);
+        const canvas = document.createElement("canvas");
+        canvas.width  = img.width  * escala;
+        canvas.height = img.height * escala;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", qualidade));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(arquivo);
+  });
+}
+
+// ─── Preview do upload de imagens no formulário de vaga (até 3) ────────────────
+function renderPreviewFotos() {
+  const wrap = document.getElementById("post-foto-preview-wrap");
+  const texto = document.getElementById("post-foto-texto");
+  if (!wrap) return;
+  wrap.innerHTML = fotosClubeBase64.map((src, i) => `
+    <div style="position:relative">
+      <img src="${src}" class="lfg-foto-preview" alt="Prévia ${i + 1}" />
+      <button type="button" class="btn-remover-foto" data-idx="${i}"
+        style="position:absolute;top:-6px;right:-6px;background:#d32f2f;color:#fff;
+               border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-weight:bold">×</button>
+    </div>`).join("");
+  wrap.querySelectorAll(".btn-remover-foto").forEach(btn =>
+    btn.addEventListener("click", () => {
+      fotosClubeBase64.splice(Number(btn.dataset.idx), 1);
+      renderPreviewFotos();
+    })
+  );
+  if (texto) {
+    texto.textContent = fotosClubeBase64.length
+      ? `✅ ${fotosClubeBase64.length}/${MAX_FOTOS_VAGA} imagem(ns) selecionada(s)`
+      : `📷 Adicionar até ${MAX_FOTOS_VAGA} imagens do anúncio (opcional, 2MB cada)`;
+  }
+}
+
+const inputFotoClube = document.getElementById("post-foto");
+if (inputFotoClube) {
+  inputFotoClube.addEventListener("change", async () => {
+    const arquivos = Array.from(inputFotoClube.files);
+    inputFotoClube.value = ""; // permite selecionar o mesmo arquivo de novo depois
+
+    for (const arquivo of arquivos) {
+      if (fotosClubeBase64.length >= MAX_FOTOS_VAGA) {
+        toast(`⚠️ Máximo de ${MAX_FOTOS_VAGA} imagens por anúncio.`, "erro");
+        break;
+      }
+      if (arquivo.size > 2 * 1024 * 1024) {
+        toast(`⚠️ "${arquivo.name}" é muito grande. Use até 2MB.`, "erro");
+        continue;
+      }
+      try {
+        const comprimida = await comprimirImagem(arquivo);
+        fotosClubeBase64.push(comprimida);
+      } catch {
+        toast(`Erro ao processar "${arquivo.name}".`, "erro");
+      }
+    }
+    renderPreviewFotos();
+  });
+}
+
+// ─── Lightbox: clique na imagem do card amplia ─────────────────────────────────
+const lightboxOverlay = document.getElementById("lightbox-overlay");
+const lightboxImg     = document.getElementById("lightbox-img");
+
+document.getElementById("lfg-feed")?.addEventListener("click", (e) => {
+  const img = e.target.closest(".card-imagem img, .card-galeria img");
+  if (!img || !lightboxOverlay || !lightboxImg) return;
+  lightboxImg.src = img.src;
+  lightboxOverlay.classList.remove("hidden");
+});
+
+lightboxOverlay?.addEventListener("click", () => {
+  lightboxOverlay.classList.add("hidden");
+  lightboxImg.src = "";
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    lightboxOverlay?.classList.add("hidden");
+    if (lightboxImg) lightboxImg.src = "";
+  }
+});
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
@@ -32,6 +131,7 @@ onAuthStateChanged(auth, async (user) => {
     iniciarPainelMensagens();
   }
   await carregarVagas();
+  destacarVagaCompartilhada();
 });
 
 // =========================================================================
@@ -41,42 +141,101 @@ document.getElementById("form-lfg")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!usuarioAtual) { toast("Você precisa estar logado.", "erro"); return; }
 
-  const clube      = document.getElementById("post-clube").value.trim();
-  const plataforma = document.getElementById("post-plataforma").value;
-  const posicao    = document.getElementById("post-posicao").value;
-  const estilo     = document.getElementById("post-estilo").value;
-  const jogo       = document.getElementById("post-jogo").value;
-  const descricao  = document.getElementById("post-descricao").value.trim();
+  const clube         = document.getElementById("post-clube").value.trim();
+  const plataforma    = document.getElementById("post-plataforma").value;
+  const posicao       = document.getElementById("post-posicao").value;
+  const estilo        = document.getElementById("post-estilo").value;
+  const jogo          = document.getElementById("post-jogo").value;
+  const descricao     = document.getElementById("post-descricao").value.trim();
+  const overallMinRaw = document.getElementById("post-overall-min").value;
+  const overallMinimo = overallMinRaw ? Number(overallMinRaw) : null;
 
   try {
-    const docRef = await addDoc(collection(db, "vagas"), {
-      clube, plataforma, posicao, estilo, jogo, descricao,
-      capitaoUid:  usuarioAtual.uid,
-      capitaoNome: perfilAtual.nickname || usuarioAtual.displayName || "Capitão",
-      criadoEm:    serverTimestamp(),
-    });
-    await setDoc(doc(db, "jogadores", usuarioAtual.uid),
-      { clubeId: docRef.id, ehCapitao: true, clube }, { merge: true });
-    toast("✅ Vaga publicada! Expira em 1 hora.");
+    if (!vagaEditandoId) {
+      // Limite de 1 vaga ativa por capitão (só vale para criação de vaga nova)
+      const existentes = await getDocs(query(
+        collection(db, "vagas"), where("capitaoUid", "==", usuarioAtual.uid)
+      ));
+      if (!existentes.empty) {
+        toast("⚠️ Você já tem uma vaga ativa. Edite-a ou exclua antes de criar outra.", "erro");
+        return;
+      }
+      const docRef = await addDoc(collection(db, "vagas"), {
+        clube, plataforma, posicao, estilo, jogo, descricao, overallMinimo,
+        fotosClube:  fotosClubeBase64,
+        capitaoUid:  usuarioAtual.uid,
+        capitaoNome: perfilAtual.nickname || usuarioAtual.displayName || "Capitão",
+        criadoEm:    serverTimestamp(),
+      });
+      await setDoc(doc(db, "jogadores", usuarioAtual.uid),
+        { clubeId: docRef.id, ehCapitao: true, clube }, { merge: true });
+      toast("✅ Vaga publicada! Fica ativa por 30 dias.");
+    } else {
+      // Edição: não mexe em criadoEm (usar "Renovar" pra isso)
+      await updateDoc(doc(db, "vagas", vagaEditandoId), {
+        clube, plataforma, posicao, estilo, jogo, descricao, overallMinimo,
+        fotosClube: fotosClubeBase64,
+      });
+      toast("✅ Vaga atualizada!");
+      cancelarEdicaoVaga();
+    }
+
     document.getElementById("form-lfg").reset();
+    fotosClubeBase64 = [];
+    renderPreviewFotos();
     await carregarVagas();
-  } catch (err) { toast("Erro ao publicar: " + err.message, "erro"); }
+  } catch (err) { toast("Erro ao salvar: " + err.message, "erro"); }
 });
+
+// ─── Edição de vaga ────────────────────────────────────────────────────────────
+function iniciarEdicaoVaga(v) {
+  vagaEditandoId = v.id;
+  document.getElementById("post-clube").value        = v.clube || "";
+  document.getElementById("post-plataforma").value   = v.plataforma || "";
+  document.getElementById("post-posicao").value      = v.posicao || "";
+  document.getElementById("post-estilo").value       = v.estilo || "";
+  document.getElementById("post-jogo").value         = v.jogo || "";
+  document.getElementById("post-descricao").value    = v.descricao || "";
+  document.getElementById("post-overall-min").value  = v.overallMinimo || "";
+  fotosClubeBase64 = Array.isArray(v.fotosClube) ? [...v.fotosClube]
+    : (v.fotoClube ? [v.fotoClube] : []);
+  renderPreviewFotos();
+
+  document.getElementById("btn-publicar").textContent = "Salvar alterações";
+  document.getElementById("btn-cancelar-edicao").style.display = "inline-block";
+  document.getElementById("form-lfg").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function cancelarEdicaoVaga() {
+  vagaEditandoId = null;
+  fotosClubeBase64 = [];
+  renderPreviewFotos();
+  document.getElementById("form-lfg")?.reset();
+  document.getElementById("btn-publicar").textContent = "Publicar Vaga";
+  document.getElementById("btn-cancelar-edicao").style.display = "none";
+}
+document.getElementById("btn-cancelar-edicao")?.addEventListener("click", cancelarEdicaoVaga);
 
 // =========================================================================
 // 2. LISTAR VAGAS
 // =========================================================================
-async function carregarVagas() {
-  Object.values(timersAtivos).forEach(clearInterval);
-  Object.keys(timersAtivos).forEach(k => delete timersAtivos[k]);
+const TAMANHO_PAGINA = 12;
+let vagasFiltradasAtuais = [];
+let quantidadeExibida = TAMANHO_PAGINA;
 
+async function carregarVagas() {
   const feed = document.getElementById("lfg-feed");
+  const btnMais = document.getElementById("btn-carregar-mais");
   if (!feed) return;
   feed.innerHTML = `<p style="color:#A0AAB5;text-align:center">Carregando vagas...</p>`;
+  quantidadeExibida = TAMANHO_PAGINA;
 
-  const filtPlat = document.getElementById("filtro-plataforma")?.value || "todas";
-  const filtPos  = document.getElementById("filtro-posicao")?.value    || "todas";
-  const filtJogo = document.getElementById("filtro-jogo")?.value       || "todas";
+  const filtPlat  = document.getElementById("filtro-plataforma")?.value || "todas";
+  const filtPos   = document.getElementById("filtro-posicao")?.value    || "todas";
+  const filtJogo  = document.getElementById("filtro-jogo")?.value       || "todas";
+  const ordenar   = document.getElementById("ordenar-vagas")?.value     || "recentes";
+  const busca     = (document.getElementById("busca-texto")?.value || "").trim().toLowerCase();
+  const soMeuNivel = document.getElementById("filtro-meu-nivel")?.checked || false;
 
   try {
     const snap  = await getDocs(query(collection(db, "vagas"), orderBy("criadoEm", "desc")));
@@ -90,25 +249,62 @@ async function carregarVagas() {
       else validas.push(dados);
     });
 
+    // Estado vazio: nenhuma vaga publicada ainda na plataforma (não é sobre os filtros)
+    if (!validas.length) {
+      feed.innerHTML = `
+        <div style="text-align:center;padding:30px 16px;color:#A0AAB5">
+          <p style="font-size:1rem;margin-bottom:10px">
+            ⚽ Ainda não há vagas publicadas por aqui.
+          </p>
+          <p style="font-size:0.85rem;margin-bottom:16px">
+            Seja o primeiro clube a anunciar e apareça pra todo mundo que está procurando time!
+          </p>
+        </div>`;
+      btnMais?.classList.add("hidden");
+      return;
+    }
+
     let filtradas = validas;
     if (filtPlat !== "todas") filtradas = filtradas.filter(v => v.plataforma === filtPlat);
     if (filtPos  !== "todas") filtradas = filtradas.filter(v => v.posicao    === filtPos);
     if (filtJogo !== "todas") filtradas = filtradas.filter(v => v.jogo       === filtJogo);
+    if (busca) {
+      filtradas = filtradas.filter(v =>
+        (v.clube || "").toLowerCase().includes(busca) ||
+        (v.descricao || "").toLowerCase().includes(busca)
+      );
+    }
+    if (soMeuNivel) {
+      if (!usuarioAtual) {
+        toast("Faça login para usar esse filtro.", "erro");
+        document.getElementById("filtro-meu-nivel").checked = false;
+      } else if (!perfilAtual.overall) {
+        toast("Preencha o overall no seu perfil para usar esse filtro.", "erro");
+        document.getElementById("filtro-meu-nivel").checked = false;
+      } else {
+        filtradas = filtradas.filter(v => !v.overallMinimo || perfilAtual.overall >= v.overallMinimo);
+      }
+    }
 
+    // Ordenação (a query já vem "recentes" por padrão do Firestore)
+    if (ordenar === "antigas") {
+      filtradas = [...filtradas].reverse();
+    } else if (ordenar === "az") {
+      filtradas = [...filtradas].sort((a, b) =>
+        (a.clube || "").localeCompare(b.clube || "", "pt-BR"));
+    }
+
+    vagasFiltradasAtuais = filtradas;
+
+    // Estado vazio: existem vagas, mas nenhuma bate com o filtro/busca atual
     if (!filtradas.length) {
-      feed.innerHTML = `<p style="color:#A0AAB5;text-align:center">Nenhuma vaga encontrada.</p>`;
+      feed.innerHTML = `<p style="color:#A0AAB5;text-align:center">
+        Nenhuma vaga encontrada com esses filtros. Tente ajustar a busca.</p>`;
+      btnMais?.classList.add("hidden");
       return;
     }
 
-    feed.innerHTML = filtradas.map(v => cardVaga(v)).join("");
-    feed.querySelectorAll(".btn-candidatar").forEach(btn =>
-      btn.addEventListener("click", () =>
-        candidatar(btn.dataset.vagaId, btn.dataset.capitaoUid, btn.dataset.clube))
-    );
-    feed.querySelectorAll(".btn-excluir-vaga").forEach(btn =>
-      btn.addEventListener("click", () => excluirVaga(btn.dataset.vagaId))
-    );
-    filtradas.forEach(v => iniciarCronometro(v));
+    renderPaginaAtual();
 
   } catch (err) {
     feed.innerHTML = `<p style="color:#d32f2f;text-align:center">Erro ao carregar vagas.</p>`;
@@ -116,40 +312,106 @@ async function carregarVagas() {
   }
 }
 
+function renderPaginaAtual() {
+  const feed = document.getElementById("lfg-feed");
+  const btnMais = document.getElementById("btn-carregar-mais");
+  if (!feed) return;
+
+  const visiveis = vagasFiltradasAtuais.slice(0, quantidadeExibida);
+  feed.innerHTML = visiveis.map(v => cardVaga(v)).join("");
+
+  feed.querySelectorAll(".btn-candidatar").forEach(btn =>
+    btn.addEventListener("click", () =>
+      candidatar(btn.dataset.vagaId, btn.dataset.capitaoUid, btn.dataset.clube))
+  );
+  feed.querySelectorAll(".btn-excluir-vaga").forEach(btn =>
+    btn.addEventListener("click", () => excluirVaga(btn.dataset.vagaId))
+  );
+  feed.querySelectorAll(".btn-editar-vaga").forEach(btn =>
+    btn.addEventListener("click", () => {
+      const v = vagasFiltradasAtuais.find(x => x.id === btn.dataset.vagaId);
+      if (v) iniciarEdicaoVaga(v);
+    })
+  );
+  feed.querySelectorAll(".btn-renovar-vaga").forEach(btn =>
+    btn.addEventListener("click", () => renovarVaga(btn.dataset.vagaId))
+  );
+  feed.querySelectorAll(".btn-compartilhar-vaga").forEach(btn =>
+    btn.addEventListener("click", () => compartilharVaga(btn.dataset.vagaId))
+  );
+  feed.querySelectorAll(".btn-denunciar-vaga").forEach(btn =>
+    btn.addEventListener("click", () => denunciarVaga(btn.dataset.vagaId, btn.dataset.clube, btn.dataset.capitaoUid))
+  );
+
+  // Contadores e selos que dependem de outra consulta ao banco (assíncronos)
+  visiveis.forEach(v => {
+    if (usuarioAtual?.uid === v.capitaoUid) atualizarContadorCandidaturas(v.id);
+    aplicarSeloVerificado(v.id, v.capitaoUid);
+  });
+
+  if (btnMais) btnMais.classList.toggle("hidden", quantidadeExibida >= vagasFiltradasAtuais.length);
+}
+
+document.getElementById("btn-carregar-mais")?.addEventListener("click", () => {
+  quantidadeExibida += TAMANHO_PAGINA;
+  renderPaginaAtual();
+});
+
 function cardVaga(v) {
   const ehDono = usuarioAtual?.uid === v.capitaoUid;
   const badgeClass = {
     ps5:"badge-ps5",ps4:"badge-ps5",xboxS:"badge-xbox",xboxO:"badge-xbox",
     pc:"badge-pc",switch2:"badge-switch",switch:"badge-switch",
   };
+  // Compatível com vagas antigas (campo fotoClube único) e novas (fotosClube array)
+  const fotos = Array.isArray(v.fotosClube) && v.fotosClube.length
+    ? v.fotosClube
+    : (v.fotoClube ? [v.fotoClube] : []);
+  const [fotoPrincipal, ...fotosExtras] = fotos;
+
   return `
     <div class="lfg-card" id="card-${v.id}">
       <div class="card-topo">
         <span class="badge ${badgeClass[v.plataforma]||''}">${v.plataforma.toUpperCase()}</span>
         <span class="badge badge-posicao">${v.posicao.toUpperCase()}</span>
         <span class="badge" style="background:#1a2a1a;color:#12E06C;border:1px solid #12E06C">${v.jogo.toUpperCase()}</span>
-        <span id="timer-${v.id}" style="margin-left:auto;font-size:0.75rem;font-weight:700;
-          color:#e06612;background:#1a1000;border:1px solid #e06612;
-          border-radius:20px;padding:3px 10px;white-space:nowrap">⏱ --:--</span>
+        ${v.overallMinimo ? `<span class="badge-nivel-min">OVR mín: ${v.overallMinimo}</span>` : ""}
+        <span style="margin-left:auto;font-size:0.75rem;font-weight:700;
+          color:#A0AAB5;background:#1a1a1a;border:1px solid #333;
+          border-radius:20px;padding:3px 10px;white-space:nowrap">${textoTempoPublicado(v.criadoEm)}</span>
       </div>
       <div class="card-corpo">
-        <h3 class="gamertag">⚽ ${v.clube}</h3>
+        <h3 class="gamertag">⚽ ${v.clube}<span id="selo-${v.id}"></span></h3>
         <p class="descricao">${v.descricao}</p>
+        ${fotoPrincipal ? `
+          <div class="card-imagem">
+            <img src="${fotoPrincipal}" alt="Imagem do anúncio do clube ${v.clube}" />
+          </div>` : ""}
+        ${fotosExtras.length ? `
+          <div class="card-galeria">
+            ${fotosExtras.map((src, i) => `<img src="${src}" alt="Imagem extra ${i + 2} do anúncio de ${v.clube}" />`).join("")}
+          </div>` : ""}
         <p style="font-size:0.8rem;color:#666">Capitão: ${v.capitaoNome} · ${v.estilo}</p>
+        ${ehDono ? `<p id="contador-${v.id}" style="font-size:0.8rem;color:#12E06C;font-weight:bold"></p>` : ""}
       </div>
       <div class="card-rodape">
         <span class="estilo-jogo">${v.estilo}</span>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn-acao-card btn-compartilhar-vaga" data-vaga-id="${v.id}">🔗 Compartilhar</button>
           ${ehDono ? `
+            <button class="btn-acao-card btn-editar-vaga" data-vaga-id="${v.id}">✏️ Editar</button>
+            <button class="btn-acao-card btn-renovar-vaga" data-vaga-id="${v.id}">🔄 Renovar</button>
             <button class="btn-excluir-vaga" data-vaga-id="${v.id}"
-              style="padding:7px 14px;background:transparent;color:#d32f2f;
-                border:1px solid #d32f2f;border-radius:8px;font-weight:bold;cursor:pointer;font-size:0.8rem"
+              style="padding:6px 12px;background:transparent;color:#d32f2f;
+                border:1px solid #d32f2f;border-radius:8px;font-weight:bold;cursor:pointer;font-size:0.75rem"
               onmouseover="this.style.background='#d32f2f';this.style.color='#fff'"
               onmouseout="this.style.background='transparent';this.style.color='#d32f2f'">
-              🗑 Excluir vaga
+              🗑 Excluir
             </button>
             <span style="color:#12E06C;font-size:0.85rem;font-weight:bold">✓ Sua vaga</span>
           ` : `
+            <button class="btn-acao-card btn-denunciar-vaga" data-vaga-id="${v.id}"
+              data-clube="${v.clube}" data-capitao-uid="${v.capitaoUid}">🚩 Denunciar</button>
             <button class="btn-chamar btn-candidatar"
               data-vaga-id="${v.id}" data-capitao-uid="${v.capitaoUid}" data-clube="${v.clube}">
               Me candidatar
@@ -160,45 +422,118 @@ function cardVaga(v) {
     </div>`;
 }
 
-function iniciarCronometro(v) {
-  const expiraEm = (v.criadoEm?.toMillis?.() || Date.now()) + EXPIRACAO_MS;
-  function tick() {
-    const restante = expiraEm - Date.now();
-    const el = document.getElementById(`timer-${v.id}`);
-    if (!el) { clearInterval(timersAtivos[v.id]); delete timersAtivos[v.id]; return; }
-    if (restante <= 0) {
-      clearInterval(timersAtivos[v.id]); delete timersAtivos[v.id];
-      document.getElementById(`card-${v.id}`)?.remove();
-      deleteDoc(doc(db, "vagas", v.id));
-      return;
-    }
-    const min = String(Math.floor(restante / 60000)).padStart(2,"0");
-    const seg = String(Math.floor((restante % 60000) / 1000)).padStart(2,"0");
-    el.textContent = `⏱ ${min}:${seg}`;
-    if (restante < 5*60*1000) {
-      el.style.color="#ff4444"; el.style.borderColor="#ff4444"; el.style.background="#1a0000";
-    }
-  }
-  tick();
-  timersAtivos[v.id] = setInterval(tick, 1000);
+function textoTempoPublicado(criadoEm) {
+  const criadoMs = criadoEm?.toMillis?.() || Date.now();
+  const diasPassados = Math.floor((Date.now() - criadoMs) / (24 * 60 * 60 * 1000));
+  if (diasPassados <= 0) return "publicada hoje";
+  if (diasPassados === 1) return "publicada há 1 dia";
+  return `publicada há ${diasPassados} dias`;
 }
 
 async function excluirVaga(vagaId) {
   if (!confirm("Tem certeza que quer excluir essa vaga?")) return;
   try {
-    clearInterval(timersAtivos[vagaId]); delete timersAtivos[vagaId];
     await deleteDoc(doc(db, "vagas", vagaId));
-    document.getElementById(`card-${vagaId}`)?.remove();
+    if (vagaEditandoId === vagaId) cancelarEdicaoVaga();
     toast("🗑 Vaga excluída.");
-    const feed = document.getElementById("lfg-feed");
-    if (feed && !feed.querySelector(".lfg-card"))
-      feed.innerHTML = `<p style="color:#A0AAB5;text-align:center">Nenhuma vaga encontrada.</p>`;
+    await carregarVagas();
   } catch (err) { toast("Erro ao excluir: " + err.message, "erro"); }
 }
 
-["filtro-plataforma","filtro-posicao","filtro-jogo"].forEach(id =>
+// ─── Renovar vaga: reseta o prazo de 30 dias sem precisar recriar tudo ────────
+async function renovarVaga(vagaId) {
+  if (!confirm("Renovar essa vaga por mais 30 dias?")) return;
+  try {
+    await updateDoc(doc(db, "vagas", vagaId), { criadoEm: serverTimestamp() });
+    toast("🔄 Vaga renovada por mais 30 dias!");
+    await carregarVagas();
+  } catch (err) { toast("Erro ao renovar: " + err.message, "erro"); }
+}
+
+// ─── Compartilhar vaga: copia link direto pra essa vaga ────────────────────────
+async function compartilharVaga(vagaId) {
+  const link = `${location.origin}${location.pathname}?vaga=${vagaId}`;
+  try {
+    await navigator.clipboard.writeText(link);
+    toast("🔗 Link copiado! Cole no grupo do seu time.");
+  } catch {
+    prompt("Copie o link da vaga:", link);
+  }
+}
+
+// ─── Denunciar vaga ────────────────────────────────────────────────────────────
+async function denunciarVaga(vagaId, clube, capitaoUid) {
+  if (!usuarioAtual) { toast("Faça login para denunciar.", "erro"); return; }
+  if (!confirm(`Denunciar a vaga do clube "${clube}"? Nossa equipe vai revisar.`)) return;
+  try {
+    await addDoc(collection(db, "denuncias"), {
+      vagaId, clube, capitaoUid,
+      denuncianteUid: usuarioAtual.uid,
+      criadoEm: serverTimestamp(),
+    });
+    toast("🚩 Denúncia enviada. Obrigado por ajudar a manter o mercado seguro!");
+  } catch (err) { toast("Erro ao denunciar: " + err.message, "erro"); }
+}
+
+// ─── Contador de candidaturas (visível só pro capitão dono da vaga) ────────────
+async function atualizarContadorCandidaturas(vagaId) {
+  const el = document.getElementById(`contador-${vagaId}`);
+  if (!el) return;
+  try {
+    const snap = await getDocs(query(collection(db, "candidaturas"), where("vagaId", "==", vagaId)));
+    el.textContent = snap.size > 0
+      ? `👥 ${snap.size} candidatura(s) recebida(s)`
+      : "";
+  } catch { /* silencioso: não é crítico exibir isso */ }
+}
+
+// ─── Selo de clube verificado (5+ contratações aceitas) ────────────────────────
+const CONTRATACOES_PARA_SELO = 5;
+const cacheVerificado = new Map();
+async function aplicarSeloVerificado(vagaId, capitaoUid) {
+  const el = document.getElementById(`selo-${vagaId}`);
+  if (!el) return;
+  try {
+    if (!cacheVerificado.has(capitaoUid)) {
+      const snap = await getDocs(query(
+        collection(db, "candidaturas"),
+        where("capitaoUid", "==", capitaoUid),
+        where("status", "==", "aceito")
+      ));
+      cacheVerificado.set(capitaoUid, snap.size >= CONTRATACOES_PARA_SELO);
+    }
+    if (cacheVerificado.get(capitaoUid)) {
+      el.innerHTML = `<span class="badge-verificado" title="${CONTRATACOES_PARA_SELO}+ contratações fechadas pela plataforma">✅ Verificado</span>`;
+    }
+  } catch { /* silencioso */ }
+}
+
+// ─── Destaca a vaga aberta via link compartilhado (?vaga=ID) ──────────────────
+function destacarVagaCompartilhada() {
+  const params = new URLSearchParams(location.search);
+  const vagaId = params.get("vaga");
+  if (!vagaId) return;
+  setTimeout(() => {
+    const card = document.getElementById(`card-${vagaId}`);
+    if (card) {
+      card.classList.add("destaque-compartilhada");
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      toast("Essa vaga não está mais disponível (pode ter expirado ou sido removida).", "erro");
+    }
+  }, 400);
+}
+
+["filtro-plataforma","filtro-posicao","filtro-jogo","ordenar-vagas","filtro-meu-nivel"].forEach(id =>
   document.getElementById(id)?.addEventListener("change", carregarVagas)
 );
+
+// Busca por texto: espera o usuário parar de digitar (debounce) antes de filtrar
+let buscaTimeout = null;
+document.getElementById("busca-texto")?.addEventListener("input", () => {
+  clearTimeout(buscaTimeout);
+  buscaTimeout = setTimeout(carregarVagas, 350);
+});
 
 // =========================================================================
 // 3. CANDIDATAR-SE
