@@ -49,6 +49,32 @@
 }
 .menu-acao{
     flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.menu-acao[hidden],
+.btn-ver-perfil-publico[hidden],
+.publico-btn[hidden]{
+    display:none !important;
+}
+.btn-ver-perfil-publico{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:12px 17px;
+    color:#d9e1dc;
+    font-size:13px;
+    font-weight:700;
+    text-decoration:none;
+    border:1px solid #3a423c;
+    border-radius:8px;
+    transition:.2s;
+    white-space:nowrap;
+}
+.btn-ver-perfil-publico:hover{
+    color:#22C55E;
+    border-color:#22C55E;
 }
 .btn-salvar-clube{
     display:flex;
@@ -113,8 +139,10 @@
     }
     .menu-acao{
         width:100%;
+        flex-direction:column;
     }
-    .btn-salvar-clube{
+    .btn-salvar-clube,
+    .btn-ver-perfil-publico{
         width:100%;
         justify-content:center;
     }
@@ -777,48 +805,687 @@ display: flex;
 /* =========================================================================
    MODO VISITANTE — visualização pública de um clube (clubes.html?uid=...)
 ========================================================================= */
-.modo-visitante .menu-acao,
-.modo-visitante .abas-clube,
-.modo-visitante .button-upload,
-.modo-visitante .escudo-content p,
-.modo-visitante .btn-convidar-jogador,
-.modo-visitante .btn-remover-jogador {
+.modo-visitante .menu,
+.modo-visitante #painel-clube-edicao {
     display: none;
 }
 
-.modo-visitante input:disabled,
-.modo-visitante select:disabled,
-.modo-visitante textarea:disabled {
-    opacity: 1;
-    color: #fff;
-    cursor: default;
-    -webkit-text-fill-color: #fff;
+.clube-publico[hidden] {
+    display: none !important;
 }
 
-.modo-visitante .select-box {
-    border-color: transparent;
-}
-.modo-visitante .select-box i {
-    display: none;
-}
-.modo-visitante .select-box select {
-    padding-right: 0;
+.clube-publico {
+    width: min(1400px, calc(100% - 40px));
+    margin: 0 auto 70px;
+    color: #f6f8f7;
 }
 
-.modo-visitante .chip:disabled {
-    opacity: 1;
-    cursor: default;
-}
-.modo-visitante .chip:disabled:hover {
-    border-color: inherit;
-}
-
-.modo-visitante .rede-item {
-    cursor: default;
-}
-
-.btn-contato-clube {
+.publico-voltar {
+    display: inline-flex;
+    margin-bottom: 14px;
+    color: #9ca59f;
+    font-size: 13px;
+    font-weight: 700;
     text-decoration: none;
+}
+
+.publico-voltar:hover,
+.publico-link-mercado:hover {
+    color: #22C55E;
+}
+
+.publico-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    min-height: 280px;
+    padding: clamp(26px, 5vw, 54px);
+    overflow: hidden;
+    background:
+        linear-gradient(115deg, rgba(34, 197, 94, .14), transparent 52%),
+        linear-gradient(135deg, #161a17 0%, #101311 100%);
+    border: 1px solid #2b342e;
+    border-radius: 22px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .26);
+}
+
+.publico-hero-brilho {
+    position: absolute;
+    right: -80px;
+    bottom: -170px;
+    width: 430px;
+    height: 430px;
+    pointer-events: none;
+    background: rgba(34, 197, 94, .1);
+    filter: blur(2px);
+    border: 1px solid rgba(34, 197, 94, .14);
+    border-radius: 50%;
+}
+
+.publico-identidade,
+.publico-identidade-texto,
+.publico-acoes {
+    position: relative;
+    z-index: 1;
+}
+
+.publico-identidade {
+    display: flex;
+    align-items: center;
+    gap: clamp(20px, 4vw, 38px);
+    min-width: 0;
+}
+
+.publico-escudo-wrap {
+    display: grid;
+    flex: 0 0 auto;
+    width: clamp(130px, 16vw, 185px);
+    height: clamp(130px, 16vw, 185px);
+    place-items: center;
+    padding: 20px;
+    background: rgba(8, 12, 9, .62);
+    border: 1px solid rgba(34, 197, 94, .38);
+    border-radius: 22px;
+    box-shadow: inset 0 0 50px rgba(34, 197, 94, .06);
+}
+
+.publico-escudo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.publico-identidade-texto {
+    min-width: 0;
+}
+
+.publico-eyebrow,
+.publico-card-kicker {
+    display: block;
+    margin-bottom: 8px;
+    color: #22C55E;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .16em;
+}
+
+.publico-identidade h1 {
+    max-width: 720px;
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1;
+}
+
+.publico-identidade p {
+    margin: 13px 0 0;
+    color: #aab3ad;
+    font-size: 14px;
+}
+
+.publico-tags,
+.publico-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.publico-tags {
+    margin-top: 17px;
+}
+
+.publico-tags span,
+.publico-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 6px 11px;
+    color: #c8d0cb;
+    font-size: 11px;
+    font-weight: 800;
+    background: #222823;
+    border: 1px solid #343c36;
+    border-radius: 999px;
+}
+
+.publico-chip.ativo {
+    color: #bbf7d0;
+    background: rgba(34, 197, 94, .1);
+    border-color: rgba(34, 197, 94, .35);
+}
+
+.publico-acoes {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 190px;
+}
+
+.publico-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 45px;
+    padding: 11px 17px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    transition: .2s ease;
+}
+
+.publico-btn-primario {
+    color: #07120b;
+    background: #22C55E;
+}
+
+.publico-btn-primario:hover {
+    background: #3bd672;
+    transform: translateY(-1px);
+}
+
+.publico-btn-secundario {
+    color: #eef3ef;
+    background: rgba(19, 24, 20, .72);
+    border-color: #3a423c;
+}
+
+.publico-btn-secundario:hover {
+    color: #22C55E;
+    border-color: #22C55E;
+}
+
+.publico-metricas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 14px 0;
+}
+
+.publico-metricas article {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    padding: 19px 20px;
+    background: #151816;
+    border: 1px solid #29302b;
+    border-radius: 13px;
+}
+
+.publico-metricas strong {
+    overflow: hidden;
+    color: #fff;
+    font-size: clamp(1.35rem, 3vw, 2rem);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.publico-metricas span {
+    color: #8d978f;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.publico-conteudo-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(310px, .75fr);
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.publico-card {
+    min-width: 0;
+    margin-bottom: 14px;
+    padding: clamp(20px, 3vw, 30px);
+    background: #151816;
+    border: 1px solid #29302b;
+    border-radius: 15px;
+}
+
+.publico-conteudo-grid .publico-card {
+    margin-bottom: 0;
+}
+
+.publico-card-cabecalho {
+    margin-bottom: 20px;
+}
+
+.publico-card-cabecalho-linha {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.publico-card h2 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(1.3rem, 2.6vw, 1.85rem);
+}
+
+.publico-descricao {
+    max-width: 850px;
+    margin: 0;
+    color: #b6beb8;
+    font-size: 14px;
+    line-height: 1.75;
+    white-space: pre-line;
+}
+
+.publico-destaques {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 26px;
+}
+
+.publico-destaques > div {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    padding: 14px;
+    background: #1d221e;
+    border: 1px solid #303832;
+    border-radius: 10px;
+}
+
+.publico-destaques span {
+    color: #7f8a82;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.publico-destaques strong {
+    overflow: hidden;
+    color: #eef2ef;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.publico-lista-detalhes {
+    display: grid;
+    margin: 0;
+}
+
+.publico-lista-detalhes > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 10px 0;
+    border-bottom: 1px solid #282e29;
+}
+
+.publico-lista-detalhes > div:last-child {
+    border-bottom: 0;
+}
+
+.publico-lista-detalhes dt {
+    color: #828d85;
+    font-size: 12px;
+}
+
+.publico-lista-detalhes dd {
+    margin: 0;
+    color: #eef2ef;
+    font-size: 12px;
+    font-weight: 750;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.publico-recrutamento-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px;
+}
+
+.publico-recrutamento h3 {
+    margin: 0 0 12px;
+    color: #bdc6c0;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.publico-contagem {
+    flex: 0 0 auto;
+    padding: 7px 10px;
+    color: #a7f3d0;
+    font-size: 11px;
+    font-weight: 800;
+    background: rgba(34, 197, 94, .1);
+    border: 1px solid rgba(34, 197, 94, .26);
+    border-radius: 999px;
+}
+
+.publico-elenco-grid,
+.publico-vagas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+}
+
+.publico-jogador-card {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr) auto;
+    gap: 13px;
+    align-items: center;
+    min-width: 0;
+    padding: 14px;
+    color: inherit;
+    text-decoration: none;
+    background: #1c211d;
+    border: 1px solid #303832;
+    border-radius: 11px;
+    transition: .18s ease;
+}
+
+.publico-jogador-card:hover {
+    border-color: rgba(34, 197, 94, .55);
+    transform: translateY(-1px);
+}
+
+.publico-jogador-card > img {
+    width: 54px;
+    height: 54px;
+    object-fit: cover;
+    background: #111411;
+    border: 1px solid #374039;
+    border-radius: 50%;
+}
+
+.publico-jogador-info {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.publico-jogador-info strong,
+.publico-jogador-info span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.publico-jogador-info strong {
+    color: #f6f8f7;
+    font-size: 13px;
+}
+
+.publico-jogador-info span {
+    color: #879189;
+    font-size: 11px;
+}
+
+.publico-jogador-numeros {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.publico-jogador-numeros > span:not(.publico-selo-capitao) {
+    color: #8c968e;
+    font-size: 10px;
+}
+
+.publico-jogador-numeros b {
+    color: #fff;
+    font-size: 13px;
+}
+
+.publico-selo-capitao {
+    padding: 3px 7px;
+    color: #bbf7d0;
+    font-size: 9px;
+    font-weight: 900;
+    background: rgba(34, 197, 94, .1);
+    border-radius: 999px;
+}
+
+.publico-vaga-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 18px;
+    background: #1c211d;
+    border: 1px solid #303832;
+    border-radius: 11px;
+}
+
+.publico-vaga-topo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.publico-vaga-card h3 {
+    margin: 14px 0 7px;
+    overflow-wrap: anywhere;
+    color: #fff;
+    font-size: 15px;
+}
+
+.publico-vaga-card p {
+    display: -webkit-box;
+    margin: 0 0 17px;
+    overflow: hidden;
+    color: #9da69f;
+    font-size: 12px;
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.publico-vaga-rodape {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: auto;
+    padding-top: 13px;
+    border-top: 1px solid #2b312c;
+}
+
+.publico-vaga-rodape span {
+    color: #7f8981;
+    font-size: 10px;
+}
+
+.publico-vaga-rodape a,
+.publico-link-mercado {
+    color: #22C55E;
+    font-size: 11px;
+    font-weight: 850;
+    text-decoration: none;
+}
+
+.publico-contatos-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.publico-contatos-card p {
+    margin: 8px 0 0;
+    color: #879189;
+    font-size: 12px;
+}
+
+.publico-contatos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 9px;
+}
+
+.publico-contato-link {
+    display: grid;
+    gap: 3px;
+    min-width: 160px;
+    padding: 11px 13px;
+    color: inherit;
+    text-decoration: none;
+    background: #1d221e;
+    border: 1px solid #303832;
+    border-radius: 9px;
+}
+
+.publico-contato-link:hover {
+    border-color: #22C55E;
+}
+
+.publico-contato-link span {
+    color: #7f8981;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.publico-contato-link strong {
+    color: #e9eeeb;
+    font-size: 11px;
+}
+
+.publico-vazio,
+.publico-estado {
+    grid-column: 1 / -1;
+    padding: 30px 18px;
+    color: #879189;
+    text-align: center;
+    background: #191d1a;
+    border: 1px dashed #343b36;
+    border-radius: 10px;
+}
+
+.publico-estado {
+    max-width: 620px;
+    margin: 70px auto;
+}
+
+.publico-estado h1 {
+    margin: 0 0 10px;
+    color: #fff;
+}
+
+.publico-estado p {
+    margin: 0 0 20px;
+}
+
+@media (max-width: 980px) {
+    .publico-hero {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .publico-acoes {
+        width: 100%;
+        flex-direction: row;
+    }
+
+    .publico-acoes > * {
+        flex: 1;
+    }
+
+    .publico-conteudo-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .clube-publico {
+        width: min(100% - 24px, 1400px);
+        margin-bottom: 42px;
+    }
+
+    .publico-hero {
+        padding: 24px 18px;
+        border-radius: 16px;
+    }
+
+    .publico-identidade {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .publico-escudo-wrap {
+        width: 118px;
+        height: 118px;
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .publico-identidade h1 {
+        font-size: clamp(1.8rem, 10vw, 2.7rem);
+    }
+
+    .publico-metricas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .publico-destaques,
+    .publico-recrutamento-grid,
+    .publico-elenco-grid,
+    .publico-vagas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .publico-contatos-card,
+    .publico-card-cabecalho-linha {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .publico-contatos {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .publico-contato-link {
+        flex: 1 1 150px;
+    }
+}
+
+@media (max-width: 460px) {
+    .clube-publico {
+        width: min(100% - 16px, 1400px);
+    }
+
+    .publico-acoes,
+    .publico-vaga-rodape {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .publico-card {
+        padding: 19px 15px;
+    }
+
+    .publico-jogador-card {
+        grid-template-columns: 46px minmax(0, 1fr);
+    }
+
+    .publico-jogador-card > img {
+        width: 46px;
+        height: 46px;
+    }
+
+    .publico-jogador-numeros {
+        grid-column: 2;
+        align-items: center;
+        flex-flow: row wrap;
+    }
 }
 
 /* =========================================================================

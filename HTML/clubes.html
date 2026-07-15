@@ -8,7 +8,6 @@
       content="Gerencie as informações, o elenco, as vagas e os contatos do seu clube de Pro Clubs."
     />
     <link rel="stylesheet" href="../CSS/style.css" />
-    <link rel="stylesheet" href="../CSS/clube.css" />
     <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml" />
     <title>Meu Clube | Mercado Pro Clubs</title>
   </head>
@@ -71,6 +70,9 @@
           <p>Configure todas as informações que serão exibidas <br> para os jogadores que visitarem seu perfil.</p>
         </div>
         <div class="menu-acao">
+          <a id="btn-ver-perfil-publico" class="btn-ver-perfil-publico" href="#" target="_blank" rel="noopener" hidden>
+            Ver perfil público
+          </a>
           <button type="button" id="btn-salvar-clube" class="btn-salvar-clube">
             <svg viewBox="0 0 24 24" class="salvar-icon"><path d="M5 4h11l3 3v13H5V4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 4v5h8V4M8 14h8v6H8v-6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
             Salvar Alterações
@@ -85,7 +87,111 @@
           <button type="button" class="aba-item" id="aba-aparencia" role="tab" aria-selected="false" aria-controls="painel-aparencia" tabindex="-1" data-tab="aparencia">Aparência</button>
         </nav>
       </section>
-      <section aria-label="Painel do clube">
+
+      <section id="clube-publico" class="clube-publico" aria-labelledby="publico-nome-clube" hidden>
+        <a href="./mercado.html" class="publico-voltar">← Voltar para o mercado</a>
+
+        <article class="publico-hero">
+          <div class="publico-hero-brilho" aria-hidden="true"></div>
+          <div class="publico-identidade">
+            <div class="publico-escudo-wrap">
+              <img id="publico-escudo" src="../IMG/real madrid.svg" alt="Escudo do clube" />
+            </div>
+            <div class="publico-identidade-texto">
+              <span class="publico-eyebrow">PERFIL PÚBLICO DO CLUBE</span>
+              <h1 id="publico-nome-clube">Carregando clube...</h1>
+              <p id="publico-capitao">Confira os detalhes antes de entrar para o elenco.</p>
+              <div id="publico-tags" class="publico-tags" aria-label="Informações rápidas do clube"></div>
+            </div>
+          </div>
+          <div class="publico-acoes">
+            <button type="button" id="publico-compartilhar" class="publico-btn publico-btn-secundario">Compartilhar clube</button>
+            <a id="publico-contato-principal" class="publico-btn publico-btn-primario" href="./mercado.html" hidden>Entrar em contato</a>
+          </div>
+        </article>
+
+        <div class="publico-metricas" aria-label="Resumo do clube">
+          <article><strong id="publico-total-jogadores">—</strong><span>jogadores</span></article>
+          <article><strong id="publico-total-vagas">—</strong><span>vagas abertas</span></article>
+          <article><strong id="publico-total-posicoes">—</strong><span>posições procuradas</span></article>
+          <article><strong id="publico-divisao-resumo">—</strong><span>divisão atual</span></article>
+        </div>
+
+        <div class="publico-conteudo-grid">
+          <article class="publico-card publico-sobre">
+            <div class="publico-card-cabecalho">
+              <div>
+                <span class="publico-card-kicker">CONHEÇA O TIME</span>
+                <h2>Sobre o clube</h2>
+              </div>
+            </div>
+            <p id="publico-descricao" class="publico-descricao">Carregando apresentação do clube...</p>
+            <div id="publico-destaques" class="publico-destaques"></div>
+          </article>
+
+          <aside class="publico-card publico-detalhes">
+            <div class="publico-card-cabecalho">
+              <div>
+                <span class="publico-card-kicker">INFORMAÇÕES</span>
+                <h2>Detalhes do clube</h2>
+              </div>
+            </div>
+            <dl id="publico-lista-detalhes" class="publico-lista-detalhes"></dl>
+          </aside>
+        </div>
+
+        <section class="publico-card publico-recrutamento" aria-labelledby="publico-titulo-recrutamento">
+          <div class="publico-card-cabecalho">
+            <div>
+              <span class="publico-card-kicker">RECRUTAMENTO</span>
+              <h2 id="publico-titulo-recrutamento">O que o clube procura</h2>
+            </div>
+          </div>
+          <div class="publico-recrutamento-grid">
+            <div>
+              <h3>Posições necessárias</h3>
+              <div id="publico-necessidades" class="publico-chips"></div>
+            </div>
+            <div>
+              <h3>Dias de treino</h3>
+              <div id="publico-dias-treino" class="publico-chips"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="publico-card" aria-labelledby="publico-titulo-elenco">
+          <div class="publico-card-cabecalho publico-card-cabecalho-linha">
+            <div>
+              <span class="publico-card-kicker">ELENCO ATUAL</span>
+              <h2 id="publico-titulo-elenco">Jogadores do clube</h2>
+            </div>
+            <span id="publico-elenco-contagem" class="publico-contagem"></span>
+          </div>
+          <div id="publico-elenco" class="publico-elenco-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="publico-card" aria-labelledby="publico-titulo-vagas">
+          <div class="publico-card-cabecalho publico-card-cabecalho-linha">
+            <div>
+              <span class="publico-card-kicker">OPORTUNIDADES</span>
+              <h2 id="publico-titulo-vagas">Vagas abertas</h2>
+            </div>
+            <a href="./mercado.html" class="publico-link-mercado">Ver mercado completo →</a>
+          </div>
+          <div id="publico-vagas" class="publico-vagas-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="publico-card publico-contatos-card" aria-labelledby="publico-titulo-contatos">
+          <div>
+            <span class="publico-card-kicker">FALE COM O CLUBE</span>
+            <h2 id="publico-titulo-contatos">Canais de contato</h2>
+            <p>Use os canais informados pelo capitão para conversar antes de entrar.</p>
+          </div>
+          <div id="publico-contatos" class="publico-contatos"></div>
+        </section>
+      </section>
+
+      <section id="painel-clube-edicao" aria-label="Painel do clube">
         <div class="tab-painel ativo" id="painel-geral" role="tabpanel" aria-labelledby="aba-geral" data-painel="geral">
         <div class="dashboard" id="dashboard-clube">
           <div class="escudo card">

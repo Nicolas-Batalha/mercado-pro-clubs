@@ -897,6 +897,7 @@ function cardVaga(v) {
       <div class="card-rodape">
         <span class="estilo-jogo">${escHtml(estiloTexto)}</span>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          ${v.capitaoUid ? `<a href="./clubes.html?uid=${encodeURIComponent(v.capitaoUid)}" class="btn-acao-card btn-ver-clube">👁 Ver clube</a>` : ""}
           <button type="button" class="btn-acao-card btn-compartilhar-vaga" data-vaga-id="${v.id}">🔗 Compartilhar</button>
           ${ehDono ? `
             <button type="button" class="btn-acao-card btn-editar-vaga" data-vaga-id="${v.id}">✏️ Editar</button>

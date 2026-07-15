@@ -6,6 +6,41 @@
      Tablet         : max-width: 1024px
 ========================================================================= */
 
+/* Base fluida: impede que imagens, textos e controles forcem rolagem lateral. */
+html {
+  max-width: 100%;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+}
+
+main,
+section,
+article,
+aside,
+nav,
+div {
+  min-width: 0;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+@media (max-width: 1024px) {
+  body {
+    background-attachment: scroll;
+  }
+}
+
 /* =========================================================================
    HEADER GLOBAL
 ========================================================================= */
@@ -13,23 +48,66 @@
   .main-header {
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 8px 16px;
-    gap: 8px;
+    width: 100%;
+    height: auto;
+    min-height: 72px;
+    margin-bottom: 18px;
+    padding: 8px 12px 10px;
+    gap: 7px 10px;
   }
 
-  .logo {
-    width: 120px;
-    height: 80px;
+  .main-header > .logo {
+    width: auto;
+    height: auto;
     margin: 0;
   }
 
-  /* Esconde o menu de navegação em mobile — pode virar hamburguer futuramente */
+  .main-header > .logo a {
+    display: flex;
+    align-items: center;
+  }
+
+  .main-header > .logo img.logo {
+    width: 116px;
+    height: 56px;
+    margin: 0;
+    object-fit: contain;
+  }
+
+  /* Menu vira uma faixa horizontal acessível por toque. */
   .menu-carrossel {
+    order: 3;
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    overflow-x: auto;
+    padding: 3px 0 1px;
+    scrollbar-width: none;
+  }
+
+  .menu-carrossel::-webkit-scrollbar {
     display: none;
   }
 
+  .lista-links {
+    width: max-content;
+    min-width: 100%;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .lista-links a {
+    display: block;
+    margin: 0;
+    padding: 7px 11px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
   .login-header {
-    gap: 10px;
+    min-width: 0;
+    margin-left: auto;
+    gap: 8px;
     align-items: center;
   }
 
@@ -63,7 +141,30 @@
 }
 
 @media (max-width: 480px) {
-  .login { display: none; } /* só "Criar conta" em telas muito pequenas */
+  .main-header {
+    padding-inline: 8px;
+  }
+
+  .main-header > .logo img.logo {
+    width: 96px;
+    height: 48px;
+  }
+
+  .login,
+  .cadastra-se {
+    display: inline-flex;
+    padding: 7px 9px;
+    font-size: 11px;
+  }
+
+  .hu-foto {
+    width: 34px;
+    height: 34px;
+  }
+
+  .lista-links {
+    justify-content: flex-start;
+  }
 
   #painel-sino,
   #painel-msg {
@@ -78,7 +179,8 @@
 ========================================================================= */
 @media (max-width: 768px) {
   .hero {
-    padding: 48px 16px;
+    min-height: auto;
+    padding: 42px 16px;
   }
 
   .hero h1 {
@@ -97,6 +199,7 @@
   }
 
   .btn-neon {
+    width: min(100%, 340px);
     font-size: 15px;
     padding: 12px 28px;
   }
@@ -159,6 +262,8 @@
   }
 
   .lfg-header {
+    align-items: flex-start;
+    flex-direction: column;
     padding: 0 12px;
   }
 
@@ -194,6 +299,7 @@
 
   .lfg-card {
     padding: 14px;
+    overflow: hidden;
   }
 
   .card-topo {
@@ -209,7 +315,7 @@
 
   .card-rodape > div {
     width: 100%;
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 
   /* Cronômetro não some */
@@ -229,6 +335,14 @@
 
   /* Badge de plataforma/posição menor */
   .badge { font-size: 0.7rem; padding: 3px 8px; }
+
+  .card-rodape > div > a,
+  .card-rodape > div > button {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+    min-height: 38px;
+    text-align: center;
+  }
 }
 
 /* =========================================================================
@@ -281,6 +395,7 @@
   /* Formulário de detalhes */
   .detalhes-jogador {
     grid-template-columns: 1fr;
+    width: auto;
     margin: 12px;
     padding: 16px;
   }
@@ -297,6 +412,7 @@
 
   /* Posições e plataformas */
   .posicoes {
+    width: auto;
     margin: 12px;
     padding: 16px;
   }
@@ -482,6 +598,10 @@
    MEU CLUBE (clubes.html)
 ========================================================================= */
 @media (max-width: 1024px) {
+  .menu {
+    width: 100%;
+  }
+
   .dashboard {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
@@ -505,6 +625,36 @@
 }
 
 @media (max-width: 768px) {
+  .menu {
+    padding: 0 12px;
+  }
+
+  .menu-clubes {
+    align-items: flex-start;
+  }
+
+  .text-menu h1 {
+    font-size: clamp(1.55rem, 8vw, 2rem);
+  }
+
+  .text-menu p br {
+    display: none;
+  }
+
+  .abas-clube {
+    max-width: 100%;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+
+  .abas-clube::-webkit-scrollbar {
+    display: none;
+  }
+
+  .aba-item {
+    padding: 9px 14px;
+  }
+
   .dashboard {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -527,6 +677,14 @@
   .info-content {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  .select-box {
+    width: 100%;
+  }
+
+  .select-box select {
+    padding-right: 28px;
   }
 
   .perfil-grid {
@@ -560,6 +718,19 @@
 }
 
 @media (max-width: 480px) {
+  .dashboard {
+    padding: 0 8px;
+  }
+
+  .menu-clubes {
+    gap: 12px;
+  }
+
+  .img-menu {
+    width: 52px;
+    height: 52px;
+  }
+
   .perfil-grid {
     grid-template-columns: 1fr;
   }

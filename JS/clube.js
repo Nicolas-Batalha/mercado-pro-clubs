@@ -593,66 +593,296 @@ function renderCTASemClube() {
   aplicarFiltrosElenco("", false);
 }
 
-// ─── Modo visitante: alguém vendo o clube de outra pessoa (via ?uid=) ──────────
+// ─── Modo visitante: perfil público completo do clube (via ?uid=) ─────────────
+const ROTULOS_DIAS = {
+  domingo: "Domingo",
+  segunda: "Segunda",
+  terca: "Terça",
+  quarta: "Quarta",
+  quinta: "Quinta",
+  sexta: "Sexta",
+  sabado: "Sábado",
+};
+
+const ROTULOS_POSICOES_CLUBE = {
+  goleiro: "Goleiro",
+  gk: "Goleiro",
+  gol: "Goleiro",
+  zagueiro: "Zagueiro",
+  zag: "Zagueiro",
+  lateral: "Lateral",
+  lat: "Lateral",
+  volante: "Volante",
+  vol: "Volante",
+  meia: "Meia",
+  mei: "Meia",
+  atacante: "Atacante",
+  ata: "Atacante",
+  ponta: "Ponta",
+};
+
+const TEMPO_ATIVO_VAGA_MS = 30 * 24 * 60 * 60 * 1000;
+
+function textoPublico(valor, fallback = "Não informado") {
+  const resultado = String(valor ?? "").trim();
+  return resultado || fallback;
+}
+
+function rotuloPublico(valor) {
+  const texto = String(valor ?? "").trim();
+  if (!texto) return "Não informado";
+  const formatado = texto.replaceAll("_", " ").replaceAll("-", " ");
+  return formatado.charAt(0).toUpperCase() + formatado.slice(1);
+}
+
+function rotuloPosicaoClube(valor) {
+  const chave = String(valor ?? "").toLowerCase().trim();
+  return ROTULOS_POSICOES_CLUBE[chave] || rotuloPublico(valor);
+}
+
+function criarLinkContato(tipo, valor) {
+  const original = String(valor || "").trim();
+  if (!original) return null;
+
+  if (tipo === "Discord") {
+    const limpo = original.replace(/^https?:\/\//i, "");
+    if (/^(?:www\.)?discord(?:\.gg|\.com\/invite)\/[A-Za-z0-9_-]+\/?$/i.test(limpo)) {
+      return { tipo, texto: "Abrir Discord", url: `https://${limpo}` };
+    }
+  }
+
+  if (tipo === "WhatsApp") {
+    const numero = original.replace(/\D/g, "");
+    if (numero.length >= 10 && numero.length <= 15) {
+      const numeroInternacional = numero.length <= 11 ? `55${numero}` : numero;
+      return { tipo, texto: "Conversar no WhatsApp", url: `https://wa.me/${numeroInternacional}` };
+    }
+  }
+
+  if (tipo === "Instagram") {
+    const usuario = original
+      .replace(/^https?:\/\/(?:www\.)?instagram\.com\//i, "")
+      .replace(/^@/, "")
+      .replace(/\/$/, "");
+    if (/^[A-Za-z0-9._]{1,30}$/.test(usuario)) {
+      return { tipo, texto: `@${usuario}`, url: `https://instagram.com/${usuario}` };
+    }
+  }
+
+  return null;
+}
+
+function renderizarContatosPublicos(clube) {
+  const contatos = [
+    criarLinkContato("Discord", clube.discord),
+    criarLinkContato("WhatsApp", clube.whatsapp),
+    criarLinkContato("Instagram", clube.instagram),
+  ].filter(Boolean);
+  const container = document.getElementById("publico-contatos");
+  const principal = document.getElementById("publico-contato-principal");
+
+  if (container) {
+    container.innerHTML = contatos.length
+      ? contatos.map(contato => `
+          <a href="${escHtml(contato.url)}" target="_blank" rel="noopener noreferrer" class="publico-contato-link">
+            <span>${escHtml(contato.tipo)}</span>
+            <strong>${escHtml(contato.texto)}</strong>
+          </a>`).join("")
+      : '<div class="publico-vazio">O capitão ainda não informou canais públicos de contato.</div>';
+  }
+
+  if (principal && contatos.length) {
+    principal.href = contatos[0].url;
+    principal.target = "_blank";
+    principal.rel = "noopener noreferrer";
+    principal.hidden = false;
+  }
+}
+
+function renderizarElencoPublico(elenco, capitaoUid) {
+  const container = document.getElementById("publico-elenco");
+  const contagem = document.getElementById("publico-elenco-contagem");
+  if (!container) return;
+
+  const ordenado = [...elenco].sort((a, b) => {
+    if (a.uid === capitaoUid) return -1;
+    if (b.uid === capitaoUid) return 1;
+    return String(a.nickname || "").localeCompare(String(b.nickname || ""), "pt-BR");
+  });
+  if (contagem) contagem.textContent = `${ordenado.length} jogador${ordenado.length === 1 ? "" : "es"}`;
+
+  container.innerHTML = ordenado.length
+    ? ordenado.map(jogador => {
+        const capitao = jogador.uid === capitaoUid;
+        const avatar = imagemSegura(jogador.fotoURL, "../IMG/user-icon.svg");
+        const nivel = jogador.nivel || jogador.level;
+        return `
+          <a href="./meu-perfil.html?uid=${encodeURIComponent(jogador.uid)}" class="publico-jogador-card">
+            <img src="${escHtml(avatar)}" alt="Foto de ${escHtml(jogador.nickname || "jogador")}" />
+            <div class="publico-jogador-info">
+              <strong>${escHtml(jogador.nickname || "Jogador")}</strong>
+              <span>${escHtml(rotuloPosicaoClube(jogador.posicao))}${jogador.eaId ? ` · ${escHtml(jogador.eaId)}` : ""}</span>
+            </div>
+            <div class="publico-jogador-numeros">
+              ${capitao ? '<span class="publico-selo-capitao">Capitão</span>' : ""}
+              <span>OVR <b>${escHtml(jogador.overall ?? "—")}</b></span>
+              ${nivel ? `<span>Nível <b>${escHtml(nivel)}</b></span>` : ""}
+            </div>
+          </a>`;
+      }).join("")
+    : '<div class="publico-vazio">Este clube ainda não possui jogadores no elenco.</div>';
+
+  container.querySelectorAll(".publico-jogador-card img").forEach(imagem => {
+    imagem.addEventListener("error", () => {
+      imagem.src = "../IMG/user-icon.svg";
+    }, { once: true });
+  });
+}
+
+function renderizarVagasPublicas(vagas) {
+  const container = document.getElementById("publico-vagas");
+  if (!container) return;
+  container.innerHTML = vagas.length
+    ? vagas.map(vaga => `
+        <article class="publico-vaga-card">
+          <div class="publico-vaga-topo">
+            <span class="publico-chip ativo">${escHtml(rotuloPosicaoClube(vaga.posicao))}</span>
+            ${vaga.overallMinimo ? `<span class="publico-chip">OVR mínimo ${escHtml(vaga.overallMinimo)}</span>` : ""}
+          </div>
+          <h3>${escHtml(textoPublico(vaga.clube, "Vaga do clube"))}</h3>
+          <p>${escHtml(textoPublico(vaga.descricao, "Veja os detalhes desta oportunidade no mercado."))}</p>
+          <div class="publico-vaga-rodape">
+            <span>${escHtml(textoPublico(vaga.jogo))} · ${escHtml(rotuloPublico(vaga.estilo))}</span>
+            <a href="./mercado.html?vaga=${encodeURIComponent(vaga.id)}">Ver e candidatar-se →</a>
+          </div>
+        </article>`).join("")
+    : '<div class="publico-vazio">Este clube não possui vagas abertas no momento.</div>';
+}
+
+function renderizarPerfilPublico(clube, perfilCapitao, elenco, vagas, uidClube) {
+  const publico = document.getElementById("clube-publico");
+  publico.hidden = false;
+
+  const nome = textoPublico(clube.nome, "Clube");
+  const escudo = imagemSegura(clube.escudoUrl, "../IMG/real madrid.svg");
+  const necessidades = Object.entries(clube.necessidades || {})
+    .filter(([, ativo]) => ativo === true)
+    .map(([posicao]) => posicao);
+  const dias = Array.isArray(clube.diasTreino) ? clube.diasTreino : [];
+
+  document.title = `${nome} | Mercado Pro Clubs`;
+  document.getElementById("publico-nome-clube").textContent = nome;
+  document.getElementById("publico-capitao").textContent = `Capitão: ${textoPublico(perfilCapitao.nickname || clube.capitaoNome, "Não informado")}`;
+  const escudoElemento = document.getElementById("publico-escudo");
+  escudoElemento.src = escudo;
+  escudoElemento.alt = `Escudo do ${nome}`;
+  escudoElemento.addEventListener("error", () => {
+    escudoElemento.src = "../IMG/real madrid.svg";
+  }, { once: true });
+  document.getElementById("publico-descricao").textContent = textoPublico(
+    clube.descricao,
+    "O capitão ainda não adicionou uma apresentação para este clube.",
+  );
+
+  document.getElementById("publico-tags").innerHTML = [clube.jogo, clube.plataforma, clube.regiao]
+    .filter(Boolean)
+    .map(valor => `<span>${escHtml(rotuloPublico(valor))}</span>`)
+    .join("");
+
+  document.getElementById("publico-total-jogadores").textContent = elenco.length;
+  document.getElementById("publico-total-vagas").textContent = vagas.length;
+  document.getElementById("publico-total-posicoes").textContent = necessidades.length;
+  document.getElementById("publico-divisao-resumo").textContent = textoPublico(clube.divisao, "—");
+
+  const destaques = [
+    ["Objetivo", rotuloPublico(clube.objetivo)],
+    ["Estilo de jogo", textoPublico(clube.estiloJogo)],
+    ["Treinos", clube.horarioTreino ? `${clube.horarioTreino}h` : "Não informado"],
+  ];
+  document.getElementById("publico-destaques").innerHTML = destaques.map(([titulo, valor]) => `
+    <div><span>${escHtml(titulo)}</span><strong>${escHtml(valor)}</strong></div>`).join("");
+
+  const detalhes = [
+    ["Jogo", clube.jogo],
+    ["Plataforma", rotuloPublico(clube.plataforma)],
+    ["Região", clube.regiao],
+    ["Divisão", clube.divisao],
+    ["Estilo", clube.estiloJogo],
+    ["Objetivo", rotuloPublico(clube.objetivo)],
+    ["Horário", clube.horarioTreino ? `${clube.horarioTreino}h` : null],
+    ["ID EA do capitão", clube.capitaoIdEA || perfilCapitao.eaId],
+    ["Capitão com microfone", clube.capitaoMicrofone === "sim" ? "Sim" : clube.capitaoMicrofone === "nao" ? "Não" : null],
+  ];
+  document.getElementById("publico-lista-detalhes").innerHTML = detalhes.map(([titulo, valor]) => `
+    <div><dt>${escHtml(titulo)}</dt><dd>${escHtml(textoPublico(valor))}</dd></div>`).join("");
+
+  document.getElementById("publico-necessidades").innerHTML = necessidades.length
+    ? necessidades.map(posicao => `<span class="publico-chip ativo">${escHtml(rotuloPosicaoClube(posicao))}</span>`).join("")
+    : '<span class="publico-chip">Sem posições anunciadas</span>';
+  document.getElementById("publico-dias-treino").innerHTML = dias.length
+    ? dias.map(dia => `<span class="publico-chip">${escHtml(ROTULOS_DIAS[dia] || rotuloPublico(dia))}</span>`).join("")
+    : '<span class="publico-chip">Dias não informados</span>';
+
+  renderizarElencoPublico(elenco, uidClube);
+  renderizarVagasPublicas(vagas);
+  renderizarContatosPublicos(clube);
+}
+
+function mostrarErroClubePublico(mensagem) {
+  const publico = document.getElementById("clube-publico");
+  publico.hidden = false;
+  publico.innerHTML = `
+    <div class="publico-estado">
+      <h1>Clube não disponível</h1>
+      <p>${escHtml(mensagem)}</p>
+      <a href="./mercado.html" class="publico-btn publico-btn-primario">Voltar para o mercado</a>
+    </div>`;
+}
+
 async function carregarModoVisitante(uidClube) {
   document.body.classList.add("modo-visitante");
   try {
     const clubeSnap = await getDoc(doc(db, "clubes", uidClube));
     if (!clubeSnap.exists()) {
-      document.getElementById("dashboard-clube").innerHTML =
-        `<p style="color:#8b8b8b;text-align:center;grid-column:1/-1;padding:60px 0">Esse clube não foi encontrado ou não existe mais.</p>`;
+      mostrarErroClubePublico("Esse clube não foi encontrado ou não existe mais.");
       return;
     }
-    const clube = clubeSnap.data();
-    const perfilCapitaoSnap = await getDoc(doc(db, "jogadores", uidClube));
-    const perfilCapitao = perfilCapitaoSnap.exists() ? perfilCapitaoSnap.data() : {};
 
-    preencherFormulario(clube, perfilCapitao);
-    ativarModoSomenteLeitura(clube);
-    await Promise.all([
-      carregarEstatisticas(uidClube),
-      renderizarElenco(uidClube, false),
+    const [perfilCapitaoSnap, elenco, vagasSnap] = await Promise.all([
+      getDoc(doc(db, "jogadores", uidClube)),
+      buscarElenco(uidClube),
+      getDocs(query(collection(db, "vagas"), where("capitaoUid", "==", uidClube))),
     ]);
+    const clube = clubeSnap.data();
+    const perfilCapitao = perfilCapitaoSnap.exists() ? perfilCapitaoSnap.data() : {};
+    const agora = Date.now();
+    const vagas = vagasSnap.docs
+      .map(vagaDoc => ({ id: vagaDoc.id, ...vagaDoc.data() }))
+      .filter(vaga => {
+        const criadoMs = vaga.criadoEm?.toMillis?.() || 0;
+        return !criadoMs || agora - criadoMs < TEMPO_ATIVO_VAGA_MS;
+      })
+      .sort((a, b) => (b.criadoEm?.toMillis?.() || 0) - (a.criadoEm?.toMillis?.() || 0));
+
+    renderizarPerfilPublico(clube, perfilCapitao, elenco, vagas, uidClube);
   } catch (err) {
     console.error("Erro ao carregar clube público:", err);
-    const dashboard = document.getElementById("dashboard-clube");
-    dashboard.replaceChildren();
-    const mensagem = document.createElement("p");
-    mensagem.style.cssText = "color:#d32f2f;text-align:center;grid-column:1/-1;padding:60px 0";
-    mensagem.textContent = "Não foi possível carregar este clube. Tente novamente.";
-    dashboard.appendChild(mensagem);
+    mostrarErroClubePublico("Não foi possível carregar este clube. Atualize a página e tente novamente.");
   }
 }
 
-function ativarModoSomenteLeitura(clube) {
-  // Trava todos os campos do dashboard
-  document.querySelectorAll("#dashboard-clube input, #dashboard-clube textarea, #dashboard-clube select")
-    .forEach(el => (el.disabled = true));
-  document.querySelectorAll(".chip").forEach(chip => (chip.disabled = true));
-  const btnConvidar = document.getElementById("btn-convidar-jogador");
-  if (btnConvidar) btnConvidar.hidden = true;
-
-  // Atualiza o cabeçalho: "Meu Clube" vira o nome do clube visitado
-  const titulo = document.querySelector(".text-menu h1");
-  const subtitulo = document.querySelector(".text-menu p");
-  if (titulo) titulo.textContent = clube.nome || "Clube";
-  if (subtitulo) subtitulo.textContent = "Perfil público do clube — veja se combina com o seu perfil.";
-
-  // Troca "Editar Perfil" por um contato direto (Discord do clube, se houver)
-  const btnEditar = document.querySelector(".btn-editar-perfil");
-  if (btnEditar) {
-    const discord = String(clube.discord || "").trim();
-    const linkContato = /^(?:https:\/\/)?(?:www\.)?discord(?:\.gg|\.com\/invite)\/[A-Za-z0-9_-]+\/?$/i.test(discord)
-      ? `https://${discord.replace(/^https?:\/\//i, "")}`
-      : null;
-    btnEditar.outerHTML = linkContato
-      ? `<a href="${linkContato}" target="_blank" rel="noopener" class="btn-editar-perfil btn-contato-clube">
-           <svg viewBox="0 0 24 24" class="edit-icon"><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5 8.4 8.4 0 01-4.2-1.1L3 20l1.1-5.3A8.5 8.5 0 1121 11.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-           Entrar em Contato
-         </a>`
-      : `<span class="btn-editar-perfil btn-contato-clube" style="opacity:.5;cursor:default">Sem contato cadastrado</span>`;
+document.getElementById("publico-compartilhar")?.addEventListener("click", async () => {
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: document.title, text: "Confira este clube no Mercado Pro Clubs", url: location.href });
+      return;
+    }
+    await navigator.clipboard.writeText(location.href);
+    toast("Link do clube copiado!");
+  } catch (err) {
+    if (err?.name !== "AbortError") toast("Não foi possível compartilhar o clube.", "erro");
   }
-}
+});
 
 // ─── Troca de abas (Geral / Elenco / Vagas / Estatísticas / Aparência) ─────────
 // Não depende de login nem do Firestore — roda assim que o script carrega.
@@ -703,12 +933,19 @@ if (uidVisitante) {
 
       if (ehCapitao) {
         const dadosClube = clubeSnap.exists() ? clubeSnap.data() : { nome: perfilAtual.clube || "" };
+        const linkPublico = document.getElementById("btn-ver-perfil-publico");
+        if (linkPublico) {
+          linkPublico.href = `./clubes.html?uid=${encodeURIComponent(usuario.uid)}`;
+          linkPublico.hidden = false;
+        }
         preencherFormulario(dadosClube, perfilAtual);
         ligarEventosDashboard(usuario.uid);
         await carregarEstatisticas(usuario.uid);
       } else if (perfilAtual.clubeAtualId) {
+        document.querySelector(".menu-acao")?.setAttribute("hidden", "");
         await renderPainelJogador(perfilAtual);
       } else {
+        document.querySelector(".menu-acao")?.setAttribute("hidden", "");
         renderCTASemClube();
       }
     } catch (err) {
