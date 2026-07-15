@@ -1,4 +1,4 @@
- /* =========================================================================
+/* =========================================================================
    MERCADO PRO CLUBS — responsive.css
    Breakpoints:
      Mobile pequeno : max-width: 480px
@@ -479,8 +479,107 @@
 }
 
 /* =========================================================================
-   UTILITÁRIOS GERAIS
+   MEU CLUBE (clubes.html)
 ========================================================================= */
+@media (max-width: 1024px) {
+  .dashboard {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "escudo informações"
+      "preview preview"
+      "perfil perfil"
+      "redes capitao"
+      "necessidades necessidades"
+      "stats stats";
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  .perfil-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .necessidades-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "escudo"
+      "informações"
+      "preview"
+      "perfil"
+      "redes"
+      "capitao"
+      "necessidades"
+      "stats";
+    padding: 0 12px;
+    gap: 14px;
+  }
+
+  .card {
+    padding: 16px 18px;
+  }
+
+  .info-content {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .perfil-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .capitao-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .necessidades-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .preview .escudo-img {
+    width: 90px;
+    height: 90px;
+  }
+
+  .btn-editar-perfil {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .perfil-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .necessidades-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .rede-nome {
+    display: none;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+}
 @media (max-width: 768px) {
   /* Remove animações pesadas em mobile para performance */
   .animar-scroll {

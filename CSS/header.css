@@ -1,11 +1,21 @@
-
 .main-header{
   display: flex;
-  justify-content: space-around;
+  justify-content:space-around;
   align-items: center;
   width: 100%;
-  height: auto;
-  
+  height: 120px;
+   position: sticky;
+    top: 0;
+    margin-bottom: 30px;
+    backdrop-filter: blur(6px);
+
+    border-bottom: 1px solid rgba(255,255,255,.08);
+
+    box-shadow:
+        0 1px 0 rgba(255,255,255,.03),
+        0 10px 30px rgba(0,0,0,.45);
+
+    z-index:1000;
 }
 
 .logo{
@@ -14,7 +24,7 @@
   flex-direction: row;
   margin: 10px 10px 0 10px;
   width: 220px;
-  height: 150px;
+  height: 120px;
 }
 .menu-carrossel {
   position: relative;

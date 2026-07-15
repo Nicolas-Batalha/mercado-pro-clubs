@@ -3,56 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="./IMG/favicon.svg" type="image/svg+xml">
+  <meta name="description" content="Crie e atualize seu perfil de jogador de Pro Clubs, com posição, plataforma, overall e clube atual." />
+  <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="../CSS/style.css" />
-  <title>meu perfil - mercado pro clubs</title>
+  <title>Meu Perfil | Mercado Pro Clubs</title>
 </head>
 
 <body class="animar-scroll body-perfil">
 
-  <!-- HEADER — corrigido: </a> solta removida, header fechado corretamente -->
   <header class="main-header">
     <div class="logo animar-scroll">
-      <a href="../index.html" title="voltar para a página inicial">
+      <a href="../index.html" title="Voltar para a página inicial">
         <img src="../IMG/logo.svg" class="logo" alt="Pro Clubs Hub Brasil Logo" />
       </a>
     </div>
     <div class="menu-carrossel">
-      <nav>
+      <nav aria-label="Navegação principal">
         <ul class="lista-links animar-scroll">
           <li><a href="../HTML/mercado.html">mercado</a></li>
+          <li><a href="../HTML/clubes.html">clubes</a></li>
         </ul>
       </nav>
     </div>
     <div class="login-header animar-scroll">
-        <div class="login-header animar-scroll">
-      <div class="notification-icon" onclick="adicionarNotificacao()">
+      <div class="notification-icon" id="sino-btn" role="button" tabindex="0" hidden
+        aria-label="Abrir notificações" aria-expanded="false">
         <span class="bell-icon">🔔</span>
         <span id="badge" class="notification-badge hidden">0</span>
       </div>
-      <div class="email-container" id="emailIcon">
-        <svg viewBox="0 0 24 24" class="email-icon">
+      <div class="email-container" id="emailIcon" role="button" tabindex="0" hidden
+        aria-label="Abrir mensagens" aria-expanded="false">
+        <svg viewBox="0 0 24 24" class="email-icon" aria-hidden="true">
           <path
             d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
         </svg>
       </div>
-           <div class="login-header animar-scroll" id="login-header">
-  </a>
-      </div>
+      <div id="login-header"></div>
+    </div>
   </header>
 
   <main>
+
+    <section class="perfil-menu" aria-labelledby="titulo-meu-perfil">
+      <div class="perfil-menu-icon" aria-hidden="true">
+        <img src="../IMG/player.svg" alt="">
+      </div>
+      <div class="perfil-menu-texto">
+        <span class="perfil-eyebrow">MINHA CONTA</span>
+        <h1 id="titulo-meu-perfil">Meu Perfil</h1>
+        <p>Complete seus dados para aparecer melhor no mercado e facilitar o contato dos clubes.</p>
+      </div>
+      <div class="perfil-progresso-card">
+        <div class="perfil-progresso-topo">
+          <span>Perfil completo</span>
+          <strong id="perfil-progresso-texto">0%</strong>
+        </div>
+        <div class="perfil-progresso" role="progressbar" aria-label="Progresso do perfil" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <span id="perfil-progresso-barra"></span>
+        </div>
+        <small id="perfil-progresso-dica">Preencha seus dados principais para começar.</small>
+      </div>
+    </section>
 
     <!-- SEÇÃO TOPO DO PERFIL -->
     <section class="perfil-container-main">
       <div class="perfil-preview">
         <div class="perfil-imagem-container">
-          <img id="foto-perfil-preview" src="../IMG/user-icon.svg" class="img-icon" alt="Foto de perfil do jogador" onerror="this.src='../IMG/user-icon.svg'">
+          <img id="foto-perfil-preview" src="../IMG/user-icon.svg" class="img-icon" alt="Foto de perfil do jogador">
           <label for="upload-foto" class="btn-upload-foto" title="Alterar foto de perfil">
             <img src="../IMG/camera.svg" alt="">
             <span>+</span>
           </label>
-          <input type="file" id="upload-foto" accept="image/*" style="display: none;" />
+          <input type="file" id="upload-foto" name="foto-perfil" accept="image/png,image/jpeg,image/webp" hidden />
         </div>
       </div>
 
@@ -60,6 +82,7 @@
         <div class="perfil-identificacao">
           <h2 id="usuario-nickname" class="perfil-nick-topo">Jogador Pro Clubs</h2>
           <span id="usuario-email" class="perfil-email-topo">carregando Nick EA...</span>
+          <span id="perfil-mercado-status" class="perfil-mercado-status" hidden>Disponível para clubes</span>
         </div>
         <div class="info">
           <div class="position">  
@@ -87,18 +110,22 @@
         <div class="grid-container">
           <div class="static-filho">
             <p>partidas</p>
+            <strong id="topo-partidas">0</strong>
             <img src="../IMG/bola-golf.svg" alt="partidas" class="club">
           </div>
           <div class="static-filho">
             <p>gols</p>
+            <strong id="topo-gols">0</strong>
             <img src="../IMG/goal.svg" alt="gols" class="club">
           </div>
           <div class="static-filho">
             <p>assistências</p>
+            <strong id="topo-assistencias">0</strong>
             <img src="../IMG/runner.svg" alt="assistências" class="club">
           </div>
           <div class="static-filho">
             <p>defesas</p>
+            <strong id="topo-defesas">0</strong>
             <img src="../IMG/goalkeeper-.svg" alt="defesas" class="club">
           </div>
         </div>
@@ -109,20 +136,20 @@
     <form id="form-dados-jogador" class="perfil-dados-form">
 
       <!-- DADOS DO JOGADOR -->
-      <section class="detalhes-jogador">
+      <section class="detalhes-jogador" aria-labelledby="titulo-dados-jogador">
         <div>
           <div class="icon-text">
             <img src="../IMG/player.svg" alt="" class="icon-text-img">
-            <h3>Dados do Jogador</h3>
+            <h2 id="titulo-dados-jogador">Dados do Jogador</h2>
           </div>
           <div class="linha-um">
             <div class="campo-user campo-grupo">
               <label for="nickname" class="text-static">Nickname</label>
-              <input type="text" id="nickname" placeholder="Ex: Allejo" class="modifcação-name" required>
+              <input type="text" id="nickname" name="nickname" autocomplete="username" placeholder="Ex: Allejo" maxlength="40" class="modifcação-name" required>
             </div>
             <div class="campo-EA campo-grupo">
               <label for="ea-id" class="text-static">ID da EA</label>
-              <input type="text" id="ea-id" placeholder="Ex: JogadorPro123" class="modifcação-name" required>
+              <input type="text" id="ea-id" name="ea-id" autocomplete="off" placeholder="Ex: JogadorPro123" maxlength="40" class="modifcação-name" required>
             </div>
             <!-- overall e nivel adicionados aqui para o JS encontrar -->
           </div>
@@ -133,7 +160,7 @@
               <img src="../IMG/regua.svg" alt="" class="icon-static">
               <div>
                 <label for="altura" class="text-static">Altura (cm)</label>
-                <input type="number" id="altura" placeholder="Ex: 180" min="150" max="220" class="modifcação">
+                <input type="number" id="altura" name="altura" placeholder="Ex: 180" min="150" max="220" inputmode="numeric" class="modifcação">
               </div>
             </div>
           </div>
@@ -142,35 +169,45 @@
               <img src="../IMG/peso.svg" alt="" class="icon-static">
               <div>
                 <label for="peso" class="text-static">Peso (kg)</label>
-                <input type="number" id="peso" placeholder="Ex: 75" min="40" max="130" class="modifcação">
+                <input type="number" id="peso" name="peso" placeholder="Ex: 75" min="40" max="130" inputmode="numeric" class="modifcação">
               </div>
             </div>
           </div>
           <div class="campo-EA campo-grupo">
+            <div class="img-static">
+              <img src="../IMG/sunrise-svgrepo-com.svg" alt="" class="icon-static">
+              <div>
               <label for="overall" class="text-static">Overall</label>
-              <input type="number" id="overall" placeholder="Ex: 85" min="1" max="99" class="modifcação-name">
+              <input type="number" id="overall" name="overall" placeholder="Ex: 85" min="1" max="99" inputmode="numeric" class="modifcação-name">
+              </div>
+            </div>
             </div>
             <div class="campo-EA campo-grupo">
+              <div class="img-static">
+              <img src="../IMG/skill-level-svgrepo-com.svg" alt="" class="icon-static">
+              <div>
               <label for="nivel" class="text-static">Nível</label>
-              <input type="number" id="nivel" placeholder="Ex: 42" min="1" max="100" class="modifcação-name">
+              <input type="number" id="nivel" name="nivel" placeholder="Ex: 42" min="1" max="100" inputmode="numeric" class="modifcação-name">
+              </div>
+            </div>
             </div>  
         </div>
       </section>
 
       <!-- CLUBE ATUAL -->
-      <section class="detalhes-jogador detalhes-clube">
+      <section class="detalhes-jogador detalhes-clube" aria-labelledby="titulo-clube-atual">
         <div>
           <div class="icon-text">
             <img src="../IMG/clube.svg" alt="" class="icon-text-img">
-            <h3>clube atual</h3>
+            <h2 id="titulo-clube-atual">Clube atual</h2>
           </div>
           <div class="linha-um">
             <div class="campo-grupo clubs">
               <label for="clube-atual" class="text-static club-text">Clube Atual</label>
-              <input type="text" id="clube-atual" placeholder="Ex: Mercado FC" class="modifcação">
+              <input type="text" id="clube-atual" name="clube-atual" placeholder="Ex: Mercado FC" maxlength="60" class="modifcação">
               <span class="detalhe-vertical"></span>
               <div class="checkbox-grupo">
-                <input type="checkbox" id="agente-livre">
+                <input type="checkbox" id="agente-livre" name="agente-livre">
                 <label for="agente-livre">Estou Sem Clube (Free Agent)</label>
               </div>
             </div>
@@ -181,11 +218,99 @@
         </div>
       </section>
 
-      <!-- POSIÇÕES -->
-      <section class="posicoes">
+      <!-- SOBRE E DISPONIBILIDADE -->
+      <section class="perfil-card perfil-complementar" aria-labelledby="titulo-sobre-jogador">
         <div class="icon-text">
           <img src="../IMG/player.svg" alt="" class="icon-text-img">
-          <h3>posição</h3>
+          <div>
+            <h2 id="titulo-sobre-jogador">Sobre o jogador</h2>
+            <p class="perfil-secao-subtitulo">Conte como você joga e quando está disponível.</p>
+          </div>
+        </div>
+
+        <div class="perfil-disponibilidade-mercado">
+          <div>
+            <strong>Aparecer em Jogadores disponíveis</strong>
+            <p>Ative esta opção e salve o perfil para capitães encontrarem você e enviarem convites.</p>
+          </div>
+          <label class="perfil-switch" for="procurando-clube">
+            <input type="checkbox" id="procurando-clube" name="procurando-clube">
+            <span aria-hidden="true"></span>
+            <em>Estou procurando clube</em>
+          </label>
+        </div>
+
+        <div class="perfil-complementar-grid">
+          <div class="perfil-campo-grupo perfil-campo-amplo">
+            <label for="bio">Apresentação</label>
+            <textarea id="bio" name="bio" rows="4" maxlength="240" placeholder="Ex: Meia criativo, jogo pelo coletivo e tenho disponibilidade para campeonatos."></textarea>
+            <span class="perfil-contador"><span id="bio-contador">0</span>/240</span>
+          </div>
+
+          <div class="perfil-campo-grupo">
+            <label for="posicao-secundaria">Posição secundária</label>
+            <select id="posicao-secundaria" name="posicao-secundaria">
+              <option value="">Nenhuma</option>
+              <option value="GOL">GOL</option>
+              <option value="ZAG">ZAG</option>
+              <option value="LD">LD</option>
+              <option value="LE">LE</option>
+              <option value="VOL">VOL</option>
+              <option value="MC">MC</option>
+              <option value="MEI">MEI</option>
+              <option value="ME/MD">ME/MD</option>
+              <option value="PE">PE</option>
+              <option value="ATA">ATA</option>
+              <option value="SA">SA</option>
+              <option value="PD">PD</option>
+            </select>
+          </div>
+
+          <div class="perfil-campo-grupo">
+            <label for="disponibilidade">Disponibilidade</label>
+            <select id="disponibilidade" name="disponibilidade">
+              <option value="">Selecione</option>
+              <option value="manha">Manhã</option>
+              <option value="tarde">Tarde</option>
+              <option value="noite">Noite</option>
+              <option value="madrugada">Madrugada</option>
+              <option value="flexivel">Horário flexível</option>
+            </select>
+          </div>
+
+          <div class="perfil-campo-grupo">
+            <label for="estilo-jogo">Estilo de jogo</label>
+            <select id="estilo-jogo" name="estilo-jogo">
+              <option value="">Selecione</option>
+              <option value="competitivo">Competitivo</option>
+              <option value="posse">Posse de bola</option>
+              <option value="contra-ataque">Contra-ataque</option>
+              <option value="marcacao">Marcação forte</option>
+              <option value="casual">Casual</option>
+              <option value="versatil">Versátil</option>
+            </select>
+          </div>
+
+          <div class="perfil-campo-grupo">
+            <label for="regiao">Região</label>
+            <select id="regiao" name="regiao">
+              <option value="">Selecione</option>
+              <option value="norte">Norte</option>
+              <option value="nordeste">Nordeste</option>
+              <option value="centro-oeste">Centro-Oeste</option>
+              <option value="sudeste">Sudeste</option>
+              <option value="sul">Sul</option>
+              <option value="exterior">Exterior</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- POSIÇÕES -->
+      <section class="posicoes" aria-labelledby="titulo-posicao">
+        <div class="icon-text">
+          <img src="../IMG/player.svg" alt="" class="icon-text-img">
+          <h2 id="titulo-posicao">Posição</h2>
         </div>
         <div class="grid-position">
 
@@ -271,10 +396,10 @@
       </section>
 
       <!-- PLATAFORMAS -->
-      <section class="posicoes">
+      <section class="posicoes" aria-labelledby="titulo-plataforma">
         <div class="icon-text">
           <img src="../IMG/joystick.svg" alt="" class="icon-text-img">
-          <h3>plataforma</h3>
+          <h2 id="titulo-plataforma">Plataforma</h2>
         </div>
         <div class="grid-position">
 
@@ -321,8 +446,38 @@
         </div>
       </section>
 
+      <!-- ESTATÍSTICAS -->
+      <section class="perfil-card perfil-estatisticas-form" aria-labelledby="titulo-estatisticas-jogador">
+        <div class="icon-text">
+          <img src="../IMG/bola-golf.svg" alt="" class="icon-text-img">
+          <div>
+            <h2 id="titulo-estatisticas-jogador">Estatísticas</h2>
+            <p class="perfil-secao-subtitulo">Informe seus números atuais no Pro Clubs.</p>
+          </div>
+        </div>
+        <div class="perfil-stats-edicao">
+          <div class="perfil-campo-grupo">
+            <label for="partidas">Partidas</label>
+            <input type="number" id="partidas" name="partidas" min="0" max="99999" inputmode="numeric" placeholder="0">
+          </div>
+          <div class="perfil-campo-grupo">
+            <label for="gols">Gols</label>
+            <input type="number" id="gols" name="gols" min="0" max="99999" inputmode="numeric" placeholder="0">
+          </div>
+          <div class="perfil-campo-grupo">
+            <label for="assistencias">Assistências</label>
+            <input type="number" id="assistencias" name="assistencias" min="0" max="99999" inputmode="numeric" placeholder="0">
+          </div>
+          <div class="perfil-campo-grupo">
+            <label for="defesas">Defesas</label>
+            <input type="number" id="defesas" name="defesas" min="0" max="99999" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+      </section>
+
       <!-- BOTÃO SALVAR — dentro do form agora -->
-      <section class="flex">
+      <section class="flex perfil-salvar-area">
+        <p id="perfil-feedback" class="perfil-feedback" role="status" aria-live="polite"></p>
         <button type="submit" class="btn-salvar">Salvar Perfil</button>
       </section>
 
@@ -344,6 +499,7 @@
   </footer>
 
   <script src="../JS/script.js" defer></script>
+  <script type="module" src="../JS/times.js"></script>
   <script type="module" src="../JS/perfil.js"></script>
   <script type="module" src="../JS/header-auth.js"></script>
 </body>

@@ -1,0 +1,1609 @@
+.menu{
+    max-width:1400px;
+    margin:0 auto 24px auto;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    padding:0 20px;
+}
+.menu-clubes{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-direction: row;
+    padding: 10px 0;
+}
+.img-menu{
+    width:64px;
+    height:64px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(34,197,94,.4);
+    border-radius:14px;
+    background:rgba(34,197,94,.08);
+}
+.img-menu img{
+    width: 34px;
+    height: auto;
+    filter: invert(1);
+}
+.text-menu{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+.text-menu h1{
+    font-size:32px;
+    font-weight:800;
+    color:#fff;
+    margin:0;
+}
+.text-menu p{
+    font-size:14px;
+    color:#8b8b8b;
+    line-height:1.5;
+    margin:0;
+}
+.menu-acao{
+    flex-shrink:0;
+}
+.btn-salvar-clube{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:13px 22px;
+    background:#22C55E;
+    color:#0a0a0a;
+    border:none;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+    white-space:nowrap;
+}
+.btn-salvar-clube:hover{
+    background:#1ea952;
+    transform:translateY(-1px);
+}
+.salvar-icon{
+    width:16px;
+    height:16px;
+}
+
+/* --- Abas (Geral / Elenco / Vagas / Estatísticas / Aparência) --- */
+.abas-clube{
+    display:flex;
+    gap:8px;
+    border:1px solid #2b2b2b;
+    background:#141414;
+    border-radius:12px;
+    padding:6px;
+    width:fit-content;
+}
+.aba-item{
+    padding:10px 22px;
+    background:transparent;
+    border:1px solid transparent;
+    border-radius:8px;
+    color:#8b8b8b;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+.aba-item:hover{
+    color:#fff;
+}
+.aba-item.ativo{
+    background:rgba(34,197,94,.1);
+    border-color:#22C55E;
+    color:#22C55E;
+}
+
+@media (max-width: 768px) {
+    .menu-clubes{
+        flex-wrap:wrap;
+    }
+    .text-menu{
+        min-width:200px;
+    }
+    .menu-acao{
+        width:100%;
+    }
+    .btn-salvar-clube{
+        width:100%;
+        justify-content:center;
+    }
+    .abas-clube{
+        width:100%;
+        overflow-x:auto;
+    }
+    .aba-item{
+        white-space:nowrap;
+    }
+}
+
+
+.dashboard{
+
+    max-width:1400px;
+    margin:auto;
+    display:grid;
+
+    grid-template-columns:
+        280px
+        1fr
+        440px;
+
+    gap:20px;
+
+    grid-template-areas:
+
+    "escudo informações preview"
+
+    "perfil perfil preview"
+
+    "redes  capitao preview"
+
+    "necessidades necessidades stats";
+}
+.card{
+    background:#141414;
+
+border:1px solid #2B2B2B;
+
+border-radius:16px;
+
+    padding:20px 26px;
+}
+.card-title{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size:15px;
+    font-weight:600;
+    color:#fff;
+    margin:0 0 16px 0;
+}
+.escudo{
+    grid-area:escudo;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    gap:14px;
+}
+.escudo p{
+    font-size: 12px;
+    color:#8b8b8b;
+    margin:0;
+}
+.escudo-img{
+ width: 130px;
+ height: 130px;
+ object-fit:contain;
+}
+.escudo input{
+    display: none;
+}
+.button-upload button{
+    padding: 10px 18px;
+    background-color:transparent;
+    color:#fff;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    border:1px solid #3a3a3a;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition:.2s;
+}
+.button-upload button:hover{
+    border-color:#22C55E;
+    color:#22C55E;
+}
+.button-upload label{
+    cursor:pointer;
+}
+.button-upload img{
+    width: 14px;
+    height: auto;
+    filter:invert(1);
+}
+
+.escudo-content{
+    display:flex;
+    align-items:center;
+    flex-direction:column;
+    justify-content:center;
+    gap:14px;
+}
+.informações{
+    grid-area:informações;
+    gap:14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.info-content{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+
+}
+.btn-info{
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 12px 18px;
+  border: 1px solid #2b2b2b;
+  background-color: #1b1b1b;
+}
+.btn-info-img{
+    display: flex;
+  flex-direction: row;
+  align-items: center;
+  width:100%;
+}
+.btn-info-img > img.icon-static{
+    width:20px;
+    height:20px;
+    opacity:.85;
+    flex-shrink:0;
+}
+.btn-inforama-text{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+.field{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    margin-left: 14px;
+    width:100%;
+    gap:4px;
+}
+.text-info{
+    font-size:12px;
+    color:#8b8b8b;
+    font-weight:500;
+    display:block;
+}
+input.modifcação,
+textarea.modifcação{
+    background:transparent;
+    border:none;
+    outline:none;
+    color:#fff;
+    font-size:14px;
+    font-weight:600;
+    width:100%;
+    padding:0;
+    font-family:inherit;
+}
+textarea.modifcação{
+    font-weight:400;
+    font-size:13.5px;
+    line-height:1.5;
+    color:#cfcfcf;
+    resize:vertical;
+}
+.btn-info input.modifcação::placeholder{
+    color:#fff;
+    opacity:1;
+}
+.select-box{
+     position: relative;
+    border:1px solid #2d2d2d;
+    border-radius:4px;
+    transition:.25s;
+    padding: 3px 6px;
+}
+.select-box:hover{
+    border-color:#22C55E;   
+}
+.select-box select{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width:100%;
+    height:100%;
+    background:none;
+    border:none;
+    color:white;
+    font-size:13px;
+    font-weight:600;
+     appearance:none;
+    -webkit-appearance:none;
+    outline:none;
+    cursor:pointer;
+    padding-right: 90px;
+}
+.select-box i{
+    position:absolute;
+    right:8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color:#bdbdbd;
+    font-size: 11px;
+    pointer-events:none;
+}
+.select-box select option{
+    background: #141414;
+    color: #fff;
+    text-align: center;
+    
+}
+.preview{
+    grid-area:preview;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+.preview .escudo-img{
+    width:110px;
+    height:110px;
+    object-fit:contain;
+}
+.preview-nome{
+    font-size:18px;
+    font-weight:700;
+    color:#fff;
+    margin:10px 0 4px 0;
+}
+.preview-estrelas{
+    display:flex;
+    gap:3px;
+    margin-bottom:18px;
+}
+.star-icon{
+    width:15px;
+    height:15px;
+}
+.star-icon.filled{
+    fill:#22C55E;
+}
+.preview-info{
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+    flex-direction: column;
+    width:100%;
+    gap:12px;
+}
+.preview-info hr{
+    border:none;
+    border-top:1px solid #2b2b2b;
+    margin:2px 0;
+    width:100%;
+}
+.preview-linha{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+}
+.preview-img{
+    width: 16px;
+    height: 16px;
+    flex-shrink:0;
+    opacity:.85;
+}
+.preview-svg{
+    color:#8b8b8b;
+}
+.preview-label{
+    font-size:13px;
+    color:#8b8b8b;
+    flex:1;
+}
+.preview-valor{
+    font-size:13px;
+    font-weight:600;
+    color:#fff;
+    text-align:right;
+}
+.preview-badges{
+    display:flex;
+    gap:6px;
+}
+.preview-social{
+    display:flex;
+    align-items:center;
+}
+.social-icon{
+    width:18px;
+    height:18px;
+    color:#8b8b8b;
+}
+.btn-editar-perfil{
+    margin-top:20px;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:11px;
+    background:transparent;
+    border:1px solid #22C55E;
+    color:#22C55E;
+    border-radius:8px;
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+.btn-editar-perfil:hover{
+    background:rgba(34,197,94,.12);
+}
+.edit-icon{
+    width:15px;
+    height:15px;
+}
+.titulo-dashboard{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width:100%;
+}
+.titulo-dashboard h3{
+    font-size:15px;
+    font-weight:600;
+    color:#fff;
+    margin:0 0 16px 0;
+}
+/* --- badges (dias / procurando) --- */
+.badge{
+    display:inline-flex;
+    align-items:center;
+    padding:3px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
+    background:rgba(34,197,94,.12);
+    color:#22C55E;
+    border:1px solid rgba(34,197,94,.35);
+    white-space:nowrap;
+}
+.dias-badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:2px;
+}
+.chip{
+    display:inline-flex;
+    align-items:center;
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
+    font-family:inherit;
+    background:transparent;
+    color:#8b8b8b;
+    border:1px solid #333;
+    white-space:nowrap;
+    cursor:pointer;
+    transition:.2s;
+}
+.chip:hover{
+    border-color:#555;
+    color:#cfcfcf;
+}
+.chip.active{
+    background:rgba(34,197,94,.12);
+    color:#22C55E;
+    border-color:rgba(34,197,94,.35);
+}
+
+/* --- Perfil do Clube --- */
+.perfil{
+    grid-area:perfil;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+}
+.titulo-perfil{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    width:100%;
+}
+.perfil-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-bottom:14px;
+}
+/* --- Redes Sociais --- */
+.redes-lista{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.redes.card{
+    padding:20px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.rede-item{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    gap:8px;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid #2b2b2b;
+    background:#1b1b1b;
+    min-width:0;
+}
+.rede-item .social-icon{
+    width:18px;
+    height:18px;
+    flex-shrink:0;
+    object-fit:contain;
+}
+.rede-item .discord{ color:#7289DA; }
+.rede-item .whatsapp{ color:#25D366; }
+.rede-item .instagram{ color:#E1306C; }
+.rede-nome{
+    font-size:12px;
+    color:#8b8b8b;
+    flex-shrink:0;
+}
+.rede-valor{
+    font-size:12px;
+    font-weight:600;
+    color:#fff;
+    flex:1;
+    min-width:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+input.rede-input{
+    background:transparent;
+    border:none;
+    outline:none;
+    font-family:inherit;
+    padding:0;
+}
+input.rede-input::placeholder{
+    color:#5a5a5a;
+    font-weight:400;
+}
+.btn-editar-icon{
+    background:transparent;
+    border:none;
+    color:#8b8b8b;
+    cursor:pointer;
+    padding:2px;
+    display:flex;
+    flex-shrink:0;
+    transition:.2s;
+}
+.btn-editar-icon:hover{
+    color:#22C55E;
+}
+.btn-editar-icon svg{
+    width:14px;
+    height:14px;
+}
+
+/* --- Capitão do Clube --- */
+.capitao{
+ gap:14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.capita-flex{
+     gap:14px;
+display: flex;
+    justify-content: center;
+    align-items: center;
+   flex-direction: row;
+}
+
+.field-box{
+    gap:6px;
+    padding:12px 16px;
+    border-radius:8px;
+    border:1px solid #2b2b2b;
+    background:#1b1b1b;
+}
+.field-box .select-box{
+    padding:0;
+    border:none;
+}
+.field-box input.modifcação[type="time"]{
+    color-scheme:dark;
+}
+.descricao-box{
+    width:100%;
+}
+.descricao-box textarea{
+    width:100%;
+    box-sizing:border-box;
+}
+
+/* --- Necessidades do Clube --- */
+.necessidades{
+    gap:14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.necessidades-grid{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:12px;
+}
+.posicao-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 14px;
+    border-radius:8px;
+    border:1px solid #2b2b2b;
+    background:#1b1b1b;
+    font-size:13.5px;
+    color:#cfcfcf;
+    cursor:pointer;
+    transition:.2s;
+}
+.posicao-item input[type="checkbox"]{
+    display:none;
+}
+.posicao-icon{
+    width:16px;
+    height:16px;
+    color:#8b8b8b;
+    flex-shrink:0;
+}
+.checkbox-visual{
+    width:16px;
+    height:16px;
+    border-radius:4px;
+    border:1px solid #444;
+    flex-shrink:0;
+    position:relative;
+    transition:.2s;
+}
+.posicao-item input[type="checkbox"]:checked ~ .checkbox-visual{
+    background:#22C55E;
+    border-color:#22C55E;
+}
+.posicao-item input[type="checkbox"]:checked ~ .checkbox-visual::after{
+    content:"";
+    position:absolute;
+    left:4px;
+    top:1px;
+    width:4px;
+    height:8px;
+    border:solid #0a0a0a;
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+}
+.posicao-item:has(input:checked),
+.posicao-item.marcado{
+    border-color:rgba(34,197,94,.4);
+    background:rgba(34,197,94,.07);
+    color:#fff;
+}
+.posicao-item:has(input:checked) .posicao-icon,
+.posicao-item.marcado .posicao-icon{
+    color:#22C55E;
+}
+
+/* --- Estatísticas do Clube --- */
+.stats{
+     gap:14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+.stat-box{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:14px 16px;
+    border-radius:8px;
+    border:1px solid #2b2b2b;
+    background:#1b1b1b;
+}
+.stat-icon{
+    width:18px;
+    height:18px;
+    color:#22C55E;
+}
+.stat-numero{
+    font-size:20px;
+    font-weight:700;
+    color:#fff;
+}
+.stat-label{
+    font-size:12px;
+    color:#8b8b8b;
+}
+.redes{
+    grid-area:redes;
+}
+
+.capitao{
+    grid-area:capitao;
+    
+}
+
+.necessidades{
+    grid-area:necessidades;
+}
+
+.stats{
+    grid-area:stats; 
+}
+
+/* =========================================================================
+   MODO VISITANTE — visualização pública de um clube (clubes.html?uid=...)
+========================================================================= */
+.modo-visitante .menu-acao,
+.modo-visitante .abas-clube,
+.modo-visitante .button-upload,
+.modo-visitante .escudo-content p,
+.modo-visitante .btn-convidar-jogador,
+.modo-visitante .btn-remover-jogador {
+    display: none;
+}
+
+.modo-visitante input:disabled,
+.modo-visitante select:disabled,
+.modo-visitante textarea:disabled {
+    opacity: 1;
+    color: #fff;
+    cursor: default;
+    -webkit-text-fill-color: #fff;
+}
+
+.modo-visitante .select-box {
+    border-color: transparent;
+}
+.modo-visitante .select-box i {
+    display: none;
+}
+.modo-visitante .select-box select {
+    padding-right: 0;
+}
+
+.modo-visitante .chip:disabled {
+    opacity: 1;
+    cursor: default;
+}
+.modo-visitante .chip:disabled:hover {
+    border-color: inherit;
+}
+
+.modo-visitante .rede-item {
+    cursor: default;
+}
+
+.btn-contato-clube {
+    text-decoration: none;
+}
+
+/* =========================================================================
+   ABAS — troca de painel (Geral / Elenco / Vagas / Estatísticas / Aparência)
+========================================================================= */
+.tab-painel{
+    max-width:1400px;
+    margin:0 auto;
+}
+.tab-painel[hidden]{
+    display:none;
+}
+.em-breve-card{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content:center; 
+    max-width:640px;
+    margin:60px auto;
+    text-align:center;
+    padding:40px 30px;
+}
+.em-breve-card .card-title{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content:center;
+}
+
+/* =========================================================================
+   ELENCO DO CLUBE
+========================================================================= */
+.elenco-layout{
+    display:grid;
+    grid-template-columns: 1fr 340px;
+    gap:20px;
+    align-items:start;
+}
+.elenco-principal{
+    min-width:0;
+    display: flex;
+    flex-direction: column;
+}
+.elenco-cabecalho{
+    margin-bottom:18px;
+}
+.elenco-cabecalho .card-title{
+    margin-bottom:4px;
+}
+.elenco-subtitulo{
+    font-size:13px;
+    color:#8b8b8b;
+    margin:0;
+}
+
+/* --- Toolbar (busca + filtros + convidar) --- */
+.elenco-toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+}
+.elenco-busca{
+    flex:1;
+    min-width:180px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 14px;
+    border:1px solid #2b2b2b;
+    border-radius:8px;
+    background:#1b1b1b;
+}
+.busca-icon{
+    width:16px;
+    height:16px;
+    color:#8b8b8b;
+    flex-shrink:0;
+}
+.elenco-busca input{
+    background:transparent;
+    border:none;
+    outline:none;
+    color:#fff;
+    font-size:13px;
+    font-family:inherit;
+    width:100%;
+}
+.elenco-busca input::placeholder{
+    color:#6a6a6a;
+}
+.elenco-filtro{
+    min-width:150px;
+    background:#1b1b1b;
+}
+.elenco-filtro select{
+    padding-right:26px;
+}
+.btn-convidar-jogador{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 18px;
+    background:transparent;
+    border:1px solid #22C55E;
+    color:#22C55E;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:.2s;
+}
+.btn-convidar-jogador:hover{
+    background:rgba(34,197,94,.12);
+}
+.convidar-icon{
+    width:14px;
+    height:14px;
+}
+
+/* --- Tabela --- */
+.elenco-tabela-wrap{
+    overflow-x:auto;
+}
+.elenco-tabela{
+    width:100%;
+    border-collapse:collapse;
+    min-width:760px;
+}
+.elenco-tabela thead th{
+    text-align:left;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    color:#8b8b8b;
+    padding:0 12px 10px 12px;
+    border-bottom:1px solid #2b2b2b;
+    white-space:nowrap;
+}
+.elenco-tabela tbody td{
+    padding:14px 12px;
+    border-bottom:1px solid #202020;
+    vertical-align:middle;
+    font-size:13px;
+    color:#cfcfcf;
+    white-space:nowrap;
+}
+.elenco-tabela tbody tr:last-child td{
+    border-bottom:none;
+}
+.elenco-tabela tbody tr:hover{
+    background:rgba(255,255,255,.02);
+}
+
+.col-jogador{
+    white-space:nowrap;
+}
+.col-jogador-link{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:inherit;
+    padding:2px;
+    margin:-2px;
+    border-radius:6px;
+    transition:.2s;
+}
+.col-jogador-link:hover{
+    background:rgba(34,197,94,.06);
+}
+.col-jogador-link:hover .jogador-nome{
+    color:#22C55E;
+}
+.jogador-avatar{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    object-fit:cover;
+    flex-shrink:0;
+    background:#1b1b1b;
+    border:1px solid #2b2b2b;
+}
+.jogador-info{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+.jogador-nome{
+    font-size:13.5px;
+    font-weight:600;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.tag-capitao{
+    font-size:10px;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:999px;
+    background:rgba(34,197,94,.15);
+    color:#22C55E;
+    border:1px solid rgba(34,197,94,.35);
+}
+.jogador-idea{
+    font-size:11px;
+    color:#8b8b8b;
+}
+
+.tag-posicao{
+    display:inline-flex;
+    padding:3px 9px;
+    border-radius:6px;
+    font-size:11px;
+    font-weight:700;
+    color:#cfcfcf;
+    border:1px solid #333;
+    background:#1b1b1b;
+}
+
+.col-ger{
+    font-weight:700;
+    color:#22C55E;
+    font-size:14px;
+}
+
+.disponibilidade{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12.5px;
+}
+.disponibilidade::before{
+    content:"";
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:currentColor;
+    flex-shrink:0;
+}
+.disponibilidade.online{ color:#22C55E; }
+.disponibilidade.partida{ color:#e0a020; }
+.disponibilidade.offline{ color:#6a6a6a; }
+
+.col-xp{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    min-width:130px;
+}
+.xp-texto{
+    font-size:11.5px;
+    color:#cfcfcf;
+    white-space:nowrap;
+}
+.xp-barra{
+    display:block;
+    width:100%;
+    height:5px;
+    border-radius:999px;
+    background:#242424;
+    overflow:hidden;
+}
+.xp-fill{
+    display:block;
+    height:100%;
+    background:#22C55E;
+    border-radius:999px;
+}
+
+.status-badge{
+    display:inline-flex;
+    padding:4px 11px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+}
+.status-badge.titular{ background:rgba(34,197,94,.15); color:#22C55E; }
+.status-badge.reserva{ background:rgba(224,160,32,.15); color:#e0a020; }
+.status-badge.banco{ background:rgba(150,150,150,.15); color:#9a9a9a; }
+.status-badge.espera{ background:rgba(59,130,246,.15); color:#3b82f6; }
+
+.col-acoes{
+    display:flex;
+    gap:6px;
+}
+.btn-acao-icone{
+    width:28px;
+    height:28px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:transparent;
+    border:1px solid #2b2b2b;
+    border-radius:6px;
+    color:#8b8b8b;
+    cursor:pointer;
+    transition:.2s;
+    flex-shrink:0;
+}
+.btn-acao-icone svg{
+    width:14px;
+    height:14px;
+}
+.btn-acao-icone:hover{
+    border-color:#22C55E;
+    color:#22C55E;
+}
+
+/* --- Paginação --- */
+.elenco-paginacao{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:18px;
+}
+.elenco-mostrando{
+    font-size:12.5px;
+    color:#8b8b8b;
+}
+.elenco-paginas{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.pagina-seta,
+.pagina-num{
+    width:30px;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:transparent;
+    border:1px solid #2b2b2b;
+    border-radius:6px;
+    color:#8b8b8b;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+.pagina-seta svg{
+    width:14px;
+    height:14px;
+}
+.pagina-seta:hover,
+.pagina-num:hover{
+    border-color:#22C55E;
+    color:#22C55E;
+}
+.pagina-num.ativa{
+    background:rgba(34,197,94,.12);
+    border-color:#22C55E;
+    color:#22C55E;
+}
+
+/* --- Lateral: Resumo do Elenco --- */
+.elenco-lateral{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+.resumo-linha{
+display:flex;
+justify-content: center;
+    align-items:center;
+    flex-direction: row;
+}
+.resumo-elenco .resumo-linha{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid #202020;
+}
+.resumo-elenco .resumo-linha:last-child{
+    border-bottom:none;
+    padding-bottom:0;
+}
+.resumo-icon{
+    width:22px;
+    height:22px;
+    color:#22C55E;
+    flex-shrink:0;
+}
+.resumo-texto{
+    display:flex;
+    flex-direction:column;
+}
+.resumo-numero{
+    font-size:19px;
+    font-weight:700;
+    color:#fff;
+}
+.resumo-label{
+    font-size:12px;
+    color:#8b8b8b;
+}
+
+/* --- Lateral: Distribuição por Posição (mini campo) --- */
+.elenco-title{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.mini-campo{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    border:1px solid #2b2b2b;
+    border-radius:12px;
+    padding:20px 12px;
+    background:#141414;
+}
+.campo-linha{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+}
+.campo-meio,
+.campo-volante,
+.campo-gol{
+    justify-content:center;
+}
+.pos-slot{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+}
+.pos-nome{
+    font-size:10.5px;
+    font-weight:700;
+    color:#8b8b8b;
+    letter-spacing:.3px;
+}
+.pos-contagem{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:26px;
+    height:22px;
+    padding:0 6px;
+    border-radius:6px;
+    border:1px solid #2b2b2b;
+    background:#1b1b1b;
+    color:#cfcfcf;
+    font-size:12px;
+    font-weight:700;
+}
+.pos-slot.pos-destaque .pos-contagem{
+    border-color:rgba(34,197,94,.4);
+    background:rgba(34,197,94,.1);
+    color:#22C55E;
+}
+
+/* --- Lateral: Legenda --- */
+.legenda-elenco .legenda-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 0;
+    font-size:12.5px;
+    color:#cfcfcf;
+}
+.legend{
+display: flex;
+flex-direction: column;
+}
+.legenda-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    flex-shrink:0;
+}
+.dot-titular{ background:#22C55E; }
+.dot-reserva{ background:#e0a020; }
+.dot-banco{ background:#9a9a9a; }
+.dot-espera{ background:#3b82f6; }
+
+/* --- Responsivo básico --- */
+@media (max-width: 1024px){
+    .elenco-layout{
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 768px){
+    .elenco-toolbar{
+        flex-direction:column;
+        align-items:stretch;
+    }
+    .elenco-filtro,
+    .btn-convidar-jogador{
+        width:100%;
+    }
+}
+
+/* --- Estado vazio / carregando da tabela --- */
+.elenco-vazio{
+    text-align:center !important;
+    color:#8b8b8b !important;
+    padding:30px 12px !important;
+    white-space:normal !important;
+}
+
+/* --- Ação de remover / vazia --- */
+.btn-remover-jogador{
+    padding:6px 12px;
+    background:transparent;
+    border:1px solid #d32f2f;
+    color:#d32f2f;
+    border-radius:6px;
+    font-size:11.5px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    transition:.2s;
+    white-space:nowrap;
+}
+.btn-remover-jogador:hover{
+    background:#d32f2f;
+    color:#fff;
+}
+.acao-vazia{
+    color:#4a4a4a;
+    font-size:12px;
+}
+
+/* =========================================================================
+   MODAL — Convidar Jogador
+========================================================================= */
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:10000;
+    padding:20px;
+}
+.modal-convidar-box{
+    width:100%;
+    max-width:420px;
+    max-height:80vh;
+    display:flex;
+    flex-direction:column;
+    background:#141414;
+    border:1px solid #2b2b2b;
+    border-radius:16px;
+    padding:22px;
+}
+.modal-convidar-cabecalho{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+}
+.modal-convidar-cabecalho h3{
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+    margin:0;
+}
+.modal-fechar{
+    background:transparent;
+    border:none;
+    color:#8b8b8b;
+    font-size:22px;
+    line-height:1;
+    cursor:pointer;
+    padding:0 4px;
+}
+.modal-fechar:hover{
+    color:#fff;
+}
+.modal-busca-input{
+    width:100%;
+    padding:10px 14px;
+    background:#1b1b1b;
+    border:1px solid #2b2b2b;
+    border-radius:8px;
+    color:#fff;
+    font-size:13px;
+    font-family:inherit;
+    outline:none;
+    box-sizing:border-box;
+}
+.modal-busca-input:focus{
+    border-color:#22C55E;
+}
+.modal-resultados{
+    margin-top:14px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+.modal-dica{
+    color:#8b8b8b;
+    font-size:12.5px;
+    text-align:center;
+    padding:20px 0;
+    margin:0;
+}
+.modal-resultado-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    border:1px solid #2b2b2b;
+    border-radius:8px;
+    background:#1b1b1b;
+}
+.modal-resultado-avatar{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    object-fit:cover;
+    flex-shrink:0;
+    background:#141414;
+    border:1px solid #2b2b2b;
+}
+.modal-resultado-info{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+.modal-resultado-nome{
+    font-size:13px;
+    font-weight:600;
+    color:#fff;
+}
+.modal-resultado-detalhe{
+    font-size:11px;
+    color:#8b8b8b;
+}
+.btn-convidar-resultado{
+    padding:6px 12px;
+    background:transparent;
+    border:1px solid #22C55E;
+    color:#22C55E;
+    border-radius:6px;
+    font-size:11.5px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    white-space:nowrap;
+    flex-shrink:0;
+    transition:.2s;
+}
+.btn-convidar-resultado:hover{
+    background:rgba(34,197,94,.12);
+}
+.btn-convidar-resultado:disabled{
+    opacity:.6;
+    cursor:default;
+}
+
+/* =========================================================================
+   BANNER — Convite pendente pro jogador (aceitar entra no elenco)
+========================================================================= */
+.banner-convite{
+    position:fixed;
+    top:16px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:10001;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    justify-content:center;
+    background:#141414;
+    border:1px solid #22C55E;
+    border-radius:12px;
+    padding:12px 18px;
+    box-shadow:0 8px 30px rgba(0,0,0,.5);
+    color:#fff;
+    font-size:13px;
+    max-width:92vw;
+}
+.banner-convite-acoes{
+    display:flex;
+    gap:8px;
+}
+.btn-aceitar-convite,
+.btn-recusar-convite{
+    padding:7px 16px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    border:1px solid transparent;
+}
+.btn-aceitar-convite{
+    background:#22C55E;
+    color:#0a0a0a;
+}
+.btn-recusar-convite{
+    background:transparent;
+    border-color:#444;
+    color:#8b8b8b;
+}
+.btn-recusar-convite:hover{
+    border-color:#d32f2f;
+    color:#d32f2f;
+}
+
+/* =========================================================================
+   MODAL — Confirmação (substitui o confirm() nativo do navegador)
+========================================================================= */
+.modal-confirm-box{
+    width:100%;
+    max-width:380px;
+    background:#141414;
+    border:1px solid #2b2b2b;
+    border-radius:16px;
+    padding:24px;
+    animation:modalConfirmEntrar .18s ease-out;
+}
+@keyframes modalConfirmEntrar{
+    from{ opacity:0; transform:scale(.96) translateY(6px); }
+    to{ opacity:1; transform:scale(1) translateY(0); }
+}
+.modal-confirm-titulo{
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+    margin:0 0 10px 0;
+}
+.modal-confirm-mensagem{
+    font-size:13.5px;
+    color:#cfcfcf;
+    line-height:1.5;
+    margin:0 0 22px 0;
+}
+.modal-confirm-mensagem strong{
+    color:#fff;
+}
+.modal-confirm-acoes{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+}
+.modal-confirm-cancelar,
+.modal-confirm-confirmar{
+    padding:9px 18px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+    transition:.2s;
+    border:1px solid transparent;
+}
+.modal-confirm-cancelar{
+    background:transparent;
+    border-color:#3a3a3a;
+    color:#cfcfcf;
+}
+.modal-confirm-cancelar:hover{
+    border-color:#5a5a5a;
+    color:#fff;
+}
+.modal-confirm-confirmar{
+    background:#22C55E;
+    color:#0a0a0a;
+}
+.modal-confirm-confirmar:hover{
+    background:#1ea952;
+}
+.modal-confirm-confirmar.destrutivo{
+    background:#d32f2f;
+    color:#fff;
+}
+.modal-confirm-confirmar.destrutivo:hover{
+    background:#b52626;
+}

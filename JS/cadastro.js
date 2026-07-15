@@ -1,90 +1,88 @@
-// =========================================================================
-// MERCADO PRO CLUBS — header-auth.js
-// Responsabilidade: detectar login e renderizar avatar ou botões no header.
-// NÃO chama initializeApp — importa auth e db de firebase-config.js.
-// =========================================================================
+// Controla as abas de criação de conta e login.
+const tabCadastro = document.getElementById("tabCadastro");
+const tabLogin = document.getElementById("tabLogin");
+const formCadastro = document.getElementById("form-cadastro");
+const formLogin = document.getElementById("form-login");
 
-import { auth, db }                             from "./firebase-config.js";
-import { onAuthStateChanged, signOut }          from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, getDoc }                          from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+function selecionarAba(modo, atualizarHash = true) {
+  const loginAtivo = modo === "login";
 
-// Detecta se está na raiz ou dentro de HTML/
-const base = window.location.pathname.includes("/HTML/") ? "../" : "./";
+  tabCadastro?.classList.toggle("active", !loginAtivo);
+  tabLogin?.classList.toggle("active", loginAtivo);
+  formCadastro?.classList.toggle("active", !loginAtivo);
+  formLogin?.classList.toggle("active", loginAtivo);
 
-// ─── Render: deslogado ────────────────────────────────────────────────────────
-function renderDeslogado(container) {
-  container.innerHTML = `
-    <a href="${base}HTML/cadastrar-se.html" class="login">Entrar</a>
-    <a href="${base}HTML/cadastrar-se.html" class="cadastra-se">Criar conta</a>
-  `;
-}
+  if (tabCadastro) {
+    tabCadastro.setAttribute("aria-selected", String(!loginAtivo));
+    tabCadastro.tabIndex = loginAtivo ? -1 : 0;
+  }
+  if (tabLogin) {
+    tabLogin.setAttribute("aria-selected", String(loginAtivo));
+    tabLogin.tabIndex = loginAtivo ? 0 : -1;
+  }
+  if (formCadastro) formCadastro.hidden = loginAtivo;
+  if (formLogin) formLogin.hidden = !loginAtivo;
 
-// ─── Render: logado ───────────────────────────────────────────────────────────
-function renderLogado(container) {
-  container.innerHTML = `
-    <div class="header-usuario" id="header-usuario">
-      <div class="hu-avatar-wrap">
-        <img id="hu-foto" src="${base}IMG/user-icon.svg" class="hu-foto" alt="foto do usuário"
-             onerror="this.src='${base}IMG/user-icon.svg'" />
-        <span class="hu-status-dot"></span>
-      </div>
-      <span class="hu-nome" id="hu-nome">...</span>
-      <div class="hu-dropdown" id="hu-dropdown">
-        <a href="${base}HTML/meu-perfil.html" class="hu-drop-item">👤 Meu Perfil</a>
-        <a href="${base}HTML/mercado.html"    class="hu-drop-item">🏪 Mercado</a>
-        <a href="${base}HTML/torneio.html"    class="hu-drop-item">🏆 Torneios</a>
-        <div class="hu-drop-divider"></div>
-        <button class="hu-drop-item hu-sair" id="hu-btn-sair">🚪 Sair</button>
-      </div>
-    </div>
-  `;
-
-  document.getElementById("header-usuario").addEventListener("click", (e) => {
-    e.stopPropagation();
-    document.getElementById("hu-dropdown").classList.toggle("aberto");
-  });
-  document.addEventListener("click", () => {
-    document.getElementById("hu-dropdown")?.classList.remove("aberto");
-  });
-  document.getElementById("hu-btn-sair").addEventListener("click", async (e) => {
-    e.stopPropagation();
-    await signOut(auth);
-    window.location.href = `${base}HTML/cadastrar-se.html`;
-  });
-}
-
-// ─── Preenche foto e nome após login ─────────────────────────────────────────
-async function preencherWidget(usuario) {
-  const elFoto = document.getElementById("hu-foto");
-  const elNome = document.getElementById("hu-nome");
-
-  // Foto do Google como ponto de partida
-  if (usuario.photoURL && elFoto) elFoto.src = usuario.photoURL;
-
-  // Tenta pegar nickname e foto do Firestore
-  try {
-    const snap = await getDoc(doc(db, "jogadores", usuario.uid));
-    if (snap.exists()) {
-      const dados = snap.data();
-      if (elNome) elNome.textContent = dados.nickname || usuario.displayName || "Jogador";
-      if (elFoto && dados.fotoURL) elFoto.src = dados.fotoURL;
-    } else {
-      if (elNome) elNome.textContent = usuario.displayName || "Jogador";
-    }
-  } catch {
-    if (elNome) elNome.textContent = usuario.displayName || "Jogador";
+  if (atualizarHash) {
+    history.replaceState(null, "", loginAtivo ? "#login" : "#cadastro");
   }
 }
 
-// ─── Listener principal ───────────────────────────────────────────────────────
-onAuthStateChanged(auth, (usuario) => {
-  const container = document.getElementById("login-header");
-  if (!container) return;
+tabCadastro?.addEventListener("click", () => selecionarAba("cadastro"));
+tabLogin?.addEventListener("click", () => selecionarAba("login"));
 
-  if (usuario) {
-    renderLogado(container);
-    preencherWidget(usuario);
+[tabCadastro, tabLogin].forEach((tab) => {
+  tab?.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    event.preventDefault();
+    const proximoModo = tab === tabCadastro ? "login" : "cadastro";
+    selecionarAba(proximoModo);
+    (proximoModo === "login" ? tabLogin : tabCadastro)?.focus();
+  });
+});
+
+window.addEventListener("hashchange", () => {
+  selecionarAba(location.hash === "#login" ? "login" : "cadastro", false);
+});
+
+selecionarAba(location.hash === "#login" ? "login" : "cadastro", false);
+
+// Mostrar ou ocultar senhas sem alterar o valor digitado.
+document.querySelectorAll(".cad-mostrar-senha").forEach((botao) => {
+  botao.addEventListener("click", () => {
+    const campo = document.getElementById(botao.dataset.alvo);
+    if (!campo) return;
+    const mostrar = campo.type === "password";
+    campo.type = mostrar ? "text" : "password";
+    botao.textContent = mostrar ? "Ocultar" : "Mostrar";
+    botao.setAttribute("aria-label", mostrar ? "Ocultar senha" : "Mostrar senha");
+  });
+});
+
+// Indicador simples de força: orienta sem guardar ou enviar a senha.
+const campoSenha = document.getElementById("senha");
+const forcaSenha = document.getElementById("forca-senha");
+campoSenha?.addEventListener("input", () => {
+  if (!forcaSenha) return;
+  const valor = campoSenha.value;
+  forcaSenha.className = "cad-senha-dica";
+  if (!valor) {
+    forcaSenha.textContent = "Use 8 ou mais caracteres.";
+    return;
+  }
+  const pontos = [
+    valor.length >= 8,
+    /[a-z]/.test(valor) && /[A-Z]/.test(valor),
+    /\d/.test(valor),
+    /[^A-Za-z0-9]/.test(valor),
+  ].filter(Boolean).length;
+  if (pontos >= 4) {
+    forcaSenha.textContent = "Senha forte.";
+    forcaSenha.classList.add("forte");
+  } else if (pontos >= 2) {
+    forcaSenha.textContent = "Senha média. Misture letras, números e símbolos.";
+    forcaSenha.classList.add("media");
   } else {
-    renderDeslogado(container);
+    forcaSenha.textContent = "Senha fraca. Use pelo menos 8 caracteres.";
   }
 });

@@ -3,35 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Procure jogadores e clubes de Pro Clubs por posição, plataforma e versão do jogo (EAFC23 a 26). Encontre seu próximo time ou reforço para o elenco.">
+    <meta name="description" content="Veja vagas abertas em clubes de Pro Clubs, filtre por posição, plataforma e versão do EA FC, e encontre seu próximo time." />
+    <link rel="canonical" href="https://www.mercadoproclubs.com/HTML/mercado.html" />
     <link rel="stylesheet" href="../CSS/style.css" />
-    <link rel="icon" href="./IMG/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml" />
     <title>Mercado de Jogadores - Vagas Abertas em Clubes de Pro Clubs</title>
-    <meta name="description" content="Veja vagas abertas em clubes de Pro Clubs, filtre por posição e plataforma, e candidate-se direto pela plataforma.">
   </head>
   <body>
     <header class="main-header">
       <div class="logo animar-scroll">
-        <a href="../index.html" title="voltar para a página inicial">
+        <a href="../index.html" title="Voltar para a página inicial">
           <img src="../IMG/logo.svg" class="logo" alt="Pro Clubs Hub Brasil Logo" />
         </a>
       </div>
       <div class="menu-carrossel">
-        <nav>
+        <nav aria-label="Navegação principal">
           <ul class="lista-links animar-scroll">
             <li><a href="./meu-perfil.html">meu perfil</a></li>
+            <li><a href="./clubes.html">meu clube</a></li>
           </ul>
         </nav>
       </div>
       <div class="login-header animar-scroll">
         <!-- Sino de notificações -->
-        <div class="notification-icon" id="sino-btn" style="position:relative;cursor:pointer">
+        <div class="notification-icon" id="sino-btn" role="button" tabindex="0" hidden
+          aria-label="Abrir notificações" aria-expanded="false"
+          style="position:relative;cursor:pointer">
           <span class="bell-icon">🔔</span>
           <span id="badge" class="notification-badge hidden">0</span>
         </div>
         <!-- Ícone de mensagens → vai para o chat mais recente -->
-        <div class="email-container" id="emailIcon">
-          <svg viewBox="0 0 24 24" class="email-icon">
+        <div class="email-container" id="emailIcon" role="button" tabindex="0" hidden
+          aria-label="Abrir mensagens" aria-expanded="false">
+          <svg viewBox="0 0 24 24" class="email-icon" aria-hidden="true">
             <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
           </svg>
         </div>
@@ -44,17 +48,32 @@
       <section class="lfg-section">
         <div class="lfg-container">
           <div class="lfg-header">
-            <h2>Mercado de Transferências</h2>
+            <h1>Mercado de Transferências</h1>
             <p>Encontre o seu esquadrão ou recrute para o seu clube.</p>
+
+            <div class="mercado-abas" role="tablist" aria-label="Áreas do mercado">
+              <button type="button" id="tab-vagas" class="mercado-aba ativo" role="tab"
+                aria-selected="true" aria-controls="painel-vagas" data-mercado-aba="vagas">
+                Vagas de clubes
+              </button>
+              <button type="button" id="tab-jogadores" class="mercado-aba" role="tab"
+                aria-selected="false" aria-controls="painel-jogadores" data-mercado-aba="jogadores">
+                Jogadores disponíveis
+              </button>
+            </div>
+
+            <div id="painel-vagas" class="mercado-painel" role="tabpanel" aria-labelledby="tab-vagas">
             <span class="bastao"></span>
             <h2 class="filtragem">Filtrar vagas</h2>
             <!-- BUSCA POR TEXTO -->
             <div class="lfg-busca">
-              <input type="text" id="busca-texto" class="lfg-input" placeholder="🔎 Buscar por nome do clube ou descrição..." />
+              <label for="busca-texto" class="sr-only">Buscar vagas</label>
+              <input type="search" id="busca-texto" class="lfg-input" placeholder="🔎 Buscar por nome do clube ou descrição..." />
             </div>
             <!-- FILTROS -->
             <div class="lfg-filtros">
-              <select id="filtro-plataforma" class="lfg-select">
+              <label for="filtro-plataforma" class="sr-only">Filtrar por plataforma</label>
+              <select id="filtro-plataforma" class="lfg-select" aria-label="Filtrar por plataforma">
                 <option value="todas">Todas as Plataformas</option>
                 <option value="switch2">Nintendo Switch 2</option>
                 <option value="switch">Nintendo Switch</option>
@@ -64,41 +83,52 @@
                 <option value="ps4">PlayStation 4</option>
                 <option value="pc">PC</option>
               </select>
-              <select id="filtro-posicao" class="lfg-select">
+              <label for="filtro-posicao" class="sr-only">Filtrar por posição</label>
+              <select id="filtro-posicao" class="lfg-select" aria-label="Filtrar por posição">
                 <option value="todas">Todas as Posições</option>
                 <option value="ata">Ataque (ATA)</option>
                 <option value="mei">Meio-Campo (MEI/VOL)</option>
                 <option value="zag">Defesa (ZAG/LAT)</option>
                 <option value="gk">Goleiro (GK)</option>
               </select>
-              <select id="filtro-jogo" class="lfg-select">
+              <label for="filtro-jogo" class="sr-only">Filtrar por versão do jogo</label>
+              <select id="filtro-jogo" class="lfg-select" aria-label="Filtrar por versão do jogo">
                 <option value="todas">Todos os jogos</option>
                 <option value="eafc26">EAFC26</option>
                 <option value="eafc25">EAFC25</option>
                 <option value="eafc24">EAFC24</option>
                 <option value="eafc23">EAFC23</option>
               </select>
-              <select id="ordenar-vagas" class="lfg-select">
+              <label for="filtro-estilo" class="sr-only">Filtrar por estilo do clube</label>
+              <select id="filtro-estilo" class="lfg-select" aria-label="Filtrar por estilo do clube">
+                <option value="todos">Todos os estilos</option>
+                <option value="competitivo">Competitivo</option>
+                <option value="casual">Casual</option>
+              </select>
+              <label for="ordenar-vagas" class="sr-only">Ordenar vagas</label>
+              <select id="ordenar-vagas" class="lfg-select" aria-label="Ordenar vagas">
                 <option value="recentes">Mais recentes</option>
                 <option value="antigas">Mais antigas</option>
                 <option value="az">Clube (A-Z)</option>
               </select>
             </div>
 
-            <h1 class="titulo-time">encontre seu clube</h1>
+            <h2 class="titulo-time">Encontre seu clube</h2>
 
             <!-- FORMULÁRIO DE PUBLICAR VAGA -->
             <div class="lfg-criador">
               <h3>Anunciar Vaga no Seu Clube</h3>
               <form id="form-lfg" class="form-lfg">
                 <div class="form-linha">
-                  <input type="text" id="post-clube" class="lfg-input" placeholder="Nome do Clube" required />
-                  <select id="post-plataforma" required class="lfg-input">
+                  <label for="post-clube" class="sr-only">Nome do clube</label>
+                  <input type="text" id="post-clube" name="clube" class="lfg-input" placeholder="Nome do Clube" maxlength="60" required />
+                  <label for="post-plataforma" class="sr-only">Plataforma do clube</label>
+                  <select id="post-plataforma" name="plataforma" required class="lfg-input">
                     <option value="" disabled selected>Plataforma do Clube</option>
                     <option value="switch2">Nintendo Switch 2</option>
                     <option value="switch">Nintendo Switch</option>
-                    <option value="xbox-Series">Xbox Series X/S</option>
-                    <option value="xbox-One">Xbox One</option>
+                    <option value="xboxS">Xbox Series X/S</option>
+                    <option value="xboxO">Xbox One</option>
                     <option value="ps5">PlayStation 5</option>
                     <option value="ps4">PlayStation 4</option>
                     <option value="pc">PC</option>
@@ -107,12 +137,13 @@
                 <div class="form-linha">
                   <label for="post-foto" class="lfg-label-upload">
                     <span id="post-foto-texto">📷 Adicionar até 3 imagens do anúncio (opcional, 2MB cada)</span>
-                    <input type="file" id="post-foto" accept="image/*" class="lfg-input-file" multiple />
+                    <input type="file" id="post-foto" name="fotos" accept="image/png,image/jpeg,image/webp" class="lfg-input-file" multiple />
                   </label>
                 </div>
                 <div class="form-linha lfg-galeria-preview" id="post-foto-preview-wrap"></div>
                 <div class="form-linha">
-                  <select id="post-posicao" required class="lfg-input">
+                  <label for="post-posicao" class="sr-only">Posição necessária</label>
+                  <select id="post-posicao" name="posicao" required class="lfg-input">
                     <option value="" disabled selected>Posição Necessária</option>
                     <option value="psd">Todas as posições</option>
                     <option value="ata">Precisamos de ATA</option>
@@ -121,24 +152,28 @@
                     <option value="zag">Precisamos de ZAG/LAT</option>
                     <option value="gk">Precisamos de GK</option>
                   </select>
-                  <select id="post-estilo" required class="lfg-input">
+                  <label for="post-estilo" class="sr-only">Estilo do time</label>
+                  <select id="post-estilo" name="estilo" required class="lfg-input">
                     <option value="" disabled selected>Estilo do Time</option>
                     <option value="casual">Casual (Por diversão)</option>
                     <option value="competitivo">Competitivo (Ligas/Campeonatos)</option>
                   </select>
                 </div>
                 <div class="form-linha">
-                  <select id="post-jogo" required class="lfg-input">
+                  <label for="post-jogo" class="sr-only">Versão do jogo</label>
+                  <select id="post-jogo" name="jogo" required class="lfg-input">
                     <option value="" disabled selected>Versão do Jogo</option>
                     <option value="eafc26">EA FC 26</option>
                     <option value="eafc25">EA FC 25</option>
                     <option value="eafc24">EA FC 24</option>
                     <option value="eafc23">EA FC 23</option>
                   </select>
-                  <input type="number" id="post-overall-min" class="lfg-input" min="1" max="99"
+                  <label for="post-overall-min" class="sr-only">Overall mínimo exigido</label>
+                  <input type="number" id="post-overall-min" name="overall-minimo" class="lfg-input" min="1" max="99"
                     placeholder="Overall mínimo exigido (opcional)" />
                 </div>
-                <textarea id="post-descricao" class="lfg-textarea" rows="3"
+                <label for="post-descricao" class="sr-only">Descrição da vaga</label>
+                <textarea id="post-descricao" name="descricao" class="lfg-textarea" rows="3" maxlength="500"
                   placeholder="Ex: Nosso clube está na Divisão 2. Precisamos de um volante pegador. Jogamos todos os dias às 21h."
                   ></textarea>
                 <button type="submit" id="btn-publicar" class="btn-publicar">Publicar Vaga</button>
@@ -153,19 +188,128 @@
             </label>
 
             <!-- FEED DE VAGAS -->
-            <h3 class="titulo-time">vagas publicadas</h3>
-            <div class="lfg-feed" id="lfg-feed">
+            <div class="mercado-resultados-cabecalho">
+              <div>
+                <h2 class="titulo-time">Vagas publicadas</h2>
+                <p id="resultado-vagas" class="mercado-resultado" aria-live="polite">Carregando vagas...</p>
+              </div>
+              <button type="button" id="btn-limpar-filtros" class="btn-limpar-filtros" hidden>
+                Limpar filtros
+              </button>
+            </div>
+            <div class="lfg-feed" id="lfg-feed" aria-live="polite">
               <!-- cards injetados via JS -->
             </div>
             <button type="button" id="btn-carregar-mais" class="btn-carregar-mais hidden">Carregar mais vagas</button>
+            </div>
+
+            <div id="painel-jogadores" class="mercado-painel" role="tabpanel" aria-labelledby="tab-jogadores" hidden>
+              <div class="jogadores-intro">
+                <div>
+                  <span class="jogadores-eyebrow">RECRUTAMENTO DIRETO</span>
+                  <h2>Jogadores disponíveis</h2>
+                  <p>Encontre jogadores que ativaram a opção “Estou procurando clube” no perfil.</p>
+                </div>
+                <a href="./meu-perfil.html" class="btn-meu-perfil-mercado">Gerenciar meu perfil</a>
+              </div>
+
+              <div class="jogadores-filtros-card">
+                <label for="busca-jogador" class="sr-only">Buscar jogador</label>
+                <input type="search" id="busca-jogador" class="lfg-input jogadores-busca"
+                  placeholder="🔎 Buscar por nickname, EA ID ou apresentação...">
+
+                <div class="jogadores-filtros">
+                  <label for="filtro-jogador-plataforma" class="sr-only">Plataforma do jogador</label>
+                  <select id="filtro-jogador-plataforma" class="lfg-select">
+                    <option value="todas">Todas as plataformas</option>
+                    <option value="playstation5">PlayStation 5</option>
+                    <option value="xbox serie">Xbox Series</option>
+                    <option value="pc">PC</option>
+                    <option value="playstation4">PlayStation 4</option>
+                    <option value="xbox one">Xbox One</option>
+                    <option value="switch2">Nintendo Switch 2</option>
+                    <option value="switch1">Nintendo Switch</option>
+                  </select>
+
+                  <label for="filtro-jogador-posicao" class="sr-only">Posição do jogador</label>
+                  <select id="filtro-jogador-posicao" class="lfg-select">
+                    <option value="todas">Todas as posições</option>
+                    <option value="GOL">Goleiro</option>
+                    <option value="ZAG">Zagueiro</option>
+                    <option value="LD">Lateral direito</option>
+                    <option value="LE">Lateral esquerdo</option>
+                    <option value="VOL">Volante</option>
+                    <option value="MC">Meio-campo</option>
+                    <option value="MEI">Meia ofensivo</option>
+                    <option value="ME/MD">Meia lateral</option>
+                    <option value="PE">Ponta esquerda</option>
+                    <option value="ATA">Atacante</option>
+                    <option value="SA">Segundo atacante</option>
+                    <option value="PD">Ponta direita</option>
+                  </select>
+
+                  <label for="filtro-jogador-regiao" class="sr-only">Região do jogador</label>
+                  <select id="filtro-jogador-regiao" class="lfg-select">
+                    <option value="todas">Todas as regiões</option>
+                    <option value="norte">Norte</option>
+                    <option value="nordeste">Nordeste</option>
+                    <option value="centro-oeste">Centro-Oeste</option>
+                    <option value="sudeste">Sudeste</option>
+                    <option value="sul">Sul</option>
+                    <option value="exterior">Exterior</option>
+                  </select>
+
+                  <label for="filtro-jogador-disponibilidade" class="sr-only">Disponibilidade do jogador</label>
+                  <select id="filtro-jogador-disponibilidade" class="lfg-select">
+                    <option value="todas">Todos os horários</option>
+                    <option value="manha">Manhã</option>
+                    <option value="tarde">Tarde</option>
+                    <option value="noite">Noite</option>
+                    <option value="madrugada">Madrugada</option>
+                    <option value="flexivel">Horário flexível</option>
+                  </select>
+
+                  <label for="filtro-jogador-estilo" class="sr-only">Estilo de jogo do jogador</label>
+                  <select id="filtro-jogador-estilo" class="lfg-select">
+                    <option value="todos">Todos os estilos</option>
+                    <option value="competitivo">Competitivo</option>
+                    <option value="posse">Posse de bola</option>
+                    <option value="contra-ataque">Contra-ataque</option>
+                    <option value="marcacao">Marcação forte</option>
+                    <option value="casual">Casual</option>
+                    <option value="versatil">Versátil</option>
+                  </select>
+
+                  <label for="ordenar-jogadores" class="sr-only">Ordenar jogadores</label>
+                  <select id="ordenar-jogadores" class="lfg-select">
+                    <option value="recentes">Atualizados recentemente</option>
+                    <option value="overall">Maior overall</option>
+                    <option value="az">Nickname (A-Z)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mercado-resultados-cabecalho jogadores-resultados-cabecalho">
+                <div>
+                  <h2 class="titulo-time">Perfis publicados</h2>
+                  <p id="resultado-jogadores" class="mercado-resultado" aria-live="polite">Abra esta aba para carregar jogadores.</p>
+                </div>
+                <button type="button" id="btn-limpar-filtros-jogadores" class="btn-limpar-filtros" hidden>
+                  Limpar filtros
+                </button>
+              </div>
+
+              <div id="jogadores-feed" class="jogadores-feed" aria-live="polite"></div>
+            </div>
           </div>
         </div>
       </section>
     </main>
 
     <!-- LIGHTBOX: mostra a imagem do anúncio ampliada ao clicar -->
-    <div id="lightbox-overlay" class="lightbox-overlay hidden">
-      <span class="lightbox-fechar">&times;</span>
+    <div id="lightbox-overlay" class="lightbox-overlay hidden" role="dialog" aria-modal="true"
+      aria-label="Imagem ampliada do anúncio" aria-hidden="true">
+      <button type="button" class="lightbox-fechar" aria-label="Fechar imagem ampliada">&times;</button>
       <img id="lightbox-img" src="" alt="Imagem ampliada do anúncio" />
     </div>
 

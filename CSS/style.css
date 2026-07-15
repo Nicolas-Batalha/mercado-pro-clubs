@@ -1,10 +1,27 @@
-@import url(global.css);
-@import url(header.css );
-@import url(hero.css);
-@import url(main.css);
-@import url(footer.css);
-@import url(style-perfil.css);
-@import url(mercado.css);
-@import url(torneio.css);
-@import url(cadastro.css);
-@import url(responsive.css);
+/* ==========================================================================
+   1. CONFIGURAÇÕES GLOBAIS
+   ========================================================================== */
+@import "global.css";
+
+/* ==========================================================================
+   2. ESTRUTURA / LAYOUT BASE
+   ========================================================================== */
+@import "header.css";
+@import "main.css";
+@import "footer.css";
+
+/* ========================================================================== 
+   3. PÁGINAS E COMPONENTES ESPECÍFICOS
+   ========================================================================== */
+@import "hero.css";
+@import "style-perfil.css";
+@import "mercado.css";
+@import "torneio.css";
+@import "cadastro.css";
+@import "clube.css";
+@import "admin.css";
+
+/* ========================================================================== 
+   4. RESPONSIVIDADE (Sempre por último para garantir a prioridade)
+   ========================================================================== */
+@import "responsive.css";

@@ -1,0 +1,56 @@
+// TRECHO DE EXEMPLO — não substitua suas regras atuais por este arquivo.
+// Mescle o conteúdo abaixo dentro de:
+// match /databases/{database}/documents { ... }
+
+function isAdmin() {
+  return request.auth != null
+    && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+    && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.ativo == true;
+}
+
+function canModerate() {
+  return isAdmin()
+    && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.permissoes is map
+    && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.permissoes.moderarConteudo == true;
+}
+
+// Cada usuário pode consultar somente o próprio documento administrativo.
+// A criação e alteração de administradores deve ser feita pelo Console do Firebase
+// ou, futuramente, por um servidor confiável com Firebase Admin SDK.
+match /admins/{uid} {
+  allow read: if request.auth != null && request.auth.uid == uid;
+  allow create, update, delete: if false;
+}
+
+// Permite ao painel consultar os dados usados nas métricas e listas.
+// Estes blocos podem coexistir com os blocos atuais das mesmas coleções.
+match /jogadores/{uid} {
+  allow read: if isAdmin();
+}
+
+match /clubes/{clubeId} {
+  allow read: if isAdmin();
+}
+
+match /vagas/{vagaId} {
+  allow read: if isAdmin();
+  allow delete: if canModerate();
+}
+
+match /denuncias/{denunciaId} {
+  allow read: if isAdmin();
+  allow update, delete: if canModerate();
+}
+
+match /convitesClube/{conviteId} {
+  allow read: if isAdmin();
+}
+
+// Histórico administrativo: administradores podem ler; somente moderadores
+// podem criar um registro atribuído ao próprio UID. Logs não são editáveis.
+match /logsAdmin/{logId} {
+  allow read: if isAdmin();
+  allow create: if canModerate()
+    && request.resource.data.adminUid == request.auth.uid;
+  allow update, delete: if false;
+}

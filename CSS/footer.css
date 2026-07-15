@@ -37,3 +37,19 @@
   line-height: 1.8;
   margin: 0;
 }
+.instagram{
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.instagram img{
+  width: 30px;
+  height: auto;
+}
+.instagram a{
+  color: #ffffff;
+  list-style: none;
+  text-decoration: none;
+}

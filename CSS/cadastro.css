@@ -288,6 +288,89 @@ body.pagina-cadastro {
   height: 18px;
 }
 
+/* Segurança e mensagens da conta */
+.cad-senha-wrap {
+  position: relative;
+}
+
+.cad-senha-wrap input {
+  padding-right: 78px;
+}
+
+.cad-mostrar-senha {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  padding: 5px 7px;
+  border: 0;
+  background: transparent;
+  color: #12E06C;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cad-senha-dica,
+.cad-seguranca {
+  color: #A0AAB5;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.cad-senha-dica.media {
+  color: #f0b429;
+}
+
+.cad-senha-dica.forte {
+  color: #12E06C;
+}
+
+.cad-link-button {
+  align-self: center;
+  border: 0;
+  background: transparent;
+  color: #12E06C;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cad-feedback {
+  min-height: 18px;
+  color: #A0AAB5;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.cad-feedback.sucesso {
+  color: #12E06C;
+}
+
+.cad-feedback.aviso {
+  color: #f0b429;
+}
+
+.cad-feedback.erro {
+  color: #ff6b6b;
+}
+
+.cad-btn-primary:disabled,
+.cad-btn-google:disabled,
+.cad-link-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  transform: none;
+}
+
+.cad-seguranca {
+  margin-top: 16px;
+  text-align: center;
+}
+
 /* ─── RESPONSIVO ─── */
 @media (max-width: 768px) {
   .cad-main {

@@ -29,44 +29,55 @@
 
         <!-- ABAS: Cadastro / Login -->
         <div class="cad-tabs" role="tablist">
-          <button class="cad-tab active" id="tabCadastro" role="tab" aria-selected="true" aria-controls="form-cadastro">Criar conta</button>
-          <button class="cad-tab" id="tabLogin" role="tab" aria-selected="false" aria-controls="form-login">Já tenho conta</button>
+          <button type="button" class="cad-tab active" id="tabCadastro" role="tab" aria-selected="true" aria-controls="form-cadastro">Criar conta</button>
+          <button type="button" class="cad-tab" id="tabLogin" role="tab" aria-selected="false" aria-controls="form-login" tabindex="-1">Já tenho conta</button>
         </div>
 
         <!-- FORMULÁRIO DE CADASTRO -->
         <form id="form-cadastro" class="cad-form active" role="tabpanel" aria-labelledby="tabCadastro">
           <div class="cad-field">
             <label for="nome">Nome / Usuário</label>
-            <input type="text" id="nome" name="nome" autocomplete="username" placeholder="Ex: CraqueNeymar10" required />
+            <input type="text" id="nome" name="nome" autocomplete="username" placeholder="Ex: CraqueNeymar10" maxlength="40" required />
           </div>
           <div class="cad-field">
             <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" autocomplete="email" placeholder="exemplo@email.com" required />
+            <input type="email" id="email" name="email" autocomplete="email" autocapitalize="none" placeholder="exemplo@email.com" required />
           </div>
           <div class="cad-field">
             <label for="senha">Senha</label>
-            <input type="password" id="senha" name="senha" autocomplete="new-password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+            <div class="cad-senha-wrap">
+              <input type="password" id="senha" name="senha" autocomplete="new-password" placeholder="Mínimo 8 caracteres" required minlength="8" />
+              <button type="button" class="cad-mostrar-senha" data-alvo="senha" aria-label="Mostrar senha">Mostrar</button>
+            </div>
+            <p id="forca-senha" class="cad-senha-dica">Use 8 ou mais caracteres.</p>
           </div>
           <div class="cad-field">
             <label for="senha1">Repetir senha</label>
-            <!-- validarSenha precisa estar exposta em window (ex: window.validarSenha = validarSenha)
-                 já que auth.js/cadastro.js são type="module" e não expõem funções globalmente por padrão -->
-            <input type="password" id="senha1" name="senha1" autocomplete="new-password" placeholder="Repita a senha" required oninput="validarSenha(this)" />
+            <div class="cad-senha-wrap">
+              <input type="password" id="senha1" name="senha1" autocomplete="new-password" placeholder="Repita a senha" required minlength="8" />
+              <button type="button" class="cad-mostrar-senha" data-alvo="senha1" aria-label="Mostrar confirmação da senha">Mostrar</button>
+            </div>
           </div>
           <button type="submit" class="cad-btn-primary">Criar minha conta</button>
+          <p id="cadastro-feedback" class="cad-feedback" role="status" aria-live="polite"></p>
         </form>
 
         <!-- FORMULÁRIO DE LOGIN -->
         <form id="form-login" class="cad-form" role="tabpanel" aria-labelledby="tabLogin" hidden>
           <div class="cad-field">
             <label for="login-email">E-mail</label>
-            <input type="email" id="login-email" name="login-email" autocomplete="email" placeholder="exemplo@email.com" required />
+            <input type="email" id="login-email" name="login-email" autocomplete="email" autocapitalize="none" placeholder="exemplo@email.com" required />
           </div>
           <div class="cad-field">
             <label for="login-senha">Senha</label>
-            <input type="password" id="login-senha" name="login-senha" autocomplete="current-password" placeholder="Sua senha" required />
+            <div class="cad-senha-wrap">
+              <input type="password" id="login-senha" name="login-senha" autocomplete="current-password" placeholder="Sua senha" required />
+              <button type="button" class="cad-mostrar-senha" data-alvo="login-senha" aria-label="Mostrar senha">Mostrar</button>
+            </div>
           </div>
           <button type="submit" class="cad-btn-primary">Entrar</button>
+          <button type="button" id="btn-esqueci-senha" class="cad-link-button">Esqueci minha senha</button>
+          <p id="login-feedback" class="cad-feedback" role="status" aria-live="polite"></p>
         </form>
 
         <!-- DIVISOR -->
@@ -76,9 +87,11 @@
 
         <!-- BOTÃO GOOGLE -->
         <button type="button" class="cad-btn-google" id="btn-google">
-          <img src="../IMG/pesquisa.png" class="cad-google-icon" alt="Google" />
+          <img src="../IMG/pesquisa.png" class="cad-google-icon" alt="" />
           Entrar com o Google
         </button>
+        <p id="google-feedback" class="cad-feedback" role="status" aria-live="polite"></p>
+        <p class="cad-seguranca">🔒 Sua senha é processada com segurança pelo Firebase e não é armazenada neste site.</p>
 
       </div>
     </div>

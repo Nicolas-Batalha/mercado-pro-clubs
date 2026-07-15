@@ -28,10 +28,10 @@
     <link rel="icon" href="./IMG/favicon.svg" type="image/svg+xml" />
   </head>
 
-  <body class="">
+  <body>
     <header class="main-header">
       <div class="logo animar-scroll">
-        <a href="index.html" title="voltar para a página inicial">
+        <a href="index.html" title="Voltar para a página inicial">
           <img
             src="IMG/logo.svg"
             class="logo"
@@ -40,26 +40,29 @@
         </a>
       </div>
       <div class="menu-carrossel">
-        <nav>
+        <nav aria-label="Navegação principal">
           <ul class="lista-links animar-scroll">
             <li><a href="./HTML/mercado.html">mercado</a></li>
+            <li><a href="./HTML/clubes.html">clubes</a></li>
             <li><a href="#como-funciona">Como funciona</a></li>
           </ul>
         </nav>
       </div>
       <div class="login-header animar-scroll">
-        <div class="notification-icon" onclick="adicionarNotificacao()">
+        <div class="notification-icon" id="sino-btn" role="button" tabindex="0" hidden
+          aria-label="Abrir notificações" aria-expanded="false">
           <span class="bell-icon">🔔</span>
           <span id="badge" class="notification-badge hidden">0</span>
         </div>
-        <div class="email-container" id="emailIcon">
-          <svg viewBox="0 0 24 24" class="email-icon">
+        <div class="email-container" id="emailIcon" role="button" tabindex="0" hidden
+          aria-label="Abrir mensagens" aria-expanded="false">
+          <svg viewBox="0 0 24 24" class="email-icon" aria-hidden="true">
             <path
               d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
             />
           </svg>
         </div>
-        <div class="login-header" id="login-header">
+        <div id="login-header">
           <!-- preenchido dinamicamente por header-auth.js (botão de login ou avatar do usuário) -->
         </div>
       </div>
@@ -81,7 +84,7 @@
             >CRIAR SEU PERFIL ⚽</a
           >
         </div>
-        <section class="card-grid animar-scroll">
+        <div class="card-grid animar-scroll">
           <div class="card">
             <div class="card-icon">
               <img
@@ -127,7 +130,7 @@
               </p>
             </div>
           </div>
-        </section>
+        </div>
       </section>
       <section class="como-funciona" id="como-funciona">
         <div class="header-funciona"></div>
@@ -144,7 +147,7 @@
             alt="Ícone de criar perfil"
           />
           <p>
-            Crie seu perfil Cadastre posição, plataforma e histórico. <br />
+            Crie seu perfil. Cadastre posição, plataforma e histórico. <br />
             Seu perfil vira sua carteira de jogador.
           </p>
           <a href="HTML/cadastrar-se.html" class="btn-neon"
@@ -160,7 +163,7 @@
             alt="Ícone de mercado de jogadores"
           />
           <p>
-            Apareça na aba mercado Você entra na lista de disponíveis,
+            Apareça na aba Mercado. Você entra na lista de disponíveis,
             <br />visível para todos os clubes cadastrados.
           </p>
           <a href="./HTML/mercado.html" class="btn-mercado">mercado</a>
@@ -187,8 +190,8 @@
             alt="Ícone de contrato fechado"
           />
           <p>
-            Combinem os detalhes pelo chat do clube — você também recebe o aviso
-            por e-mail — e é só entrar em campo pelo novo clube.
+            Combinem os detalhes pelo chat do clube e acompanhem tudo pelo painel
+            de mensagens. Depois, é só entrar em campo pelo novo clube.
           </p>
         </div>
       </section>
@@ -205,13 +208,22 @@
           Todas as marcas registradas pertencem a seus respectivos
           proprietários.
         </p>
+
+        <div class="instagram">
+        <a href="https://www.instagram.com/mercado_pro_clubs/?hl=pt-br" target="_blank"
+          rel="noopener noreferrer" aria-label="Instagram do Mercado Pro Clubs">
+        <img src="./IMG/icone-instagram.svg" alt="" />
+        </a>
+        </div>
+
         <p class="footer-texto">
-          desenvolvedores Nicolas Batalha <br />
-          colaboradores Mateus Portes , Kauan Taconi
+          Desenvolvedor: Nicolas Batalha.<br />
+          Colaboradores: Mateus Portes e Kauan Taconi.
         </p>
       </div>
     </footer>
     <script src="./JS/script.js" defer></script>
+    <script type="module" src="./JS/times.js"></script>
     <script type="module" src="./JS/header-auth.js"></script>
   </body>
 </html>

@@ -4,11 +4,63 @@
 // NÃO chama initializeApp — importa auth de firebase-config.js.
 // =========================================================================
 
-import { auth }                                              from "./firebase-config.js";
-import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider }
+import { auth, db }                                          from "./firebase-config.js";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  updateProfile,
+} 
                                                              from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc, setDoc, serverTimestamp }
+                                                             from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const googleProvider = new GoogleAuthProvider();
+
+function mensagemErroAuth(err) {
+  const mensagens = {
+    "auth/email-already-in-use": "Este e-mail já está cadastrado.",
+    "auth/invalid-email": "Digite um e-mail válido.",
+    "auth/invalid-credential": "E-mail ou senha incorretos.",
+    "auth/weak-password": "A senha precisa ter pelo menos 8 caracteres.",
+    "auth/popup-closed-by-user": "A janela do Google foi fechada antes de concluir.",
+    "auth/popup-blocked": "O navegador bloqueou a janela do Google. Permita pop-ups e tente novamente.",
+    "auth/network-request-failed": "Falha de conexão. Confira sua internet e tente novamente.",
+    "auth/too-many-requests": "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
+    "auth/user-disabled": "Esta conta foi desativada. Entre em contato com o suporte.",
+    "auth/operation-not-allowed": "Este método de acesso ainda não está habilitado.",
+    "auth/unauthorized-domain": "Este endereço ainda não foi autorizado no Firebase.",
+  };
+  return mensagens[err?.code] || "Não foi possível concluir. Tente novamente.";
+}
+
+function mostrarFeedback(id, mensagem = "", tipo = "") {
+  const elemento = document.getElementById(id);
+  if (!elemento) return;
+  elemento.textContent = mensagem;
+  elemento.className = `cad-feedback${tipo ? ` ${tipo}` : ""}`;
+}
+
+function definirCarregando(botao, carregando, textoCarregando) {
+  if (!botao) return;
+  if (carregando) {
+    botao.dataset.textoOriginal = botao.textContent;
+    botao.textContent = textoCarregando;
+    botao.disabled = true;
+    botao.setAttribute("aria-busy", "true");
+    return;
+  }
+  botao.textContent = botao.dataset.textoOriginal || botao.textContent;
+  botao.disabled = false;
+  botao.removeAttribute("aria-busy");
+}
+
+function irParaInicio() {
+  window.location.href = "../index.html";
+}
 
 // ─── Utilitário: toast ────────────────────────────────────────────────────────
 function toast(msg, tipo = "sucesso") {
@@ -26,6 +78,8 @@ function toast(msg, tipo = "sucesso") {
     boxShadow: "0 4px 16px rgba(0,0,0,0.4)", zIndex: "9999",
     opacity: "0", transition: "opacity 0.3s",
   });
+  el.setAttribute("role", "status");
+  el.setAttribute("aria-live", "polite");
   document.body.appendChild(el);
   requestAnimationFrame(() => (el.style.opacity = "1"));
   setTimeout(() => {
@@ -39,43 +93,188 @@ const formCadastro = document.getElementById("form-cadastro");
 if (formCadastro) {
   formCadastro.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email  = document.getElementById("email").value.trim();
+    const nome   = document.getElementById("nome").value.trim();
+    const email  = document.getElementById("email").value.trim().toLowerCase();
     const senha  = document.getElementById("senha").value;
     const senha1 = document.getElementById("senha1").value;
+    const botao  = formCadastro.querySelector('button[type="submit"]');
+    mostrarFeedback("cadastro-feedback");
 
     if (senha !== senha1) {
       toast("As senhas não coincidem, craque!", "erro");
+      mostrarFeedback("cadastro-feedback", "As senhas digitadas não são iguais.", "erro");
       return;
     }
 
+    if (nome.length < 3) {
+      mostrarFeedback("cadastro-feedback", "Use um nome com pelo menos 3 caracteres.", "erro");
+      document.getElementById("nome")?.focus();
+      return;
+    }
+
+    if (senha.length < 8) {
+      mostrarFeedback("cadastro-feedback", "A senha precisa ter pelo menos 8 caracteres.", "erro");
+      document.getElementById("senha")?.focus();
+      return;
+    }
+
+    definirCarregando(botao, true, "Criando conta...");
     try {
       const { user } = await createUserWithEmailAndPassword(auth, email, senha);
-      toast(`Conta criada! Bem-vindo, ${user.email}`);
-      setTimeout(() => (window.location.href = "../index.html"), 1200);
+      try {
+        await updateProfile(user, { displayName: nome });
+      } catch (perfilAuthErr) {
+        console.warn("Não foi possível atualizar o nome da conta:", perfilAuthErr);
+      }
+      try {
+        await setDoc(doc(db, "jogadores", user.uid), {
+          nickname: nome,
+          email: user.email,
+          criadoEm: serverTimestamp(),
+        }, { merge: true });
+      } catch (perfilErr) {
+        console.error("Conta criada, mas o perfil inicial não pôde ser salvo:", perfilErr);
+      }
+      let verificacaoEnviada = true;
+      try {
+        await sendEmailVerification(user);
+      } catch (verificacaoErr) {
+        verificacaoEnviada = false;
+        console.warn("Conta criada, mas o e-mail de verificação não pôde ser enviado:", verificacaoErr);
+      }
+      const mensagem = verificacaoEnviada
+        ? "Conta criada! Enviamos um link de verificação para o seu e-mail."
+        : "Conta criada! Você já pode completar seu perfil.";
+      mostrarFeedback("cadastro-feedback", mensagem, verificacaoEnviada ? "sucesso" : "aviso");
+      toast(`Conta criada! Bem-vindo, ${nome}.`);
+      setTimeout(irParaInicio, 2600);
     } catch (err) {
-      toast("Erro ao criar conta: " + err.message, "erro");
+      const mensagem = mensagemErroAuth(err);
+      toast(mensagem, "erro");
+      mostrarFeedback("cadastro-feedback", mensagem, "erro");
+      definirCarregando(botao, false);
     }
   });
 }
+
+// ─── Login com e-mail e senha ────────────────────────────────────────────────
+const formLogin = document.getElementById("form-login");
+if (formLogin) {
+  formLogin.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("login-email").value.trim().toLowerCase();
+    const senha = document.getElementById("login-senha").value;
+    const botao = formLogin.querySelector('button[type="submit"]');
+
+    mostrarFeedback("login-feedback");
+    definirCarregando(botao, true, "Entrando...");
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, senha);
+      toast("Login realizado com sucesso!");
+      if (!user.emailVerified) {
+        mostrarFeedback(
+          "login-feedback",
+          "Login realizado. Verifique seu e-mail quando puder para proteger sua conta.",
+          "aviso",
+        );
+        setTimeout(irParaInicio, 1800);
+      } else {
+        mostrarFeedback("login-feedback", "Login realizado com sucesso!", "sucesso");
+        setTimeout(irParaInicio, 800);
+      }
+    } catch (err) {
+      const mensagem = mensagemErroAuth(err);
+      toast(mensagem, "erro");
+      mostrarFeedback("login-feedback", mensagem, "erro");
+      definirCarregando(botao, false);
+    }
+  });
+}
+
+// ─── Recuperação de senha ───────────────────────────────────────────────────
+const btnEsqueciSenha = document.getElementById("btn-esqueci-senha");
+btnEsqueciSenha?.addEventListener("click", async () => {
+  const campoEmail = document.getElementById("login-email");
+  const email = campoEmail?.value.trim().toLowerCase() || "";
+  mostrarFeedback("login-feedback");
+
+  if (!email || !campoEmail?.checkValidity()) {
+    mostrarFeedback("login-feedback", "Digite um e-mail válido para recuperar a senha.", "erro");
+    campoEmail?.focus();
+    campoEmail?.reportValidity();
+    return;
+  }
+
+  definirCarregando(btnEsqueciSenha, true, "Enviando...");
+  try {
+    await sendPasswordResetEmail(auth, email);
+    mostrarFeedback(
+      "login-feedback",
+      "Se existir uma conta com esse e-mail, você receberá o link para criar uma nova senha.",
+      "sucesso",
+    );
+  } catch (err) {
+    if (err?.code === "auth/user-not-found") {
+      mostrarFeedback(
+        "login-feedback",
+        "Se existir uma conta com esse e-mail, você receberá o link para criar uma nova senha.",
+        "sucesso",
+      );
+    } else {
+      mostrarFeedback("login-feedback", mensagemErroAuth(err), "erro");
+    }
+  } finally {
+    definirCarregando(btnEsqueciSenha, false);
+  }
+});
 
 // ─── Login / Cadastro com Google ──────────────────────────────────────────────
 const btnGoogle = document.getElementById("btn-google");
 if (btnGoogle) {
   btnGoogle.addEventListener("click", async () => {
+    mostrarFeedback("google-feedback");
+    definirCarregando(btnGoogle, true, "Conectando ao Google...");
     try {
       const { user } = await signInWithPopup(auth, googleProvider);
-      toast(`Conectado: ${user.displayName}`);
-      setTimeout(() => (window.location.href = "../index.html"), 1200);
+      try {
+        const perfilRef = doc(db, "jogadores", user.uid);
+        const perfilSnap = await getDoc(perfilRef);
+        if (!perfilSnap.exists()) {
+          await setDoc(perfilRef, {
+            nickname: user.displayName || "Jogador",
+            email: user.email || "",
+            fotoURL: user.photoURL || "",
+            criadoEm: serverTimestamp(),
+          });
+        }
+      } catch (perfilErr) {
+        console.error("Login concluído, mas o perfil inicial não pôde ser salvo:", perfilErr);
+      }
+      mostrarFeedback("google-feedback", "Conta conectada com sucesso!", "sucesso");
+      toast(`Conectado: ${user.displayName || user.email || "Jogador"}`);
+      setTimeout(irParaInicio, 1000);
     } catch (err) {
-      toast("Falha com o Google: " + err.message, "erro");
+      const mensagem = mensagemErroAuth(err);
+      toast(mensagem, "erro");
+      mostrarFeedback("google-feedback", mensagem, "erro");
+      definirCarregando(btnGoogle, false);
     }
   });
 }
 
-// ─── Validação de senha em tempo real (chamada pelo oninput do HTML) ──────────
+// ─── Validação de senha em tempo real ────────────────────────────────────────
 window.validarSenha = function (input) {
   const senha = document.getElementById("senha")?.value;
   if (senha !== undefined) {
     input.setCustomValidity(input.value !== senha ? "As senhas não batem!" : "");
   }
 };
+
+document.getElementById("senha")?.addEventListener("input", () => {
+  const confirmacao = document.getElementById("senha1");
+  if (confirmacao) window.validarSenha(confirmacao);
+});
+
+document.getElementById("senha1")?.addEventListener("input", (event) => {
+  window.validarSenha(event.currentTarget);
+});

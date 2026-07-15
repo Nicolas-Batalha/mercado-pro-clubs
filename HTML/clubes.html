@@ -1,43 +1,533 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Procure jogadores e clubes de Pro Clubs por posição, plataforma e versão do jogo (EAFC23 a 26). Encontre seu próximo time ou reforço para o elenco.">
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Gerencie as informações, o elenco, as vagas e os contatos do seu clube de Pro Clubs."
+    />
     <link rel="stylesheet" href="../CSS/style.css" />
-    <link rel="icon" href="./IMG/favicon.svg" type="image/svg+xml">
-    <title>meu-clube / gerenciar seu clube </title>
-    <meta name="description" content="Veja vagas abertas em clubes de Pro Clubs, filtre por posição e plataforma, e candidate-se direto pela plataforma.">
-</head>
-<body>
+    <link rel="stylesheet" href="../CSS/clube.css" />
+    <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml" />
+    <title>Meu Clube | Mercado Pro Clubs</title>
+  </head>
+
+  <body class="animar-scroll">
     <header class="main-header">
       <div class="logo animar-scroll">
-        <a href="../index.html" title="voltar para a página inicial">
-          <img src="../IMG/logo.svg" class="logo" alt="Pro Clubs Hub Brasil Logo" />
+        <a href="../index.html" title="Voltar para a página inicial">
+          <img
+            src="../IMG/logo.svg"
+            class="logo"
+            alt="Pro Clubs Hub Brasil Logo"
+          />
         </a>
       </div>
       <div class="menu-carrossel">
-        <nav>
+        <nav aria-label="Navegação principal">
           <ul class="lista-links animar-scroll">
             <li><a href="./meu-perfil.html">meu perfil</a></li>
+            <li><a href="../HTML/mercado.html">mercado</a></li>
           </ul>
         </nav>
       </div>
       <div class="login-header animar-scroll">
         <!-- Sino de notificações -->
-        <div class="notification-icon" id="sino-btn" style="position:relative;cursor:pointer">
+        <div
+          class="notification-icon"
+          id="sino-btn"
+          hidden
+          role="button"
+          tabindex="0"
+          aria-label="Abrir notificações"
+          aria-expanded="false"
+          style="position: relative; cursor: pointer"
+        >
           <span class="bell-icon">🔔</span>
           <span id="badge" class="notification-badge hidden">0</span>
         </div>
         <!-- Ícone de mensagens → vai para o chat mais recente -->
-        <div class="email-container" id="emailIcon">
-          <svg viewBox="0 0 24 24" class="email-icon">
-            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+        <div class="email-container" id="emailIcon" role="button" tabindex="0" hidden
+          aria-label="Abrir mensagens" aria-expanded="false">
+          <svg viewBox="0 0 24 24" class="email-icon" aria-hidden="true">
+            <path
+              d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+            />
           </svg>
         </div>
         <!-- Avatar / botões de login injetados pelo header-auth.js -->
         <div id="login-header"></div>
       </div>
     </header>
-</body>
+    <main>
+      <section class="menu">
+        <div class="menu-clubes">
+        <div class="img-menu">
+          <img src="../IMG/football-club.png" alt="Ilustração de um clube de futebol">
+        </div>
+        <div class="text-menu">
+          <h1>Meu Clube</h1>
+          <p>Configure todas as informações que serão exibidas <br> para os jogadores que visitarem seu perfil.</p>
+        </div>
+        <div class="menu-acao">
+          <button type="button" id="btn-salvar-clube" class="btn-salvar-clube">
+            <svg viewBox="0 0 24 24" class="salvar-icon"><path d="M5 4h11l3 3v13H5V4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 4v5h8V4M8 14h8v6H8v-6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            Salvar Alterações
+          </button>
+        </div>
+        </div>
+        <nav class="abas-clube" role="tablist" aria-label="Seções do clube">
+          <button type="button" class="aba-item ativo" id="aba-geral" role="tab" aria-selected="true" aria-controls="painel-geral" data-tab="geral">Geral</button>
+          <button type="button" class="aba-item" id="aba-elenco" role="tab" aria-selected="false" aria-controls="painel-elenco" tabindex="-1" data-tab="elenco">Elenco</button>
+          <button type="button" class="aba-item" id="aba-vagas" role="tab" aria-selected="false" aria-controls="painel-vagas" tabindex="-1" data-tab="vagas">Vagas</button>
+          <button type="button" class="aba-item" id="aba-estatisticas" role="tab" aria-selected="false" aria-controls="painel-estatisticas" tabindex="-1" data-tab="estatisticas">Estatísticas</button>
+          <button type="button" class="aba-item" id="aba-aparencia" role="tab" aria-selected="false" aria-controls="painel-aparencia" tabindex="-1" data-tab="aparencia">Aparência</button>
+        </nav>
+      </section>
+      <section aria-label="Painel do clube">
+        <div class="tab-painel ativo" id="painel-geral" role="tabpanel" aria-labelledby="aba-geral" data-painel="geral">
+        <div class="dashboard" id="dashboard-clube">
+          <div class="escudo card">
+            <div class="titulo-dashboard">
+            <h3 class="card-title">Escudo do Clube</h3>
+            </div>
+            <div class="escudo-content">
+              <img
+                id="foto-perfil-preview"
+                src="../IMG/real madrid.svg"
+                alt="Escudo do clube"
+                class="escudo-img"
+              />
+              <div class="button-upload">
+                <button type="button" id="btn-upload-escudo">
+                  <img src="../IMG/upload-file-svgrepo-com.svg" alt="" />
+                  <span>Fazer upload</span>
+                </button>
+                <input type="file" name="upload-escudo" id="upload-escudo" accept="image/png,image/jpeg,image/webp" aria-label="Selecionar escudo do clube" hidden />
+              </div>
+              <p>PNG ou JPG. Máx 2MB.</p>
+            </div>
+          </div>
+
+          <div class="informações card">
+            <h3 class="card-title">Informações do Clube</h3>
+            <div class="info-content">
+              <div class="btn-info">
+                <div class="btn-info-img">
+                  <img
+                    src="../IMG/field-football-svgrepo-com.svg"
+                    alt=""
+                    class="icon-static"
+                  />
+                  <div>
+                    <div class="field">
+                      <label for="clube" class="text-info">Nome do Clube</label>
+                      <input
+                        type="text"
+                        id="clube"
+                        value="Brazilian Stars FC"
+                        class="modifcação"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="btn-info">
+                <div class="btn-info-img">
+                  <img
+                    src="../IMG/platform-managementhost-management-svgrepo-com.svg"
+                    alt=""
+                    class="icon-static"
+                  />
+                  <div class="field">
+                    <label for="plataforma" class="text-info">Plataforma</label>
+                    <div class="select-box">
+                      <select name="plataforma-clube" id="plataforma">
+                        <option value="new-gen">nova geração</option>
+                        <option value="ven-gen">velha geração</option>
+                        <option value="switch">switch</option>
+                      </select>
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="btn-info">
+                <div class="btn-info-img">
+                  <img
+                    src="../IMG/football-spain-svgrepo-com.svg"
+                    alt=""
+                    class="icon-static"
+                  />
+                  <div class="field">
+                    <label for="divisao" class="text-info">Divisão</label>
+                    <div class="select-box">
+                      <select name="divisao-clube" id="divisao">
+                        <option value="Divisão 1">Divisão 1</option>
+                        <option value="Divisão 2">Divisão 2</option>
+                        <option value="Divisão 3">Divisão 3</option>
+                        <option value="Divisão 4">Divisão 4</option>
+                        <option value="Divisão 5">Divisão 5</option>
+                      </select>
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="btn-info">
+                <div class="btn-info-img">
+                  <img
+                    src="../IMG/global-search-svgrepo-com.svg"
+                    alt=""
+                    class="icon-static"
+                  />
+                  <div class="field">
+                    <label for="regiao" class="text-info">Região</label>
+                    <div class="select-box">
+                      <select name="regiao-clube" id="regiao">
+                        <option value="America do Sul">América do Sul</option>
+                        <option value="Norte Americano">Norte Americano</option>
+                        <option value="Europa">Europa</option>
+                      </select>
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="btn-info">
+                <div class="btn-info-img">
+                  <img
+                    src="../IMG/joystick-svgrepo-com.svg"
+                    alt=""
+                    class="icon-static"
+                  />
+                  <div class="field">
+                    <label for="jogo" class="text-info">Jogo</label>
+                    <div class="select-box">
+                      <select name="jogo-clube" id="jogo">
+                        <option value="EA FC 26">EA FC 26</option>
+                        <option value="EA FC 25">EA FC 25</option>
+                        <option value="EA FC 24">EA FC 24</option>
+                        <option value="EA FC 23">EA FC 23</option>
+                        <option value="EA FC 22">EA FC 22</option>
+                      </select>
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="preview card">
+            <div class="titulo-dashboard">
+              <h3>Preview do Clube</h3>
+            </div>
+            <div>
+              <img
+                id="preview-escudo"
+                class="escudo-img"
+                src="../IMG/real madrid.svg"
+                alt="Escudo"
+                onerror="this.src = '../IMG/user-icon.svg'"
+              />
+            </div>
+            <p id="preview-nome" class="preview-nome">Brazilian Stars FC</p>
+            <div class="preview-estrelas">
+              <svg viewBox="0 0 20 20" class="star-icon filled"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.2 1.3 6-5.4-3.1-5.4 3.1 1.3-6L1.3 7.2l6.1-.6L10 1z"/></svg>
+              <svg viewBox="0 0 20 20" class="star-icon filled"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.2 1.3 6-5.4-3.1-5.4 3.1 1.3-6L1.3 7.2l6.1-.6L10 1z"/></svg>
+              <svg viewBox="0 0 20 20" class="star-icon filled"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.2 1.3 6-5.4-3.1-5.4 3.1 1.3-6L1.3 7.2l6.1-.6L10 1z"/></svg>
+              <svg viewBox="0 0 20 20" class="star-icon filled"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.2 1.3 6-5.4-3.1-5.4 3.1 1.3-6L1.3 7.2l6.1-.6L10 1z"/></svg>
+              <svg viewBox="0 0 20 20" class="star-icon filled"><path d="M10 1l2.6 5.6 6.1.6-4.6 4.2 1.3 6-5.4-3.1-5.4 3.1 1.3-6L1.3 7.2l6.1-.6L10 1z"/></svg>
+            </div>
+              <div class="preview-info">
+              <div class="preview-linha">
+                <img src="../IMG/trophy-svgrepo-com.svg" alt="" class="preview-img">
+                <span class="preview-label">Estilo</span><span id="preview-objetivo" class="preview-valor">Competitivo</span>
+              </div>
+              <div class="preview-linha">
+                <img src="../IMG/joystick-svgrepo-com.svg" alt="" class="preview-img">
+                <span class="preview-label">Jogo</span><span id="preview-jogo" class="preview-valor">EA FC 25</span>
+              </div>
+              <div class="preview-linha">
+                <img src="../IMG/platform-managementhost-management-svgrepo-com.svg" alt="" class="preview-img">
+                <span class="preview-label">Plataforma</span><span id="preview-plataforma" class="preview-valor">PlayStation</span>
+              </div>
+              <div class="preview-linha">
+                <img src="../IMG/football-spain-svgrepo-com.svg" alt="" class="preview-img">
+                <span class="preview-label">Divisão</span><span id="preview-divisao" class="preview-valor">Divisão 1</span>
+              </div>
+              <hr>
+              <div class="preview-linha">
+                <img src="../IMG/run-sports-runner-svgrepo-com.svg" alt="" class="preview-img">
+                <span class="preview-label">Treinos</span><span id="preview-treinos" class="preview-valor">Ter · Qui · Dom</span>
+              </div>
+              <div class="preview-linha">
+                <svg viewBox="0 0 24 24" class="preview-img preview-svg"><path d="M12 2l1.8 5.5H19l-4.6 3.4L16 16l-4-2.9L8 16l1.6-5.1L5 7.5h5.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                <span class="preview-label">Procurando</span>
+                <span class="preview-badges">
+                  <span class="badge">VOL</span><span class="badge">ATA</span><span class="badge">GOL</span>
+                </span>
+              </div>
+              <div class="preview-linha">
+                <svg viewBox="0 0 24 24" class="preview-img preview-svg"><path d="M4 12a8 8 0 1116 0 8 8 0 01-16 0z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 10c1.2-1 2.6-1 4 0s2.8 1 4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <span class="preview-label">Redes Sociais</span>
+                <span class="preview-social">
+                  <svg viewBox="0 0 24 24" class="social-icon"><path d="M8 9c2.5-1.2 5.5-1.2 8 0M8.5 16c2.2 1 4.8 1 7 0M7 8.2C5 9.5 4.3 12.5 4.5 15.3c1.4 1.4 3.6 2.2 3.6 2.2l.9-1.4M17 8.2c2 1.3 2.7 4.3 2.5 7.1-1.4 1.4-3.6 2.2-3.6 2.2l-.9-1.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="12.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+                </span>
+              </div>
+            </div>
+            <button type="button" class="btn-editar-perfil">
+              <svg viewBox="0 0 24 24" class="edit-icon"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 000-3L17 5a2.1 2.1 0 00-3 0L3.5 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              Editar Perfil
+            </button>
+          </aside>
+
+          <div class="perfil card">
+            <h3 class="card-title">Perfil do Clube</h3>
+            <div class="perfil-grid">
+              <div class="field-box">
+                <label for="estilo-jogo" class="text-info">Estilo de jogo</label>
+                <input type="text" id="estilo-jogo" value="Posse de bola" class="modifcação" />
+              </div>
+              <div class="field-box">
+                <label for="horario-treino" class="text-info">Horário dos treinos</label>
+                <input type="time" id="horario-treino" value="21:00" class="modifcação" />
+              </div>
+              <div class="field-box">
+                <label class="text-info">Dias da semana</label>
+                <div class="dias-badges">
+                  <button type="button" class="chip active" data-dia="domingo">Dom</button>
+                  <button type="button" class="chip" data-dia="segunda">Seg</button>
+                  <button type="button" class="chip active" data-dia="terca">Ter</button>
+                  <button type="button" class="chip" data-dia="quarta">Qua</button>
+                  <button type="button" class="chip active" data-dia="quinta">Qui</button>
+                  <button type="button" class="chip" data-dia="sexta">Sex</button>
+                  <button type="button" class="chip" data-dia="sabado">Sáb</button>
+                </div>
+              </div>
+              <div class="field-box">
+                <label for="objetivo" class="text-info">Objetivo</label>
+                <div class="select-box">
+                  <select id="objetivo" name="objetivo">
+                    <option value="competitivo" selected>Competitivo</option>
+                    <option value="casual">Casual</option>
+                    <option value="misto">Misto</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+              </div>
+            </div>
+            <div class="field-box descricao-box">
+              <label for="descricao" class="text-info">Descrição</label>
+              <textarea id="descricao" class="modifcação" rows="2">Clube focado em competições e evolução constante. Buscamos jogadores comprometidos, ativos e que jogam em equipe.</textarea>
+            </div>
+          </div>
+
+          <div class="redes card">
+            <h3 class="card-title">Redes Sociais</h3>
+            <ul class="redes-lista">
+              <li class="rede-item">
+                <img src="../IMG/discord-svgrepo-com.svg" alt="discord" class="social-icon">
+                <label for="discord" class="rede-nome">Discord</label>
+                <input type="text" id="discord" name="discord" class="rede-valor rede-input" value="discord.gg/bstarsfc" placeholder="link do discord" />
+              </li>
+              <li class="rede-item">
+                <img src="../IMG/icone-whatsapp.svg" alt="whatsapp" class="social-icon">
+                <label for="whatsapp" class="rede-nome">WhatsApp</label>
+                <input type="tel" id="whatsapp" name="whatsapp" class="rede-valor rede-input" value="(11) 98765-4321" placeholder="número de contato" />
+              </li>
+              <li class="rede-item">
+                <img src="../IMG/icone-instagram.svg" alt="instagram" class="social-icon">
+                <label for="instagram" class="rede-nome">Instagram</label>
+                <input type="text" id="instagram" name="instagram" class="rede-valor rede-input" value="@brazilianstarsfc" placeholder="@usuario" />
+              </li>
+            </ul>
+          </div>
+
+          <div class="capitao card">
+            <div class="titulo-dashboard">
+            <h3 class="card-title">Capitão do Clube</h3>
+            </div>
+            <div class="capita-flex">
+              <div class="field-box">
+                <label for="capitao-nome" class="text-info">Nome</label>
+                <input type="text" id="capitao-nome" value="Nicolas Batalha" class="modifcação" />
+              </div>
+              <div class="field-box">
+                <label for="capitao-idea" class="text-info">ID EA</label>
+                <input type="text" id="capitao-idea" value="NicoBatalha10" class="modifcação" />
+              </div>
+              <div class="field-box">
+                <label for="capitao-microfone" class="text-info">Microfone</label>
+                <div class="select-box">
+                  <select id="capitao-microfone" name="capitao-microfone">
+                    <option value="sim" selected>Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+              </div>
+              </div>
+          </div>
+
+          <div class="necessidades card">
+            <h3 class="card-title">Necessidades do Clube</h3>
+            <div class="necessidades-grid">
+              <label class="posicao-item necessidade-item marcado">
+                <input type="checkbox" data-pos-check="goleiro" checked />
+                <span class="checkbox-visual"></span>
+                <svg viewBox="0 0 24 24" class="posicao-icon"><path d="M12 3l2 3-2 2-2-2 2-3zM6 8l2 4-2 3M18 8l-2 4 2 3M9 12h6l-1 6H10l-1-6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Goleiro
+              </label>
+              <label class="posicao-item necessidade-item marcado">
+                <input type="checkbox" data-pos-check="zagueiro" checked />
+                <span class="checkbox-visual"></span>
+                <svg viewBox="0 0 24 24" class="posicao-icon"><path d="M12 2l7 3v6c0 5-3 8-7 11-4-3-7-6-7-11V5l7-3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Zagueiro
+              </label>
+              <label class="posicao-item necessidade-item">
+                <input type="checkbox" data-pos-check="lateral" />
+                <span class="checkbox-visual"></span>
+                <svg viewBox="0 0 24 24" class="posicao-icon"><path d="M4 4v16M4 5h11l-2 3 2 3H4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Lateral
+              </label>
+              <label class="posicao-item necessidade-item marcado">
+                <input type="checkbox" data-pos-check="volante" checked />
+                <span class="checkbox-visual"></span>
+                <svg viewBox="0 0 24 24" class="posicao-icon"><path d="M12 3a3.5 3.5 0 110 7 3.5 3.5 0 010-7zM6 21c.5-4 2.8-6.5 6-6.5S17.5 17 18 21" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                Volante
+              </label>
+              <label class="posicao-item necessidade-item">
+                <input type="checkbox" data-pos-check="meia" />
+                <span class="checkbox-visual"></span>
+                <svg viewBox="0 0 24 24" class="posicao-icon"><path d="M12 3v18M4 8l16 8M20 8L4 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Meia
+              </label>
+              <label class="posicao-item necessidade-item marcado">
+                <input type="checkbox" data-pos-check="atacante" checked />
+                <span class="checkbox-visual"></span>
+                <svg viewBox="0 0 24 24" class="posicao-icon"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4" stroke="currentColor" stroke-width="1.5"/></svg>
+                Atacante
+              </label>
+            </div>
+          </div>
+
+          <div class="stats card">
+            <div class="text-stats">
+            <h3 class="card-title">Estatísticas do Clube</h3>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-box">
+                <svg viewBox="0 0 24 24" class="stat-icon"><circle cx="9" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="8.5" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M15.3 14c2.6.2 4.7 2 4.7 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                <span class="stat-numero" id="stat-jogadores">0</span>
+                <span class="stat-label">Jogadores</span>
+              </div>
+              <div class="stat-box">
+                <svg viewBox="0 0 24 24" class="stat-icon"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 9h6M9 12h6M9 15h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span class="stat-numero" id="stat-vagas">0</span>
+                <span class="stat-label">Vagas</span>
+              </div>
+              <div class="stat-box">
+                <svg viewBox="0 0 24 24" class="stat-icon"><path d="M12 3l2.6 5.6 6.1.6-4.6 4.2 1.3 6-5.4-3.1-5.4 3.1 1.3-6-4.6-4.2 6.1-.6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                <span class="stat-numero">—</span>
+                <span class="stat-label">Reputação</span>
+              </div>
+              <div class="stat-box">
+                <svg viewBox="0 0 24 24" class="stat-icon"><rect x="3" y="8" width="18" height="9" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="12.5" r="1.3" fill="currentColor" stroke="none"/><path d="M15 11.2v2.6M13.7 12.5h2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <span class="stat-numero">—</span>
+                <span class="stat-label">Partidas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <div class="tab-painel" id="painel-elenco" role="tabpanel" aria-labelledby="aba-elenco" data-painel="elenco" hidden>
+          <div class="elenco-layout">
+            <div class="elenco-principal card">
+              <div class="elenco-cabecalho">
+                <h3 class="card-title">Elenco do Clube</h3>
+                <p class="elenco-subtitulo">Visualize e gerencie todos os jogadores do seu elenco.</p>
+              </div>
+
+              <div class="elenco-toolbar">
+                <div class="elenco-busca">
+                  <svg viewBox="0 0 24 24" class="busca-icon"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                  <label for="elenco-busca" class="sr-only">Buscar jogador no elenco</label>
+                  <input type="search" id="elenco-busca" placeholder="Buscar jogador..." />
+                </div>
+                <div class="select-box elenco-filtro">
+                  <label for="elenco-filtro-posicao" class="sr-only">Filtrar elenco por posição</label>
+                  <select id="elenco-filtro-posicao" aria-label="Filtrar elenco por posição">
+                    <option value="todas">Todas as posições</option>
+                    <option value="goleiro">Goleiro</option>
+                    <option value="zagueiro">Zagueiro</option>
+                    <option value="lateral">Lateral</option>
+                    <option value="volante">Volante</option>
+                    <option value="meia">Meia</option>
+                    <option value="atacante">Atacante</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <button type="button" class="btn-convidar-jogador" id="btn-convidar-jogador">
+                  <svg viewBox="0 0 24 24" class="convidar-icon"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  Convidar Jogador
+                </button>
+              </div>
+
+              <div class="elenco-tabela-wrap">
+                <table class="elenco-tabela">
+                  <thead>
+                    <tr>
+                      <th>Jogador</th>
+                      <th>Posição</th>
+                      <th>Ger</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="elenco-tbody">
+                    <tr><td colspan="4" class="elenco-vazio">Carregando elenco...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="elenco-paginacao">
+                <span id="elenco-mostrando" class="elenco-mostrando">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-painel" id="painel-vagas" role="tabpanel" aria-labelledby="aba-vagas" data-painel="vagas" hidden>
+          <div class="card em-breve-card">
+            <h3 class="card-title">Vagas do Clube</h3>
+            <p class="elenco-subtitulo">(Em construção 🚧)</p>
+            <p class="elenco-subtitulo">Em breve você vai poder gerenciar as vagas publicadas direto por aqui.</p>
+          </div>
+        </div>
+
+        <div class="tab-painel" id="painel-estatisticas" role="tabpanel" aria-labelledby="aba-estatisticas" data-painel="estatisticas" hidden>
+          <div class="card em-breve-card">
+            <h3 class="card-title">Estatísticas do Clube</h3>
+            <p class="elenco-subtitulo">(Em construção 🚧)</p>
+            <p class="elenco-subtitulo">Em breve: histórico de partidas, desempenho e evolução do elenco.</p>
+          </div>
+        </div>
+
+        <div class="tab-painel" id="painel-aparencia" role="tabpanel" aria-labelledby="aba-aparencia" data-painel="aparencia" hidden>
+          <div class="card em-breve-card">
+            <h3 class="card-title">Aparência do Clube</h3>
+            <p class="elenco-subtitulo">(Em construção 🚧)</p>
+            <p class="elenco-subtitulo">Em breve: personalize cores, banner e identidade visual do seu clube.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="../JS/script.js" defer></script>
+    <script type="module" src="../JS/times.js"></script>
+    <script type="module" src="../JS/header-auth.js"></script>
+    <script type="module" src="../JS/clube.js"></script>
+  </body>
 </html>

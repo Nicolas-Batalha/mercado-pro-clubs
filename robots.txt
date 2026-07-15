@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /HTML/meu-perfil.html
+Disallow: /HTML/admin.html
 
 Sitemap: https://www.mercadoproclubs.com/sitemap.xml
