@@ -1,0 +1,481 @@
+/* ==========================================================================
+   MINHAS NEGOCIAÇÕES
+   ========================================================================== */
+.body-negociacoes {
+  min-height: 100vh;
+}
+
+.negociacoes-main {
+  width: min(1120px, calc(100% - 40px));
+  min-height: 68vh;
+  margin: 0 auto;
+  padding: 42px 0 30px;
+}
+
+.negociacoes-acesso {
+  display: flex;
+  min-height: 380px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 30px;
+  color: #a0aab5;
+  text-align: center;
+}
+
+.negociacoes-acesso h1 {
+  margin: 18px 0 8px;
+  color: #fff;
+  font-size: 1.55rem;
+}
+
+.negociacoes-acesso p {
+  max-width: 520px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.negociacoes-acesso a {
+  display: inline-flex;
+  margin-top: 18px;
+  padding: 11px 18px;
+  color: #07130b;
+  border-radius: 9px;
+  background: #12e06c;
+  text-decoration: none;
+  font-weight: 850;
+}
+
+.negociacoes-carregando {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(18, 224, 108, 0.18);
+  border-top-color: #12e06c;
+  border-radius: 50%;
+  animation: negociacoes-girar 0.8s linear infinite;
+}
+
+@keyframes negociacoes-girar {
+  to { transform: rotate(360deg); }
+}
+
+.negociacoes-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  padding: clamp(28px, 4vw, 48px);
+  border: 1px solid rgba(18, 224, 108, 0.18);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 88% 15%, rgba(18, 224, 108, 0.15), transparent 35%),
+    linear-gradient(145deg, rgba(15, 26, 44, 0.98), rgba(7, 16, 27, 0.98));
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.25);
+}
+
+.negociacoes-kicker {
+  display: block;
+  margin-bottom: 8px;
+  color: #12e06c;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+
+.negociacoes-hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2rem, 4.4vw, 3.8rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.negociacoes-hero p {
+  max-width: 650px;
+  margin: 14px 0 0;
+  color: #a0aab5;
+  line-height: 1.7;
+}
+
+.negociacoes-cta {
+  display: inline-flex;
+  min-height: 45px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  color: #07130b;
+  border-radius: 10px;
+  background: #12e06c;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.negociacoes-metricas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.negociacoes-metricas article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid rgba(160, 170, 181, 0.15);
+  border-radius: 14px;
+  background: rgba(15, 26, 44, 0.9);
+}
+
+.negociacoes-metricas span {
+  color: #9da8b3;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.negociacoes-metricas strong {
+  color: #12e06c;
+  font-size: 1.6rem;
+}
+
+.negociacoes-abas {
+  display: flex;
+  gap: 8px;
+  margin-top: 26px;
+  padding: 6px;
+  overflow-x: auto;
+  border: 1px solid rgba(160, 170, 181, 0.14);
+  border-radius: 12px;
+  background: rgba(5, 11, 20, 0.68);
+}
+
+.negociacoes-aba {
+  display: inline-flex;
+  min-width: max-content;
+  min-height: 42px;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 15px;
+  color: #8f9ba7;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.negociacoes-aba span {
+  min-width: 20px;
+  padding: 3px 6px;
+  color: #b9c3cc;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 0.62rem;
+}
+
+.negociacoes-aba.ativa {
+  color: #07130b;
+  background: #12e06c;
+}
+
+.negociacoes-aba.ativa span {
+  color: #07130b;
+  background: rgba(7, 19, 11, 0.13);
+}
+
+.negociacoes-painel {
+  padding: 30px 0 6px;
+}
+
+.negociacoes-secao-topo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.negociacoes-secao-topo h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+}
+
+.negociacoes-secao-topo > p {
+  max-width: 430px;
+  margin: 0;
+  color: #8995a1;
+  font-size: 0.73rem;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.negociacoes-lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.negociacao-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 19px;
+  border: 1px solid rgba(160, 170, 181, 0.16);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(15, 26, 44, 0.96), rgba(8, 17, 28, 0.96));
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
+}
+
+.negociacao-card.nao-lido {
+  border-color: rgba(18, 224, 108, 0.42);
+}
+
+.negociacao-card-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.negociacao-tipo {
+  display: block;
+  margin-bottom: 6px;
+  color: #12e06c;
+  font-size: 0.61rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.negociacao-card h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.negociacao-status {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  color: #c9d0d6;
+  border-radius: 999px;
+  background: rgba(160, 170, 181, 0.12);
+  font-size: 0.61rem;
+  font-weight: 900;
+}
+
+.negociacao-status.status-pendente {
+  color: #f0b429;
+  background: rgba(240, 180, 41, 0.12);
+}
+
+.negociacao-status.status-aceito {
+  color: #4be488;
+  background: rgba(18, 224, 108, 0.11);
+}
+
+.negociacao-status.status-recusado {
+  color: #ff8585;
+  background: rgba(211, 47, 47, 0.12);
+}
+
+.negociacao-status.status-cancelado {
+  color: #9ca7b1;
+  background: rgba(160, 170, 181, 0.1);
+}
+
+.negociacao-resumo {
+  min-height: 42px;
+  margin: 13px 0 0;
+  color: #97a3ae;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.negociacao-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.negociacao-meta span {
+  padding: 5px 8px;
+  color: #aeb8c2;
+  border: 1px solid rgba(160, 170, 181, 0.15);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 0.61rem;
+  font-weight: 750;
+}
+
+.negociacao-data {
+  margin-top: 12px;
+  color: #687581;
+  font-size: 0.63rem;
+}
+
+.negociacao-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.negociacao-acao {
+  display: inline-flex;
+  min-height: 36px;
+  flex: 1 1 120px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 11px;
+  color: #d9e1e8;
+  border: 1px solid #344250;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+  text-decoration: none;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.negociacao-acao.primaria {
+  color: #07130b;
+  border-color: #12e06c;
+  background: #12e06c;
+}
+
+.negociacao-acao.perigo {
+  color: #ff9a9a;
+  border-color: rgba(255, 123, 123, 0.38);
+  background: rgba(211, 47, 47, 0.06);
+}
+
+.negociacao-acao:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.negociacoes-vazio {
+  grid-column: 1 / -1;
+  padding: 50px 22px;
+  color: #8d99a5;
+  border: 1px dashed rgba(160, 170, 181, 0.22);
+  border-radius: 15px;
+  background: rgba(5, 11, 20, 0.48);
+  text-align: center;
+}
+
+.negociacoes-vazio strong,
+.negociacoes-vazio span {
+  display: block;
+}
+
+.negociacoes-vazio strong {
+  color: #e2e9ef;
+}
+
+.negociacoes-vazio span {
+  max-width: 520px;
+  margin: 8px auto 0;
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+.negociacoes-vazio a {
+  display: inline-flex;
+  margin-top: 16px;
+  padding: 9px 14px;
+  color: #07130b;
+  border-radius: 8px;
+  background: #12e06c;
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.negociacoes-toast {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 9999;
+  max-width: min(360px, calc(100% - 32px));
+  padding: 13px 17px;
+  color: #07130b;
+  border-radius: 9px;
+  background: #12e06c;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.negociacoes-toast.erro {
+  color: #fff;
+  background: #d32f2f;
+}
+
+@media (max-width: 760px) {
+  .negociacoes-main {
+    width: min(100% - 24px, 1120px);
+    padding-top: 22px;
+  }
+
+  .negociacoes-hero,
+  .negociacoes-secao-topo {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .negociacoes-hero {
+    padding: 28px 20px;
+  }
+
+  .negociacoes-secao-topo > p {
+    text-align: left;
+  }
+
+  .negociacoes-metricas {
+    grid-template-columns: 1fr;
+  }
+
+  .negociacoes-lista {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .negociacoes-cta {
+    width: 100%;
+  }
+
+  .negociacoes-metricas article {
+    padding: 15px 16px;
+  }
+
+  .negociacoes-painel {
+    padding-top: 24px;
+  }
+
+  .negociacao-card {
+    padding: 16px;
+  }
+
+  .negociacoes-toast {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .negociacoes-carregando { animation: none; }
+}

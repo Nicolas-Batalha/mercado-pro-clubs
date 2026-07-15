@@ -41,7 +41,9 @@ function renderLogado(container) {
       <span class="hu-nome" id="hu-nome">...</span>
       <div class="hu-dropdown" id="hu-dropdown">
         <a href="${base}HTML/meu-perfil.html" class="hu-drop-item">👤 Meu Perfil</a>
-        <a href="${base}HTML/mercado.html"    class="hu-drop-item">🏪 Mercado</a>
+        <a href="${base}HTML/mercado.html"    class="hu-drop-item">🏪 Vagas e Jogadores</a>
+        <a href="${base}HTML/negociacoes.html" class="hu-drop-item">🤝 Minhas Negociações</a>
+        <a href="${base}HTML/explorar-clubes.html" class="hu-drop-item">🔎 Explorar Clubes</a>
         <a href="${base}HTML/clubes.html"    class="hu-drop-item">🏟 Meu Clube</a>
         <div class="hu-drop-divider"></div>
         <button class="hu-drop-item hu-sair" id="hu-btn-sair">🚪 Sair</button>

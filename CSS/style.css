@@ -19,7 +19,10 @@
 @import "torneio.css";
 @import "cadastro.css";
 @import "clube.css";
+@import "explorar-clubes.css";
+@import "negociacoes.css";
 @import "admin.css";
+@import "onboarding.css";
 
 /* ========================================================================== 
    4. RESPONSIVIDADE (Sempre por último para garantir a prioridade)

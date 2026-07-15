@@ -42,8 +42,8 @@
       <div class="menu-carrossel">
         <nav aria-label="Navegação principal">
           <ul class="lista-links animar-scroll">
-            <li><a href="./HTML/mercado.html">mercado</a></li>
-            <li><a href="./HTML/clubes.html">clubes</a></li>
+            <li><a href="./HTML/mercado.html">Vagas e jogadores</a></li>
+            <li><a href="./HTML/explorar-clubes.html">Explorar clubes</a></li>
             <li><a href="#como-funciona">Como funciona</a></li>
           </ul>
         </nav>
@@ -71,18 +71,20 @@
       <section class="hero animar-scroll">
         <div class="hero-conteudo">
           <div class="texto-brilante">
-            <h2>plataforma completa de pro clubs</h2>
+            <h2>jogadores, clubes e oportunidades</h2>
           </div>
           <h1>
             MERCADO <span class="green"><br />PRO CLUBS</span>
           </h1>
           <p>
-            Onde o futebol virtual começa. Conecte-se com jogadores, monte sua
-            equipe e domine os gramados do EA FC.
+            Encontre um clube, monte seu elenco ou conheça a comunidade de Pro
+            Clubs. Escolha seu objetivo e veja exatamente por onde começar.
           </p>
-          <a href="HTML/cadastrar-se.html" class="btn-neon"
-            >CRIAR SEU PERFIL ⚽</a
-          >
+          <div class="hero-acoes">
+            <a href="#escolha-seu-caminho" class="btn-neon">ESCOLHER MEU CAMINHO</a>
+            <a href="./HTML/explorar-clubes.html" class="btn-hero-secundario">EXPLORAR SEM CADASTRO</a>
+          </div>
+          <p class="hero-dica">Escolha abaixo se você é jogador, capitão ou visitante.</p>
         </div>
         <div class="card-grid animar-scroll">
           <div class="card">
@@ -132,67 +134,65 @@
           </div>
         </div>
       </section>
-      <section class="como-funciona" id="como-funciona">
-        <div class="header-funciona"></div>
-        <h2 class="funciona-text">como funciona</h2>
-        <p class="como-funciona__sub">
-          Do perfil ao contrato fechado, em quatro lances.
-        </p>
-        <span class="funciona-div"></span>
-        <p class="badge-passos">1</p>
-        <div class="passos">
-          <img
-            class="img-funciona"
-            src="./IMG/user-icon.svg"
-            alt="Ícone de criar perfil"
-          />
-          <p>
-            Crie seu perfil. Cadastre posição, plataforma e histórico. <br />
-            Seu perfil vira sua carteira de jogador.
-          </p>
-          <a href="HTML/cadastrar-se.html" class="btn-neon"
-            >CRIAR SEU PERFIL ⚽</a
-          >
+      <section class="inicio-proximo-passo" id="inicio-proximo-passo" hidden aria-live="polite">
+        <div class="inicio-proximo-grid">
+          <div class="inicio-proximo-conteudo">
+            <span class="inicio-proximo-kicker">SEU PRÓXIMO PASSO</span>
+            <h2 id="inicio-proximo-titulo">Continue sua jornada</h2>
+            <p id="inicio-proximo-descricao">Vamos mostrar a ação mais importante para você agora.</p>
+          </div>
+          <a id="inicio-proximo-link" class="inicio-proximo-acao" href="./HTML/meu-perfil.html">CONTINUAR</a>
         </div>
-        <span class="funciona-seta"></span>
-        <p class="badge-passos">2</p>
-        <div class="passos">
-          <img
-            class="img-funciona"
-            src="./IMG/carrinho-de-compras.svg"
-            alt="Ícone de mercado de jogadores"
-          />
-          <p>
-            Apareça na aba Mercado. Você entra na lista de disponíveis,
-            <br />visível para todos os clubes cadastrados.
-          </p>
-          <a href="./HTML/mercado.html" class="btn-mercado">mercado</a>
+        <div class="inicio-jornada" aria-label="Etapas da sua jornada no Mercado Pro Clubs">
+          <span class="inicio-jornada-etapa" data-jornada-etapa="1"><b>1</b> Perfil</span>
+          <span class="inicio-jornada-etapa" data-jornada-etapa="2"><b>2</b> Mercado</span>
+          <span class="inicio-jornada-etapa" data-jornada-etapa="3"><b>3</b> Negociação</span>
+          <span class="inicio-jornada-etapa" data-jornada-etapa="4"><b>4</b> Clube</span>
         </div>
-        <span class="funciona-seta"></span>
-        <p class="badge-passos">3</p>
-        <div class="passos">
-          <img
-            class="img-funciona"
-            src="./IMG/clube.svg"
-            alt="Ícone de clube entrando em contato"
-          />
-          <p>
-            🔔 O capitão recebe a notificação no sino para aceitar ou não a
-            proposta. O craque é avisado assim que o chat é aberto.
-          </p>
+      </section>
+
+      <section class="caminhos-inicio" id="escolha-seu-caminho">
+        <div class="caminhos-cabecalho">
+          <span>COMECE POR AQUI</span>
+          <h2>O que você quer fazer?</h2>
+          <p>Escolha seu objetivo. O site leva você direto para a área certa.</p>
         </div>
-        <span class="funciona-seta"></span>
-        <p class="badge-passos">4</p>
-        <div class="passos">
-          <img
-            class="img-funciona"
-            src="./IMG/contrato.svg"
-            alt="Ícone de contrato fechado"
-          />
-          <p>
-            Combinem os detalhes pelo chat do clube e acompanhem tudo pelo painel
-            de mensagens. Depois, é só entrar em campo pelo novo clube.
-          </p>
+        <div class="caminhos-grid">
+          <article class="caminho-card">
+            <span class="caminho-numero">01</span>
+            <p class="caminho-tipo">JOGADOR</p>
+            <h3>Quero encontrar um clube</h3>
+            <ul>
+              <li>Complete seu perfil de jogador</li>
+              <li>Veja vagas compatíveis</li>
+              <li>Candidate-se e acompanhe a negociação</li>
+            </ul>
+            <a id="caminho-jogador-link" href="./HTML/cadastrar-se.html#cadastro">COMEÇAR COMO JOGADOR</a>
+          </article>
+
+          <article class="caminho-card caminho-card-destaque">
+            <span class="caminho-numero">02</span>
+            <p class="caminho-tipo">CAPITÃO</p>
+            <h3>Quero montar ou reforçar meu clube</h3>
+            <ul>
+              <li>Configure os detalhes do clube</li>
+              <li>Publique vagas para o elenco</li>
+              <li>Compare candidatos e envie convites</li>
+            </ul>
+            <a id="caminho-capitao-link" href="./HTML/cadastrar-se.html#cadastro">COMEÇAR COMO CAPITÃO</a>
+          </article>
+
+          <article class="caminho-card">
+            <span class="caminho-numero">03</span>
+            <p class="caminho-tipo">VISITANTE</p>
+            <h3>Quero conhecer os clubes</h3>
+            <ul>
+              <li>Explore sem precisar criar conta</li>
+              <li>Veja elenco, identidade e detalhes</li>
+              <li>Descubra clubes com vagas abertas</li>
+            </ul>
+            <a href="./HTML/explorar-clubes.html">EXPLORAR CLUBES</a>
+          </article>
         </div>
       </section>
     </main>
@@ -224,6 +224,7 @@
     </footer>
     <script src="./JS/script.js" defer></script>
     <script type="module" src="./JS/times.js"></script>
+    <script type="module" src="./JS/onboarding.js"></script>
     <script type="module" src="./JS/header-auth.js"></script>
   </body>
 </html>

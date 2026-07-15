@@ -1,0 +1,300 @@
+/* Orientação da página inicial */
+.hero-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hero .hero-dica {
+  margin: 14px auto 0;
+  color: #7f9188;
+  font-size: 0.82rem;
+}
+
+.btn-hero-secundario {
+  display: inline-block;
+  margin: 10px;
+  padding: 14px 28px;
+  color: #e6edf3;
+  background: rgba(15, 26, 44, 0.82);
+  border: 1px solid rgba(18, 224, 108, 0.48);
+  border-radius: 30px;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 800;
+  transition: 0.2s ease;
+}
+
+.btn-hero-secundario:hover {
+  color: #12e06c;
+  border-color: #12e06c;
+  transform: translateY(-3px);
+}
+
+.inicio-proximo-passo,
+.caminhos-inicio {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto 72px;
+}
+
+.inicio-proximo-passo[hidden] {
+  display: none;
+}
+
+.inicio-proximo-passo {
+  padding: 24px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(18, 224, 108, 0.15), transparent 35%),
+    linear-gradient(135deg, #101d18, #0b1420);
+  border: 1px solid rgba(18, 224, 108, 0.48);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+}
+
+.inicio-proximo-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+}
+
+.inicio-proximo-kicker,
+.caminhos-cabecalho > span,
+.caminho-tipo {
+  color: #12e06c;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.inicio-proximo-conteudo h2 {
+  margin: 8px 0;
+  color: #fff;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.inicio-proximo-conteudo p {
+  margin: 0;
+  color: #a0aab5;
+  line-height: 1.6;
+}
+
+.inicio-proximo-acao,
+.caminho-card > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px 20px;
+  color: #07110b;
+  background: #12e06c;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: center;
+  transition: 0.2s ease;
+}
+
+.inicio-proximo-acao:hover,
+.caminho-card > a:hover {
+  background: #45ed8b;
+  transform: translateY(-2px);
+}
+
+.inicio-jornada {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(160, 170, 181, 0.16);
+}
+
+.inicio-jornada-etapa {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #75837b;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.inicio-jornada-etapa b {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  color: #78847e;
+  background: #111a17;
+  border: 1px solid #2a3931;
+  border-radius: 50%;
+  font-size: 0.68rem;
+}
+
+.inicio-jornada-etapa.concluida,
+.inicio-jornada-etapa.atual {
+  color: #e6edf3;
+}
+
+.inicio-jornada-etapa.concluida b {
+  color: #07110b;
+  background: #12e06c;
+  border-color: #12e06c;
+}
+
+.inicio-jornada-etapa.atual b {
+  color: #12e06c;
+  border-color: #12e06c;
+  box-shadow: 0 0 0 4px rgba(18, 224, 108, 0.1);
+}
+
+.caminhos-inicio {
+  scroll-margin-top: 110px;
+}
+
+.caminhos-cabecalho {
+  max-width: 680px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.caminhos-cabecalho h2 {
+  margin: 8px 0 10px;
+  color: #fff;
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+}
+
+.caminhos-cabecalho p {
+  color: #a0aab5;
+  line-height: 1.6;
+}
+
+.caminhos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.caminho-card {
+  position: relative;
+  display: flex;
+  min-height: 410px;
+  flex-direction: column;
+  padding: 26px;
+  overflow: hidden;
+  background: linear-gradient(155deg, rgba(17, 29, 24, 0.96), rgba(10, 18, 29, 0.96));
+  border: 1px solid #26362d;
+  border-radius: 16px;
+  transition: 0.22s ease;
+}
+
+.caminho-card:hover {
+  border-color: rgba(18, 224, 108, 0.62);
+  transform: translateY(-4px);
+}
+
+.caminho-card-destaque {
+  border-color: rgba(18, 224, 108, 0.55);
+  box-shadow: 0 14px 40px rgba(18, 224, 108, 0.09);
+}
+
+.caminho-numero {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  color: rgba(18, 224, 108, 0.13);
+  font-size: 3.4rem;
+  font-weight: 900;
+}
+
+.caminho-tipo {
+  margin: 4px 0 14px;
+}
+
+.caminho-card h3 {
+  max-width: 270px;
+  margin: 0 0 22px;
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+
+.caminho-card ul {
+  display: grid;
+  gap: 13px;
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+}
+
+.caminho-card li {
+  position: relative;
+  padding-left: 23px;
+  color: #a0aab5;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.caminho-card li::before {
+  position: absolute;
+  left: 0;
+  color: #12e06c;
+  content: "✓";
+  font-weight: 900;
+}
+
+.caminho-card > a {
+  width: 100%;
+  margin-top: auto;
+}
+
+@media (max-width: 900px) {
+  .caminhos-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .caminho-card:last-child {
+    grid-column: 1 / -1;
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 650px) {
+  .hero-acoes,
+  .hero-acoes > a {
+    width: 100%;
+  }
+
+  .hero-acoes > a {
+    margin: 4px 0;
+  }
+
+  .inicio-proximo-passo,
+  .caminhos-inicio {
+    width: min(100% - 24px, 1180px);
+    margin-bottom: 52px;
+  }
+
+  .inicio-proximo-grid,
+  .caminhos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inicio-proximo-acao {
+    width: 100%;
+  }
+
+  .inicio-jornada {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .caminho-card,
+  .caminho-card:last-child {
+    grid-column: auto;
+    min-height: 380px;
+    padding: 22px;
+  }
+}

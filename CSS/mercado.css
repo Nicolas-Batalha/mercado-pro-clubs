@@ -887,6 +887,31 @@
   color: #ff7b7b;
 }
 
+.notificacoes-rodape {
+  display: grid;
+  gap: 5px;
+  margin-top: 2px;
+  padding: 10px 4px 1px;
+  border-top: 1px solid #26362d;
+}
+
+.notificacoes-rodape p {
+  margin: 0;
+  color: #75837b;
+  font-size: 9px;
+}
+
+.notificacoes-rodape a {
+  color: #22c55e;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.notificacoes-rodape a:hover {
+  text-decoration: underline;
+}
+
 .historico-convite-item {
   margin-bottom: 7px;
   padding: 10px;
@@ -940,9 +965,19 @@
   background: rgba(240, 180, 41, 0.12);
 }
 
-.historico-abrir-chat {
-  width: 100%;
+.historico-status.status-cancelado {
+  color: #a0aab5;
+  background: rgba(160, 170, 181, 0.12);
+}
+
+.historico-acoes {
+  display: flex;
+  gap: 7px;
   margin-top: 8px;
+}
+
+.historico-abrir-chat {
+  flex: 1;
   padding: 7px 9px;
   color: #07130b;
   background: #22c55e;
@@ -952,6 +987,24 @@
   font-family: inherit;
   font-size: 9.5px;
   font-weight: 800;
+}
+
+.historico-cancelar {
+  flex: 1;
+  padding: 7px 9px;
+  color: #ff9a9a;
+  background: rgba(211, 47, 47, 0.08);
+  border: 1px solid rgba(255, 123, 123, 0.45);
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+.historico-cancelar:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 
 .chat-lista-item.nao-lido {

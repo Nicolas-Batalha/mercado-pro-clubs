@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Explore clubes de Pro Clubs, conheça o elenco, veja vagas abertas e encontre o time ideal para jogar EA FC."
+    />
+    <link rel="canonical" href="https://www.mercadoproclubs.com/HTML/explorar-clubes.html" />
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml" />
+    <title>Explorar Clubes | Mercado Pro Clubs</title>
+  </head>
+  <body class="body-explorar">
+    <header class="main-header">
+      <div class="logo animar-scroll">
+        <a href="../index.html" title="Voltar para a página inicial">
+          <img src="../IMG/logo.svg" class="logo" alt="Mercado Pro Clubs" />
+        </a>
+      </div>
+      <div class="menu-carrossel">
+        <nav aria-label="Navegação principal">
+          <ul class="lista-links animar-scroll">
+            <li><a href="./mercado.html">Vagas e jogadores</a></li>
+            <li><a href="./negociacoes.html">Minhas negociações</a></li>
+            <li><a href="./clubes.html">Meu clube</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="login-header animar-scroll">
+        <div id="login-header"></div>
+      </div>
+    </header>
+
+    <main class="explorar-main">
+      <section class="explorar-hero" aria-labelledby="explorar-titulo">
+        <div class="explorar-hero-conteudo">
+          <span class="explorar-kicker">DIRETÓRIO DE CLUBES</span>
+          <h1 id="explorar-titulo">Encontre o clube certo para o seu estilo</h1>
+          <p>
+            Compare elencos, plataformas e vagas abertas. Depois, entre no perfil público
+            para conhecer todos os detalhes do time.
+          </p>
+          <div class="explorar-atalhos">
+            <a href="#explorar-resultados" class="explorar-btn explorar-btn-primario">Explorar agora</a>
+            <a href="./mercado.html" class="explorar-btn explorar-btn-secundario">Ver vagas e jogadores</a>
+          </div>
+        </div>
+        <div class="explorar-metricas" aria-label="Resumo da plataforma">
+          <div><strong id="explorar-total-clubes">—</strong><span>clubes</span></div>
+          <div><strong id="explorar-total-vagas">—</strong><span>vagas abertas</span></div>
+          <div><strong id="explorar-total-jogadores">—</strong><span>jogadores em elencos</span></div>
+        </div>
+      </section>
+
+      <section class="explorar-painel" aria-labelledby="explorar-filtros-titulo">
+        <div class="explorar-painel-topo">
+          <div>
+            <span class="explorar-kicker">BUSCA PERSONALIZADA</span>
+            <h2 id="explorar-filtros-titulo">Filtre os clubes</h2>
+          </div>
+          <button type="button" id="explorar-limpar" class="explorar-limpar" hidden>Limpar filtros</button>
+        </div>
+
+        <div class="explorar-filtros">
+          <label class="explorar-campo explorar-campo-busca" for="explorar-busca">
+            <span>Buscar</span>
+            <input id="explorar-busca" type="search" placeholder="Nome, capitão ou estilo de jogo" autocomplete="off" />
+          </label>
+          <label class="explorar-campo" for="explorar-filtro-plataforma">
+            <span>Plataforma</span>
+            <select id="explorar-filtro-plataforma"><option value="">Todas</option></select>
+          </label>
+          <label class="explorar-campo" for="explorar-filtro-regiao">
+            <span>Região</span>
+            <select id="explorar-filtro-regiao"><option value="">Todas</option></select>
+          </label>
+          <label class="explorar-campo" for="explorar-filtro-jogo">
+            <span>Jogo</span>
+            <select id="explorar-filtro-jogo"><option value="">Todos</option></select>
+          </label>
+          <label class="explorar-campo" for="explorar-filtro-objetivo">
+            <span>Objetivo</span>
+            <select id="explorar-filtro-objetivo"><option value="">Todos</option></select>
+          </label>
+          <label class="explorar-campo" for="explorar-filtro-posicao">
+            <span>Posição procurada</span>
+            <select id="explorar-filtro-posicao"><option value="">Todas</option></select>
+          </label>
+        </div>
+      </section>
+
+      <section id="explorar-resultados" class="explorar-resultados" aria-labelledby="explorar-resultados-titulo">
+        <div class="explorar-resultados-topo">
+          <div>
+            <span class="explorar-kicker">TIMES CADASTRADOS</span>
+            <h2 id="explorar-resultados-titulo">Clubes para conhecer</h2>
+          </div>
+          <p id="explorar-contagem" aria-live="polite">Carregando clubes...</p>
+        </div>
+        <div id="explorar-grid" class="explorar-grid" aria-live="polite" aria-busy="true">
+          <div class="explorar-estado">
+            <span class="explorar-carregando" aria-hidden="true"></span>
+            <strong>Buscando clubes...</strong>
+            <p>Estamos organizando os times e as vagas para você.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="main-footer">
+      <div class="footer-inner">
+        <div class="footer-divisor"></div>
+        <h2 class="footer-titulo">MERCADO PRO CLUBS</h2>
+        <p class="footer-texto">
+          Plataforma independente para aproximar jogadores e clubes de Pro Clubs.<br />
+          Todas as marcas registradas pertencem a seus respectivos proprietários.
+        </p>
+      </div>
+    </footer>
+
+    <script src="../JS/script.js" defer></script>
+    <script type="module" src="../JS/explorar-clubes.js"></script>
+    <script type="module" src="../JS/header-auth.js"></script>
+  </body>
+</html>

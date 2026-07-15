@@ -26,8 +26,10 @@
       <div class="menu-carrossel">
         <nav aria-label="Navegação principal">
           <ul class="lista-links animar-scroll">
-            <li><a href="./meu-perfil.html">meu perfil</a></li>
-            <li><a href="../HTML/mercado.html">mercado</a></li>
+            <li><a href="./meu-perfil.html">Meu perfil</a></li>
+            <li><a href="../HTML/mercado.html">Vagas e jogadores</a></li>
+            <li><a href="./negociacoes.html">Minhas negociações</a></li>
+            <li><a href="./explorar-clubes.html">Explorar clubes</a></li>
           </ul>
         </nav>
       </div>
@@ -86,10 +88,28 @@
           <button type="button" class="aba-item" id="aba-estatisticas" role="tab" aria-selected="false" aria-controls="painel-estatisticas" tabindex="-1" data-tab="estatisticas">Estatísticas</button>
           <button type="button" class="aba-item" id="aba-aparencia" role="tab" aria-selected="false" aria-controls="painel-aparencia" tabindex="-1" data-tab="aparencia">Aparência</button>
         </nav>
+        <section id="clube-progresso" class="clube-progresso" aria-labelledby="clube-progresso-titulo" hidden>
+          <div class="clube-progresso-resumo">
+            <div class="clube-progresso-percentual">
+              <strong id="clube-progresso-percentual">0%</strong>
+              <span>perfil completo</span>
+            </div>
+            <div class="clube-progresso-texto">
+              <h2 id="clube-progresso-titulo">Complete o perfil do clube</h2>
+              <p id="clube-progresso-mensagem">Preencha as informações para transmitir mais confiança aos jogadores.</p>
+            </div>
+            <button type="button" id="clube-progresso-ir">Completar agora</button>
+          </div>
+          <div class="clube-progresso-trilha" role="progressbar" aria-label="Progresso do perfil do clube"
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span id="clube-progresso-barra"></span>
+          </div>
+          <div id="clube-progresso-pendencias" class="clube-progresso-pendencias"></div>
+        </section>
       </section>
 
       <section id="clube-publico" class="clube-publico" aria-labelledby="publico-nome-clube" hidden>
-        <a href="./mercado.html" class="publico-voltar">← Voltar para o mercado</a>
+        <a href="./mercado.html" class="publico-voltar">← Voltar para vagas e jogadores</a>
 
         <article class="publico-hero">
           <div class="publico-hero-brilho" aria-hidden="true"></div>
@@ -176,7 +196,7 @@
               <span class="publico-card-kicker">OPORTUNIDADES</span>
               <h2 id="publico-titulo-vagas">Vagas abertas</h2>
             </div>
-            <a href="./mercado.html" class="publico-link-mercado">Ver mercado completo →</a>
+            <a href="./mercado.html" class="publico-link-mercado">Ver vagas e jogadores →</a>
           </div>
           <div id="publico-vagas" class="publico-vagas-grid" aria-live="polite"></div>
         </section>

@@ -10,12 +10,15 @@ import { auth, db } from "./firebase-config.js";
 import {
   collection, addDoc, getDocs, deleteDoc,
   doc, getDoc, setDoc,
-  query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove
+  query, where, orderBy, limit, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { confirmModal } from "./confirm-modal.js";
 
 const EXPIRACAO_MS = 30 * 24 * 60 * 60 * 1000; // vagas: 30 dias
+const CAMINHO_NEGOCIACOES = window.location.pathname.includes("/HTML/")
+  ? "./negociacoes.html"
+  : "./HTML/negociacoes.html";
 
 let usuarioAtual = null;
 let perfilAtual  = {};
@@ -559,8 +562,17 @@ onAuthStateChanged(auth, async (user) => {
     escutarNotificacoes(user.uid);
     iniciarPainelMensagens();
     escutarChatsNaoLidos(user.uid);
+    const chatSolicitado = new URLSearchParams(window.location.search).get("chat");
+    if (chatSolicitado) {
+      await abrirChat(chatSolicitado);
+      const urlLimpa = new URL(window.location.href);
+      urlLimpa.searchParams.delete("chat");
+      window.history.replaceState({}, "", `${urlLimpa.pathname}${urlLimpa.search}${urlLimpa.hash}`);
+    }
   }
   await carregarVagas();
+  const abaSolicitada = new URLSearchParams(window.location.search).get("aba");
+  if (abaSolicitada === "jogadores") ativarAbaMercado("jogadores", false);
   if (!document.getElementById("painel-jogadores")?.hidden) {
     await carregarJogadoresDisponiveis();
   }
@@ -808,7 +820,7 @@ function renderPaginaAtual() {
 
   feed.querySelectorAll(".btn-candidatar").forEach(btn =>
     btn.addEventListener("click", () =>
-      candidatar(btn.dataset.vagaId, btn.dataset.capitaoUid, btn.dataset.clube))
+      candidatar(btn.dataset.vagaId, btn.dataset.capitaoUid, btn.dataset.clube, btn))
   );
   feed.querySelectorAll(".btn-excluir-vaga").forEach(btn =>
     btn.addEventListener("click", () => excluirVaga(btn.dataset.vagaId))
@@ -997,9 +1009,13 @@ async function denunciarVaga(vagaId, clube, capitaoUid) {
 // ─── Contador de candidaturas (visível só pro capitão dono da vaga) ────────────
 async function atualizarContadorCandidaturas(vagaId) {
   const el = document.getElementById(`contador-${vagaId}`);
-  if (!el) return;
+  if (!el || !usuarioAtual) return;
   try {
-    const snap = await getDocs(query(collection(db, "candidaturas"), where("vagaId", "==", vagaId)));
+    const snap = await getDocs(query(
+      collection(db, "candidaturas"),
+      where("vagaId", "==", vagaId),
+      where("capitaoUid", "==", usuarioAtual.uid),
+    ));
     el.textContent = snap.size > 0
       ? `👥 ${snap.size} candidatura(s) recebida(s)`
       : "";
@@ -1007,22 +1023,17 @@ async function atualizarContadorCandidaturas(vagaId) {
 }
 
 // ─── Selo de clube verificado (5+ contratações aceitas) ────────────────────────
-const CONTRATACOES_PARA_SELO = 5;
 const cacheVerificado = new Map();
 async function aplicarSeloVerificado(vagaId, capitaoUid) {
   const el = document.getElementById(`selo-${vagaId}`);
-  if (!el) return;
+  if (!el || !uidFirestoreValido(capitaoUid)) return;
   try {
     if (!cacheVerificado.has(capitaoUid)) {
-      const snap = await getDocs(query(
-        collection(db, "candidaturas"),
-        where("capitaoUid", "==", capitaoUid),
-        where("status", "==", "aceito")
-      ));
-      cacheVerificado.set(capitaoUid, snap.size >= CONTRATACOES_PARA_SELO);
+      const clubeSnap = await getDoc(doc(db, "clubes", capitaoUid));
+      cacheVerificado.set(capitaoUid, clubeSnap.exists() && clubeSnap.data().verificado === true);
     }
     if (cacheVerificado.get(capitaoUid)) {
-      el.innerHTML = `<span class="badge-verificado" title="${CONTRATACOES_PARA_SELO}+ contratações fechadas pela plataforma">✅ Verificado</span>`;
+      el.innerHTML = `<span class="badge-verificado" title="Clube verificado pela moderação">✅ Verificado</span>`;
     }
   } catch { /* silencioso */ }
 }
@@ -1076,28 +1087,107 @@ document.getElementById("btn-limpar-filtros")?.addEventListener("click", () => {
 // =========================================================================
 // 3. CANDIDATAR-SE
 // =========================================================================
-async function candidatar(vagaId, capitaoUid, clube) {
+function uidFirestoreValido(valor) {
+  const uid = String(valor || "").trim();
+  return Boolean(uid) && !["undefined", "null", "—"].includes(uid.toLowerCase());
+}
+
+async function resolverDadosDaVaga(vagaId, capitaoRecebido, clubeRecebido) {
+  if (!vagaId) throw new Error("Não foi possível identificar a vaga.");
+  const vagaSnap = await getDoc(doc(db, "vagas", vagaId));
+  if (!vagaSnap.exists()) throw new Error("Essa vaga não está mais disponível.");
+
+  const vaga = vagaSnap.data();
+  let capitaoUid = uidFirestoreValido(vaga.capitaoUid) ? vaga.capitaoUid : capitaoRecebido;
+  const clube = String(vaga.clube || clubeRecebido || "Clube").trim();
+
+  // Compatibilidade com vagas antigas que não salvaram capitaoUid.
+  if (!uidFirestoreValido(capitaoUid) && clube) {
+    const clubesSnap = await getDocs(query(
+      collection(db, "clubes"),
+      where("nome", "==", clube),
+      limit(2),
+    ));
+    if (clubesSnap.size === 1) {
+      const clubeDoc = clubesSnap.docs[0];
+      capitaoUid = uidFirestoreValido(clubeDoc.data().capitaoUid)
+        ? clubeDoc.data().capitaoUid
+        : clubeDoc.id;
+    }
+  }
+
+  if (!uidFirestoreValido(capitaoUid)) {
+    throw new Error("Essa é uma vaga antiga sem capitão identificado. O clube precisa republicá-la.");
+  }
+  return { capitaoUid, clube, vaga };
+}
+
+async function candidatar(vagaId, capitaoRecebido, clubeRecebido, botao) {
   const usuario = usuarioAtual;
   if (!usuario) { toast("Faça login para se candidatar.", "erro"); return; }
-  if (usuario.uid === capitaoUid) { toast("Você é o capitão desse clube!", "erro"); return; }
+  if (perfilAtual.clubeAtualId) {
+    toast("Você já faz parte de um clube. Saia do clube atual antes de se candidatar.", "erro");
+    return;
+  }
+  const textoOriginal = botao?.textContent || "Me candidatar";
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = "Enviando...";
+  }
   try {
+    const { capitaoUid, clube } = await resolverDadosDaVaga(vagaId, capitaoRecebido, clubeRecebido);
+    if (usuario.uid === capitaoUid) throw new Error("Você é o capitão desse clube.");
+
     const existSnap = await getDocs(query(
       collection(db, "candidaturas"),
       where("jogadorUid","==",usuario.uid),
       where("vagaId","==",vagaId)
     ));
-    if (!existSnap.empty) { toast("Você já se candidatou a esse clube.", "erro"); return; }
-    await addDoc(collection(db, "candidaturas"), {
+    const existentes = existSnap.docs.map(candidaturaDoc => ({
+      ref: candidaturaDoc.ref,
+      ...candidaturaDoc.data(),
+    }));
+    const ativa = existentes.find(candidatura => ["pendente", "aceito"].includes(candidatura.status));
+    if (ativa) {
+      const mensagem = ativa.status === "aceito"
+        ? "Sua candidatura já foi aceita por esse clube."
+        : "Sua candidatura já está aguardando resposta.";
+      if (botao) botao.textContent = ativa.status === "aceito" ? "Candidatura aceita" : "Candidatura pendente";
+      toast(mensagem, ativa.status === "aceito" ? "sucesso" : "erro");
+      return;
+    }
+
+    const dadosCandidatura = {
       vagaId, clube,
       jogadorUid:  usuario.uid,
       jogadorNome: perfilAtual.nickname || usuario.displayName || "Jogador",
       jogadorFoto: perfilAtual.fotoURL  || "",
       posicao:     perfilAtual.posicao  || "—",
       overall:     perfilAtual.overall  || "—",
-      capitaoUid, status: "pendente", criadoEm: serverTimestamp(),
-    });
+      capitaoUid,
+      status: "pendente",
+      jogadorViu: false,
+      atualizadoEm: serverTimestamp(),
+    };
+
+    const antiga = existentes.find(candidatura => ["recusado", "cancelado"].includes(candidatura.status));
+    if (antiga) {
+      await updateDoc(antiga.ref, { ...dadosCandidatura, reenviadoEm: serverTimestamp() });
+    } else {
+      await addDoc(collection(db, "candidaturas"), {
+        ...dadosCandidatura,
+        criadoEm: serverTimestamp(),
+      });
+    }
+    if (botao) botao.textContent = "Candidatura pendente";
     toast("✅ Candidatura enviada! Aguarde o capitão.");
-  } catch (err) { toast("Erro ao candidatar: " + err.message, "erro"); }
+  } catch (err) {
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = textoOriginal;
+    }
+    toast("Erro ao candidatar: " + err.message, "erro");
+  }
 }
 
 // =========================================================================
@@ -1161,7 +1251,7 @@ function garantirPainelSino() {
   p.id = "painel-sino";
   p.style.cssText = `
     position:fixed;top:80px;right:20px;width:320px;max-height:80vh;overflow-y:auto;
-    background:#0F1A2C;border:1px solid #1e3a1e;border-radius:14px;padding:14px;
+    background:#0b1410;border:1px solid #1e3a1e;border-radius:14px;padding:14px;
     z-index:9998;box-shadow:0 8px 32px rgba(0,0,0,0.6);display:none;flex-direction:column;gap:10px;
   `;
   p.innerHTML = `
@@ -1173,13 +1263,17 @@ function garantirPainelSino() {
       <button type="button" class="notificacoes-aba ativo" data-notificacoes-aba="pendentes"
         role="tab" aria-selected="true" aria-controls="sino-lista">Pendentes</button>
       <button type="button" class="notificacoes-aba" data-notificacoes-aba="historico"
-        role="tab" aria-selected="false" aria-controls="sino-historico">Histórico</button>
+        role="tab" aria-selected="false" aria-controls="sino-historico">Histórico rápido</button>
     </div>
     <div id="sino-lista" class="notificacoes-painel" role="tabpanel">
       <p class="notificacoes-vazio">Sem notificações pendentes.</p>
     </div>
     <div id="sino-historico" class="notificacoes-painel" role="tabpanel" hidden>
       <p class="notificacoes-vazio">Abra esta aba para carregar o histórico.</p>
+    </div>
+    <div class="notificacoes-rodape">
+      <p>O sino mostra alertas rápidos.</p>
+      <a href="${CAMINHO_NEGOCIACOES}">Abrir Minhas negociações →</a>
     </div>
   `;
   document.body.appendChild(p);
@@ -1215,7 +1309,49 @@ function trocarAbaNotificacoes(aba) {
 }
 
 function rotuloStatusConvite(status) {
-  return ({ pendente: "Pendente", aceito: "Aceito", recusado: "Recusado" })[status] || "Atualizado";
+  return ({
+    pendente: "Pendente",
+    aceito: "Aceito",
+    recusado: "Recusado",
+    cancelado: "Cancelado",
+  })[status] || "Atualizado";
+}
+
+function momentoHistorico(item) {
+  return item.respondidoEm?.toMillis?.()
+    || item.canceladoEm?.toMillis?.()
+    || item.reenviadoEm?.toMillis?.()
+    || item.atualizadoEm?.toMillis?.()
+    || item.criadoEm?.toMillis?.()
+    || 0;
+}
+
+async function normalizarCandidaturaAntiga(candidaturaDoc) {
+  const candidatura = candidaturaDoc.data();
+  if (uidFirestoreValido(candidatura.capitaoUid) || !candidatura.vagaId) {
+    return { id: candidaturaDoc.id, ...candidatura };
+  }
+  try {
+    const resolvido = await resolverDadosDaVaga(
+      candidatura.vagaId,
+      candidatura.capitaoUid,
+      candidatura.clube,
+    );
+    await updateDoc(candidaturaDoc.ref, {
+      capitaoUid: resolvido.capitaoUid,
+      clube: resolvido.clube,
+      atualizadoEm: serverTimestamp(),
+    });
+    return {
+      id: candidaturaDoc.id,
+      ...candidatura,
+      capitaoUid: resolvido.capitaoUid,
+      clube: resolvido.clube,
+    };
+  } catch (err) {
+    console.warn("Candidatura antiga sem capitão não pôde ser reparada:", candidaturaDoc.id, err);
+    return { id: candidaturaDoc.id, ...candidatura };
+  }
 }
 
 async function carregarHistoricoConvites(uid) {
@@ -1223,36 +1359,66 @@ async function carregarHistoricoConvites(uid) {
   if (!container || !uid) return;
   container.innerHTML = `<p class="notificacoes-vazio">Carregando histórico...</p>`;
   try {
-    const [recebidosSnap, enviadosSnap] = await Promise.all([
+    const [convitesRecebidosSnap, convitesEnviadosSnap, candidaturasEnviadasSnap, candidaturasRecebidasSnap] = await Promise.all([
       getDocs(query(collection(db, "convitesClube"), where("jogadorUid", "==", uid))),
       getDocs(query(collection(db, "convitesClube"), where("capitaoUid", "==", uid))),
+      getDocs(query(collection(db, "candidaturas"), where("jogadorUid", "==", uid))),
+      getDocs(query(collection(db, "candidaturas"), where("capitaoUid", "==", uid))),
     ]);
-    const convites = [
-      ...recebidosSnap.docs.map((conviteDoc) => ({ id: conviteDoc.id, direcao: "recebido", ...conviteDoc.data() })),
-      ...enviadosSnap.docs.map((conviteDoc) => ({ id: conviteDoc.id, direcao: "enviado", ...conviteDoc.data() })),
-    ].sort((a, b) => (b.criadoEm?.toMillis?.() || 0) - (a.criadoEm?.toMillis?.() || 0));
+    const candidaturasEnviadas = await Promise.all(
+      candidaturasEnviadasSnap.docs.map(normalizarCandidaturaAntiga),
+    );
+    const itens = [
+      ...convitesRecebidosSnap.docs.map((conviteDoc) => ({
+        id: conviteDoc.id, tipo: "convite", direcao: "recebido", ...conviteDoc.data(),
+      })),
+      ...convitesEnviadosSnap.docs.map((conviteDoc) => ({
+        id: conviteDoc.id, tipo: "convite", direcao: "enviado", ...conviteDoc.data(),
+      })),
+      ...candidaturasEnviadas.map((candidatura) => ({
+        ...candidatura, tipo: "candidatura", direcao: "enviado",
+      })),
+      ...candidaturasRecebidasSnap.docs.map((candidaturaDoc) => ({
+        id: candidaturaDoc.id, tipo: "candidatura", direcao: "recebido", ...candidaturaDoc.data(),
+      })),
+    ].sort((a, b) => momentoHistorico(b) - momentoHistorico(a));
 
-    if (!convites.length) {
-      container.innerHTML = `<p class="notificacoes-vazio">Nenhum convite enviado ou recebido.</p>`;
+    if (!itens.length) {
+      container.innerHTML = `<p class="notificacoes-vazio">Nenhuma candidatura ou convite no histórico.</p>`;
       return;
     }
 
-    container.innerHTML = convites.map((convite) => {
-      const data = convite.criadoEm?.toDate?.().toLocaleDateString("pt-BR") || "Data não informada";
-      const descricao = convite.direcao === "recebido"
-        ? `${convite.clube || "Um clube"} convidou você`
-        : `Convite enviado para ${convite.jogadorNome || "jogador"}`;
-      const botaoChat = convite.status === "aceito" && convite.chatId
-        ? `<button type="button" class="historico-abrir-chat" data-chat-id="${escHtml(convite.chatId)}"
-            data-clube="${escHtml(convite.clube || "Clube")}">Abrir conversa</button>`
+    container.innerHTML = itens.map((item) => {
+      const timestamp = item.respondidoEm || item.canceladoEm || item.reenviadoEm || item.atualizadoEm || item.criadoEm;
+      const data = timestamp?.toDate?.().toLocaleDateString("pt-BR") || "Data não informada";
+      let descricao = "Movimentação atualizada";
+      if (item.tipo === "convite") {
+        descricao = item.direcao === "recebido"
+          ? `${item.clube || "Um clube"} convidou você`
+          : `Convite enviado para ${item.jogadorNome || "jogador"}`;
+      } else {
+        descricao = item.direcao === "recebido"
+          ? `${item.jogadorNome || "Um jogador"} candidatou-se ao ${item.clube || "clube"}`
+          : `Você se candidatou ao ${item.clube || "clube"}`;
+      }
+      const botaoChat = item.status === "aceito" && item.chatId
+        ? `<button type="button" class="historico-abrir-chat" data-chat-id="${escHtml(item.chatId)}"
+            data-clube="${escHtml(item.clube || "Clube")}">Abrir conversa</button>`
+        : "";
+      const podeCancelar = item.status === "pendente"
+        && item.direcao === "enviado"
+        && (item.tipo === "candidatura" || item.tipo === "convite");
+      const botaoCancelar = podeCancelar
+        ? `<button type="button" class="historico-cancelar" data-tipo="${escHtml(item.tipo)}"
+            data-id="${escHtml(item.id)}">Cancelar ${item.tipo}</button>`
         : "";
       return `<article class="historico-convite-item">
         <div class="historico-convite-topo">
           <strong>${escHtml(descricao)}</strong>
-          <span class="historico-status status-${escHtml(convite.status || "atualizado")}">${escHtml(rotuloStatusConvite(convite.status))}</span>
+          <span class="historico-status status-${escHtml(item.status || "atualizado")}">${escHtml(rotuloStatusConvite(item.status))}</span>
         </div>
-        <small>${convite.direcao === "recebido" ? "Recebido" : "Enviado"} em ${escHtml(data)}</small>
-        ${botaoChat}
+        <small>${item.direcao === "recebido" ? "Recebido" : "Enviado"} · atualizado em ${escHtml(data)}</small>
+        ${(botaoChat || botaoCancelar) ? `<div class="historico-acoes">${botaoChat}${botaoCancelar}</div>` : ""}
       </article>`;
     }).join("");
 
@@ -1261,6 +1427,28 @@ async function carregarHistoricoConvites(uid) {
         fecharPainelSino();
         garantirPainelMsg();
         abrirChat(botao.dataset.chatId, botao.dataset.clube);
+      });
+    });
+    container.querySelectorAll(".historico-cancelar").forEach((botao) => {
+      botao.addEventListener("click", async () => {
+        const colecao = botao.dataset.tipo === "candidatura" ? "candidaturas" : "convitesClube";
+        botao.disabled = true;
+        botao.textContent = "Cancelando...";
+        try {
+          await updateDoc(doc(db, colecao, botao.dataset.id), {
+            status: "cancelado",
+            canceladoEm: serverTimestamp(),
+            canceladoPor: uid,
+            atualizadoEm: serverTimestamp(),
+          });
+          toast(botao.dataset.tipo === "candidatura" ? "Candidatura cancelada." : "Convite cancelado.");
+          await carregarHistoricoConvites(uid);
+        } catch (err) {
+          botao.disabled = false;
+          botao.textContent = `Cancelar ${botao.dataset.tipo}`;
+          toast("Não foi possível cancelar agora.", "erro");
+          console.error("Erro ao cancelar movimentação:", err);
+        }
       });
     });
   } catch (err) {
@@ -1461,15 +1649,23 @@ async function aceitarCandidatura(candidaturaId, jogadorUid, clube, card) {
   card.style.opacity = "0.6";
   card.querySelectorAll("button").forEach(b => b.disabled = true);
   try {
-    const chatRef = await addDoc(collection(db, "chats"), {
+    const chatRef = doc(db, "chats", `candidatura-${candidaturaId}`);
+    await setDoc(chatRef, {
       clube,
       participantes: [usuario.uid, jogadorUid],
+      tipo: "candidatura",
       criadoEm: serverTimestamp(),
       lidoPor: [usuario.uid, jogadorUid],
       arquivadoPor: [],
-    });
+    }, { merge: true });
     await updateDoc(doc(db,"candidaturas",candidaturaId), {
-      status:"aceito", chatId:chatRef.id, jogadorViu:false,
+      status: "aceito",
+      chatId: chatRef.id,
+      jogadorViu: false,
+      capitaoUid: usuario.uid,
+      respondidoEm: serverTimestamp(),
+      respondidoPor: usuario.uid,
+      atualizadoEm: serverTimestamp(),
     });
     // OBS: a atualização do perfil do jogador (jogadores/{jogadorUid}) NÃO é feita
     // aqui, porque quem está rodando esse código é o capitão, e as regras do
@@ -1501,7 +1697,12 @@ async function aceitarCandidatura(candidaturaId, jogadorUid, clube, card) {
 
 async function recusarCandidatura(candidaturaId, card) {
   try {
-    await updateDoc(doc(db,"candidaturas",candidaturaId), { status:"recusado" });
+    await updateDoc(doc(db,"candidaturas",candidaturaId), {
+      status: "recusado",
+      respondidoEm: serverTimestamp(),
+      respondidoPor: usuarioAtual?.uid || "",
+      atualizadoEm: serverTimestamp(),
+    });
     card.style.opacity = "0.4";
     card.innerHTML = `<p style="color:#666;margin:0;text-align:center">Candidatura recusada.</p>`;
   } catch (err) { toast("Erro ao recusar: " + err.message, "erro"); }

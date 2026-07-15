@@ -70,6 +70,7 @@ async function buscarElenco(capitaoUid) {
 // ELENCO — tabela real (sem dados fake), busca de jogadores livres e convites
 // =========================================================================
 let elencoAtual = [];
+let clubeCarregado = {};
 
 function linhaElenco(jogador, capitaoUid, podeEditar) {
   const ehCapitaoLinha = jogador.uid === capitaoUid;
@@ -374,6 +375,7 @@ function mostrarBannerConvite(conviteId, convite) {
 
 // ─── Preenche o dashboard do capitão com os dados salvos ──────────────────────
 function preencherFormulario(clube, perfilAtual) {
+  clubeCarregado = { ...clube };
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ""; };
 
   set("clube", clube.nome);
@@ -413,6 +415,7 @@ function preencherFormulario(clube, perfilAtual) {
   });
 
   atualizarPreview();
+  atualizarProgressoClube();
 }
 
 function atualizarPreview() {
@@ -429,6 +432,72 @@ function atualizarPreview() {
   document.getElementById("preview-treinos").textContent = texto("horario-treino");
 }
 
+function dadosClubeDoFormulario() {
+  const valor = (id) => document.getElementById(id)?.value?.trim?.() || "";
+  const necessidades = {};
+  document.querySelectorAll("[data-pos-check]").forEach((campo) => {
+    necessidades[campo.dataset.posCheck] = campo.checked;
+  });
+  return {
+    nome: valor("clube"),
+    escudoUrl: document.getElementById("upload-escudo")?.dataset.novaImagem || clubeCarregado.escudoUrl || "",
+    plataforma: valor("plataforma"),
+    divisao: valor("divisao"),
+    regiao: valor("regiao"),
+    jogo: valor("jogo"),
+    estiloJogo: valor("estilo-jogo"),
+    horarioTreino: valor("horario-treino"),
+    objetivo: valor("objetivo"),
+    descricao: valor("descricao"),
+    discord: valor("discord"),
+    whatsapp: valor("whatsapp"),
+    instagram: valor("instagram"),
+    capitaoIdEA: valor("capitao-idea"),
+    capitaoMicrofone: valor("capitao-microfone"),
+    diasTreino: Array.from(document.querySelectorAll(".chip.active")).map((item) => item.dataset.dia),
+    necessidades,
+  };
+}
+
+function atualizarProgressoClube() {
+  const container = document.getElementById("clube-progresso");
+  if (!container) return;
+  const dados = dadosClubeDoFormulario();
+  const campos = [
+    { nome: "Nome do clube", alvo: "clube", completo: dados.nome.length >= 3 },
+    { nome: "Escudo", alvo: "btn-upload-escudo", completo: Boolean(dados.escudoUrl) },
+    { nome: "Plataforma", alvo: "plataforma", completo: Boolean(dados.plataforma) },
+    { nome: "Jogo", alvo: "jogo", completo: Boolean(dados.jogo) },
+    { nome: "Região", alvo: "regiao", completo: Boolean(dados.regiao) },
+    { nome: "Divisão", alvo: "divisao", completo: Boolean(dados.divisao) },
+    { nome: "Objetivo", alvo: "objetivo", completo: Boolean(dados.objetivo) },
+    { nome: "Estilo de jogo", alvo: "estilo-jogo", completo: Boolean(dados.estiloJogo) },
+    { nome: "Descrição com 30 caracteres", alvo: "descricao", completo: dados.descricao.length >= 30 },
+    { nome: "Horário de treino", alvo: "horario-treino", completo: Boolean(dados.horarioTreino) },
+    { nome: "Dias de treino", alvo: "chip-dia", completo: dados.diasTreino.length > 0 },
+    { nome: "Posições procuradas", alvo: "posicao-necessaria", completo: Object.values(dados.necessidades).some(Boolean) },
+    { nome: "Canal de contato", alvo: "discord", completo: Boolean(dados.discord || dados.whatsapp || dados.instagram) },
+    { nome: "ID EA do capitão", alvo: "capitao-idea", completo: Boolean(dados.capitaoIdEA) },
+    { nome: "Informação de microfone", alvo: "capitao-microfone", completo: Boolean(dados.capitaoMicrofone) },
+  ];
+  const pendentes = campos.filter((campo) => !campo.completo);
+  const percentual = Math.round(((campos.length - pendentes.length) / campos.length) * 100);
+  container.hidden = false;
+  container.classList.toggle("completo", percentual === 100);
+  document.getElementById("clube-progresso-percentual").textContent = `${percentual}%`;
+  document.getElementById("clube-progresso-barra").style.width = `${percentual}%`;
+  const trilha = container.querySelector("[role='progressbar']");
+  trilha?.setAttribute("aria-valuenow", String(percentual));
+  document.getElementById("clube-progresso-mensagem").textContent = percentual === 100
+    ? "Perfil completo. Seu clube já apresenta as principais informações aos jogadores."
+    : `Faltam ${pendentes.length} item(ns). Complete o perfil para transmitir mais confiança.`;
+  const resumoPendencias = pendentes.slice(0, 5).map((campo) => `<span>${escHtml(campo.nome)}</span>`);
+  if (pendentes.length > 5) resumoPendencias.push(`<span>+${pendentes.length - 5} itens</span>`);
+  document.getElementById("clube-progresso-pendencias").innerHTML = resumoPendencias.join("");
+  const botao = document.getElementById("clube-progresso-ir");
+  if (botao) botao.dataset.alvo = pendentes[0]?.alvo || "";
+}
+
 // ─── Liga os eventos do dashboard (upload, chips, checkboxes, preview, salvar) ─
 function ligarEventosDashboard(uid) {
   // Preview ao vivo
@@ -436,6 +505,23 @@ function ligarEventosDashboard(uid) {
     document.getElementById(id)?.addEventListener("input", atualizarPreview)
   );
   document.querySelectorAll("select").forEach(sel => sel.addEventListener("change", atualizarPreview));
+  [
+    "clube", "plataforma", "divisao", "regiao", "jogo", "estilo-jogo",
+    "horario-treino", "objetivo", "descricao", "discord", "whatsapp",
+    "instagram", "capitao-idea", "capitao-microfone",
+  ].forEach((id) => {
+    document.getElementById(id)?.addEventListener("input", atualizarProgressoClube);
+    document.getElementById(id)?.addEventListener("change", atualizarProgressoClube);
+  });
+  document.getElementById("clube-progresso-ir")?.addEventListener("click", () => {
+    document.getElementById("aba-geral")?.click();
+    const alvo = document.getElementById("clube-progresso-ir")?.dataset.alvo;
+    let elemento = document.getElementById(alvo);
+    if (alvo === "chip-dia") elemento = document.querySelector(".chip[data-dia]");
+    if (alvo === "posicao-necessaria") elemento = document.querySelector("[data-pos-check]")?.closest("label") || document.querySelector("[data-pos-check]");
+    elemento?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => elemento?.focus?.(), 350);
+  });
 
   // Upload de escudo: botão abre o input de arquivo escondido
   document.getElementById("btn-upload-escudo")?.addEventListener("click", () =>
@@ -460,20 +546,25 @@ function ligarEventosDashboard(uid) {
       document.getElementById("foto-perfil-preview").src = comprimida;
       document.getElementById("preview-escudo").src = comprimida;
       document.getElementById("upload-escudo").dataset.novaImagem = comprimida;
+      atualizarProgressoClube();
     } catch { toast("Erro ao processar imagem.", "erro"); }
     finally { e.target.value = ""; }
   });
 
   // Chips de dias da semana
   document.querySelectorAll(".chip").forEach(chip =>
-    chip.addEventListener("click", () => chip.classList.toggle("active"))
+    chip.addEventListener("click", () => {
+      chip.classList.toggle("active");
+      atualizarProgressoClube();
+    })
   );
 
   // Necessidades (checkbox)
   document.querySelectorAll("[data-pos-check]").forEach(chk =>
-    chk.addEventListener("change", () =>
-      chk.closest(".necessidade-item")?.classList.toggle("marcado", chk.checked)
-    )
+    chk.addEventListener("change", () => {
+      chk.closest(".necessidade-item")?.classList.toggle("marcado", chk.checked);
+      atualizarProgressoClube();
+    })
   );
 
   // Elenco: dados reais (sem jogador fake) + botão de convidar
@@ -522,6 +613,9 @@ function ligarEventosDashboard(uid) {
         clubeAtualId: uid,
         clubeAtualNome: nome,
       }, { merge: true });
+      clubeCarregado = { ...clubeCarregado, ...dados };
+      if (novaImagem) clubeCarregado.escudoUrl = novaImagem;
+      atualizarProgressoClube();
       toast("✅ Clube atualizado!");
     } catch (err) { toast("Erro ao salvar: " + err.message, "erro"); }
   });
@@ -584,8 +678,8 @@ function renderCTASemClube() {
   document.getElementById("dashboard-clube").outerHTML = `
     <div class="card" style="max-width:520px;margin:60px auto;text-align:center">
       <p style="color:#fff">⚽ Você ainda não faz parte de nenhum clube.</p>
-      <p style="color:#8b8b8b;font-size:13px">Publique uma vaga como capitão ou candidate-se a um time no mercado.</p>
-      <a href="../HTML/mercado.html" class="btn-salvar-clube" style="display:inline-block;text-decoration:none;margin-top:14px">Ir para o mercado</a>
+      <p style="color:#8b8b8b;font-size:13px">Publique uma vaga como capitão ou candidate-se a um clube na área de vagas e jogadores.</p>
+      <a href="../HTML/mercado.html" class="btn-salvar-clube" style="display:inline-block;text-decoration:none;margin-top:14px">Abrir vagas e jogadores</a>
     </div>`;
   const btnConvidar = document.getElementById("btn-convidar-jogador");
   if (btnConvidar) btnConvidar.hidden = true;
@@ -835,7 +929,7 @@ function mostrarErroClubePublico(mensagem) {
     <div class="publico-estado">
       <h1>Clube não disponível</h1>
       <p>${escHtml(mensagem)}</p>
-      <a href="./mercado.html" class="publico-btn publico-btn-primario">Voltar para o mercado</a>
+      <a href="./mercado.html" class="publico-btn publico-btn-primario">Voltar para vagas e jogadores</a>
     </div>`;
 }
 

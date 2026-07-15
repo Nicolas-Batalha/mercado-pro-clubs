@@ -130,6 +130,107 @@
     color:#22C55E;
 }
 
+/* --- Progresso do perfil do clube --- */
+.clube-progresso{
+    padding:18px 20px;
+    border:1px solid rgba(34,197,94,.22);
+    border-radius:14px;
+    background:linear-gradient(135deg,rgba(18,42,28,.94),rgba(15,26,44,.92));
+    box-shadow:0 14px 34px rgba(0,0,0,.18);
+}
+.clube-progresso[hidden]{
+    display:none !important;
+}
+.clube-progresso-resumo{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+.clube-progresso-percentual{
+    min-width:76px;
+    padding:11px 10px;
+    border:1px solid rgba(34,197,94,.24);
+    border-radius:11px;
+    background:rgba(5,11,20,.45);
+    text-align:center;
+}
+.clube-progresso-percentual strong,
+.clube-progresso-percentual span{
+    display:block;
+}
+.clube-progresso-percentual strong{
+    color:#22C55E;
+    font-size:22px;
+    line-height:1;
+}
+.clube-progresso-percentual span{
+    margin-top:5px;
+    color:#8ea096;
+    font-size:9px;
+    font-weight:700;
+}
+.clube-progresso-texto{
+    flex:1;
+}
+.clube-progresso-texto h2{
+    margin:0;
+    color:#fff;
+    font-size:15px;
+}
+.clube-progresso-texto p{
+    margin:5px 0 0;
+    color:#91a096;
+    font-size:11px;
+    line-height:1.5;
+}
+#clube-progresso-ir{
+    flex-shrink:0;
+    padding:9px 13px;
+    color:#07130b;
+    border:0;
+    border-radius:8px;
+    background:#22C55E;
+    cursor:pointer;
+    font-size:11px;
+    font-weight:800;
+}
+.clube-progresso-trilha{
+    height:7px;
+    margin-top:14px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+}
+.clube-progresso-trilha span{
+    display:block;
+    width:0;
+    height:100%;
+    border-radius:inherit;
+    background:linear-gradient(90deg,#18b858,#31ea79);
+    transition:width .3s ease;
+}
+.clube-progresso-pendencias{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:11px;
+}
+.clube-progresso-pendencias span{
+    padding:5px 8px;
+    color:#b7c2ba;
+    border:1px solid rgba(183,194,186,.16);
+    border-radius:999px;
+    background:rgba(255,255,255,.03);
+    font-size:9px;
+    font-weight:700;
+}
+.clube-progresso.completo{
+    border-color:rgba(34,197,94,.48);
+}
+.clube-progresso.completo #clube-progresso-ir{
+    display:none;
+}
+
 @media (max-width: 768px) {
     .menu-clubes{
         flex-wrap:wrap;
@@ -152,6 +253,16 @@
     }
     .aba-item{
         white-space:nowrap;
+    }
+    .clube-progresso-resumo{
+        align-items:flex-start;
+        flex-wrap:wrap;
+    }
+    .clube-progresso-texto{
+        min-width:180px;
+    }
+    #clube-progresso-ir{
+        width:100%;
     }
 }
 
