@@ -912,55 +912,6 @@
   text-decoration: underline;
 }
 
-.modal-confirm-box.denuncia-modal-box {
-  width: min(520px, calc(100vw - 28px));
-}
-
-.denuncia-modal-campo {
-  display: grid;
-  gap: 7px;
-  margin-top: 15px;
-  color: #d7e0da;
-  text-align: left;
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.denuncia-modal-campo span small,
-.denuncia-modal-campo > small {
-  color: #7d8981;
-  font-weight: 600;
-}
-
-.denuncia-modal-campo select,
-.denuncia-modal-campo textarea {
-  width: 100%;
-  padding: 11px 12px;
-  color: #f1f5f2;
-  background: #101511;
-  border: 1px solid #344038;
-  border-radius: 9px;
-  outline: none;
-  font: inherit;
-  font-size: 0.8rem;
-}
-
-.denuncia-modal-campo textarea {
-  min-height: 105px;
-  resize: vertical;
-  line-height: 1.5;
-}
-
-.denuncia-modal-campo select:focus,
-.denuncia-modal-campo textarea:focus {
-  border-color: #12e06c;
-  box-shadow: 0 0 0 3px rgba(18, 224, 108, 0.11);
-}
-
-#denuncia-contador {
-  text-align: right;
-}
-
 .historico-convite-item {
   margin-bottom: 7px;
   padding: 10px;

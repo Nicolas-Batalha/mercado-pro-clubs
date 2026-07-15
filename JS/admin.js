@@ -23,6 +23,7 @@ const NOMES_COLECOES = {
   clubes: "clubes",
   vagas: "vagas",
   denuncias: "denuncias",
+  candidaturas: "candidaturas",
   convites: "convitesClube",
   logs: "logsAdmin",
 };
@@ -47,6 +48,15 @@ const ROTULOS_PLATAFORMA = {
   crossplay: "Crossplay",
 };
 
+const ROTULOS_MOTIVO_DENUNCIA = {
+  spam: "Spam ou anúncio repetido",
+  ofensivo: "Conteúdo ofensivo ou discriminatório",
+  falso: "Informação falsa ou enganosa",
+  golpe: "Suspeita de golpe",
+  inadequado: "Conteúdo inadequado",
+  outro: "Outro motivo",
+};
+
 const estado = {
   usuario: null,
   config: {},
@@ -57,6 +67,7 @@ const estado = {
     clubes: [],
     vagas: [],
     denuncias: [],
+    candidaturas: [],
     convites: [],
     logs: [],
   },
@@ -84,6 +95,11 @@ function normalizar(valor) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
+}
+
+function uidValido(valor) {
+  const uid = String(valor || "").trim();
+  return uid.length > 5 && !["undefined", "null", "—"].includes(uid.toLowerCase());
 }
 
 function timestampParaMs(valor) {
@@ -127,11 +143,16 @@ function statusDenuncia(denuncia) {
   const status = normalizar(denuncia?.status || "pendente");
   if (["analisada", "analisado"].includes(status)) return "analisada";
   if (["resolvida", "resolvido"].includes(status)) return "resolvida";
+  if (["descartada", "descartado"].includes(status)) return "descartada";
   return "pendente";
 }
 
 function estaPendente(denuncia) {
-  return statusDenuncia(denuncia) === "pendente";
+  return statusDenuncia(denuncia) === "pendente" && denuncia?.arquivada !== true;
+}
+
+function estaArquivada(denuncia) {
+  return denuncia?.arquivada === true;
 }
 
 function toast(mensagem, tipo = "sucesso") {
@@ -143,6 +164,63 @@ function toast(mensagem, tipo = "sucesso") {
   aviso.textContent = mensagem;
   document.body.appendChild(aviso);
   window.setTimeout(() => aviso.remove(), 4200);
+}
+
+function solicitarMotivo({ titulo, mensagem, confirmar = "Confirmar", destrutivo = false }) {
+  return new Promise((resolve) => {
+    document.getElementById("admin-motivo-modal")?.remove();
+    const focoAnterior = document.activeElement;
+    const overlay = document.createElement("div");
+    overlay.id = "admin-motivo-modal";
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+      <div class="modal-confirm-box" role="dialog" aria-modal="true" aria-labelledby="admin-motivo-titulo">
+        <h3 id="admin-motivo-titulo" class="modal-confirm-titulo"></h3>
+        <p class="modal-confirm-mensagem"></p>
+        <div class="admin-motivo-campo">
+          <label for="admin-motivo-texto">Motivo da ação</label>
+          <textarea id="admin-motivo-texto" maxlength="300" placeholder="Explique o motivo com pelo menos 5 caracteres."></textarea>
+          <span class="admin-motivo-contador">0/300</span>
+        </div>
+        <div class="modal-confirm-acoes">
+          <button type="button" class="modal-confirm-cancelar">Cancelar</button>
+          <button type="button" class="modal-confirm-confirmar${destrutivo ? " destrutivo" : ""}" disabled></button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector(".modal-confirm-titulo").textContent = titulo;
+    overlay.querySelector(".modal-confirm-mensagem").textContent = mensagem;
+    const textarea = overlay.querySelector("textarea");
+    const contador = overlay.querySelector(".admin-motivo-contador");
+    const botaoCancelar = overlay.querySelector(".modal-confirm-cancelar");
+    const botaoConfirmar = overlay.querySelector(".modal-confirm-confirmar");
+    botaoConfirmar.textContent = confirmar;
+
+    let finalizado = false;
+    const finalizar = (valor) => {
+      if (finalizado) return;
+      finalizado = true;
+      document.removeEventListener("keydown", aoTeclar);
+      overlay.remove();
+      if (focoAnterior instanceof HTMLElement && focoAnterior.isConnected) focoAnterior.focus();
+      resolve(valor);
+    };
+    const aoTeclar = (evento) => {
+      if (evento.key === "Escape") finalizar("");
+    };
+    textarea.addEventListener("input", () => {
+      const motivo = textarea.value.trim();
+      contador.textContent = `${textarea.value.length}/300`;
+      botaoConfirmar.disabled = motivo.length < 5;
+    });
+    botaoCancelar.addEventListener("click", () => finalizar(""));
+    botaoConfirmar.addEventListener("click", () => finalizar(textarea.value.trim()));
+    overlay.addEventListener("click", (evento) => {
+      if (evento.target === overlay) finalizar("");
+    });
+    document.addEventListener("keydown", aoTeclar);
+    textarea.focus();
+  });
 }
 
 function mostrarAcesso(titulo, mensagem, mostrarLogin = false) {
@@ -221,8 +299,19 @@ function preencherMetrica(id, valor) {
   if (elemento) elemento.textContent = String(valor);
 }
 
+function registrosInvalidos() {
+  const candidaturas = estado.dados.candidaturas
+    .filter((item) => !uidValido(item.jogadorUid) || !uidValido(item.capitaoUid) || !texto(item.vagaId, ""))
+    .map((item) => ({ ...item, colecao: "candidaturas", tipoRegistro: "Candidatura" }));
+  const convites = estado.dados.convites
+    .filter((item) => !uidValido(item.jogadorUid) || !uidValido(item.capitaoUid))
+    .map((item) => ({ ...item, colecao: "convites", tipoRegistro: "Convite" }));
+  return ordenarRecentes([...candidaturas, ...convites]);
+}
+
 function renderizarMetricas() {
   const pendentes = estado.dados.denuncias.filter(estaPendente);
+  const invalidos = registrosInvalidos();
   const convitesPendentes = estado.dados.convites.filter(
     (convite) => normalizar(convite.status || "pendente") === "pendente",
   );
@@ -236,11 +325,18 @@ function renderizarMetricas() {
   preencherMetrica("admin-total-vagas", estado.dados.vagas.length);
   preencherMetrica("admin-total-denuncias", pendentes.length);
   preencherMetrica("admin-total-convites", convitesPendentes.length);
+  preencherMetrica("admin-total-invalidos", invalidos.length);
 
   const contadorNav = porId("admin-nav-denuncias");
   if (contadorNav) {
     contadorNav.textContent = String(pendentes.length);
     contadorNav.hidden = pendentes.length === 0;
+  }
+
+  const contadorInvalidos = porId("admin-nav-invalidos");
+  if (contadorInvalidos) {
+    contadorInvalidos.textContent = String(invalidos.length);
+    contadorInvalidos.hidden = invalidos.length === 0;
   }
 
   const atualizacao = porId("admin-ultima-atualizacao");
@@ -257,7 +353,7 @@ function renderizarResumos() {
       ? ultimas.map((denuncia) => `
           <div class="admin-resumo-item">
             <strong>${escaparHtml(texto(denuncia.clube, "Vaga denunciada"))}</strong>
-            <span>Aguardando análise</span>
+            <span>${escaparHtml(ROTULOS_MOTIVO_DENUNCIA[normalizar(denuncia.motivo)] || "Aguardando análise")}</span>
             <time>${escaparHtml(formatarData(denuncia.criadoEm))}</time>
           </div>`).join("")
       : '<div class="admin-vazio">Nenhuma denúncia pendente.</div>';
@@ -319,7 +415,18 @@ function renderizarUsuarios() {
             <td>${escaparHtml(rotuloPlataforma(jogador.plataforma))}</td>
             <td>${escaparHtml(texto(clube, "Sem clube"))}</td>
             <td><span class="admin-badge ${status.classe}">${escaparHtml(status.texto)}</span></td>
-            <td><a class="admin-btn-link" href="./meu-perfil.html?uid=${encodeURIComponent(jogador.id)}">Ver perfil</a></td>
+            <td>
+              <div class="admin-acoes-inline">
+                <a class="admin-btn-link" href="./meu-perfil.html?uid=${encodeURIComponent(jogador.id)}">Ver perfil</a>
+                ${estado.podeModerar ? `
+                  <button type="button" class="${jogador.suspenso === true ? "admin-btn-secundario" : "admin-btn-perigo"}"
+                    data-admin-acao="${jogador.suspenso === true ? "reativar-jogador" : "suspender-jogador"}"
+                    data-jogador-id="${escaparHtml(jogador.id)}"
+                    data-nome="${escaparHtml(texto(jogador.nickname, "Jogador"))}">
+                    ${jogador.suspenso === true ? "Reativar" : "Suspender"}
+                  </button>` : ""}
+              </div>
+            </td>
           </tr>`;
       }).join("")
     : '<tr><td class="admin-vazio" colspan="6">Nenhum usuário encontrado.</td></tr>';
@@ -354,12 +461,36 @@ function renderizarClubes() {
         const capitao = obterJogador(uidCapitao);
         return `
           <tr>
-            <td><div class="admin-entidade"><strong>${escaparHtml(texto(clube.nome, "Clube sem nome"))}</strong><small>${escaparHtml(texto(clube.divisao, "Divisão não informada"))}</small></div></td>
+            <td>
+              <div class="admin-entidade">
+                <strong>${escaparHtml(texto(clube.nome, "Clube sem nome"))}</strong>
+                <small>${escaparHtml(texto(clube.divisao, "Divisão não informada"))}</small>
+                <div class="admin-acoes-inline">
+                  ${clube.verificado === true ? '<span class="admin-badge verde">Verificado</span>' : ""}
+                  ${clube.suspenso === true ? '<span class="admin-badge vermelho">Bloqueado</span>' : ""}
+                </div>
+              </div>
+            </td>
             <td>${escaparHtml(texto(capitao?.nickname || clube.capitaoNome || clube.capitaoIdEA, "Não informado"))}</td>
             <td>${escaparHtml(rotuloPlataforma(clube.plataforma))}</td>
             <td>${escaparHtml(texto(clube.regiao))}</td>
             <td>${escaparHtml(texto(clube.estiloJogo))}</td>
-            <td><a class="admin-btn-link" href="./clubes.html?uid=${encodeURIComponent(uidCapitao)}">Ver clube</a></td>
+            <td>
+              <div class="admin-acoes-inline">
+                <a class="admin-btn-link" href="./clubes.html?uid=${encodeURIComponent(uidCapitao)}">Ver clube</a>
+                ${estado.podeModerar ? `
+                  <button type="button" class="admin-btn-secundario" data-admin-acao="alternar-verificacao-clube"
+                    data-clube-id="${escaparHtml(clube.id)}" data-verificado="${String(clube.verificado === true)}"
+                    data-nome="${escaparHtml(texto(clube.nome, "Clube"))}">
+                    ${clube.verificado === true ? "Remover selo" : "Verificar"}
+                  </button>
+                  <button type="button" class="${clube.suspenso === true ? "admin-btn-secundario" : "admin-btn-perigo"}"
+                    data-admin-acao="${clube.suspenso === true ? "desbloquear-clube" : "bloquear-clube"}"
+                    data-clube-id="${escaparHtml(clube.id)}" data-nome="${escaparHtml(texto(clube.nome, "Clube"))}">
+                    ${clube.suspenso === true ? "Desbloquear" : "Bloquear"}
+                  </button>` : ""}
+              </div>
+            </td>
           </tr>`;
       }).join("")
     : '<tr><td class="admin-vazio" colspan="6">Nenhum clube encontrado.</td></tr>';
@@ -415,9 +546,11 @@ function renderizarVagas() {
 }
 
 function rotuloStatusDenuncia(denuncia) {
+  if (estaArquivada(denuncia)) return { texto: "Arquivada", classe: "" };
   const status = statusDenuncia(denuncia);
   if (status === "analisada") return { texto: "Analisada", classe: "verde" };
   if (status === "resolvida") return { texto: "Resolvida", classe: "verde" };
+  if (status === "descartada") return { texto: "Descartada", classe: "" };
   return { texto: "Aguardando análise", classe: "amarelo" };
 }
 
@@ -427,7 +560,10 @@ function renderizarDenuncias() {
   const filtro = porId("admin-filtro-denuncias")?.value || "pendentes";
   const filtradas = estado.dados.denuncias.filter((denuncia) => {
     if (filtro === "pendentes") return estaPendente(denuncia);
-    if (filtro === "analisadas") return !estaPendente(denuncia);
+    if (filtro === "analisadas") return !estaArquivada(denuncia) && statusDenuncia(denuncia) === "analisada";
+    if (filtro === "resolvidas") return !estaArquivada(denuncia)
+      && ["resolvida", "descartada"].includes(statusDenuncia(denuncia));
+    if (filtro === "arquivadas") return estaArquivada(denuncia);
     return true;
   });
 
@@ -439,6 +575,7 @@ function renderizarDenuncias() {
         const status = rotuloStatusDenuncia(denuncia);
         const vaga = estado.dados.vagas.find((item) => item.id === denuncia.vagaId);
         const denunciante = obterJogador(denuncia.denuncianteUid);
+        const motivo = ROTULOS_MOTIVO_DENUNCIA[normalizar(denuncia.motivo)] || texto(denuncia.motivo, "Motivo não informado");
         return `
           <article class="admin-registro">
             <div class="admin-registro-topo">
@@ -448,24 +585,82 @@ function renderizarDenuncias() {
             <div class="admin-registro-meta">
               <span class="admin-badge">Denúncia de ${escaparHtml(texto(denunciante?.nickname, "usuário da comunidade"))}</span>
               <span class="admin-badge">${escaparHtml(formatarData(denuncia.criadoEm))}</span>
+              <span class="admin-badge amarelo">${escaparHtml(motivo)}</span>
             </div>
-            <p>Conteúdo denunciado para revisão da equipe administrativa.</p>
+            <p class="admin-denuncia-detalhes">${escaparHtml(texto(denuncia.detalhes, "O usuário não acrescentou detalhes."))}</p>
             <div class="admin-registro-acoes">
               ${denuncia.vagaId ? `<a class="admin-btn-link" href="./mercado.html?vaga=${encodeURIComponent(denuncia.vagaId)}">Abrir anúncio</a>` : ""}
               ${estado.podeModerar && estaPendente(denuncia) ? `
                 <button type="button" class="admin-btn-secundario" data-admin-acao="analisar-denuncia"
-                  data-denuncia-id="${escaparHtml(denuncia.id)}">Marcar como analisada</button>` : ""}
-              ${vaga ? botoesModeracaoVaga(vaga, denuncia.id) : ""}
+                  data-denuncia-id="${escaparHtml(denuncia.id)}">Marcar como analisada</button>
+                <button type="button" class="admin-btn-secundario" data-admin-acao="descartar-denuncia"
+                  data-denuncia-id="${escaparHtml(denuncia.id)}" data-clube="${escaparHtml(texto(denuncia.clube, "Clube"))}">Descartar</button>` : ""}
+              ${vaga && !estaArquivada(denuncia) ? botoesModeracaoVaga(vaga, denuncia.id) : ""}
+              ${estado.podeModerar && !estaPendente(denuncia) && !estaArquivada(denuncia) ? `
+                <button type="button" class="admin-btn-secundario" data-admin-acao="arquivar-denuncia"
+                  data-denuncia-id="${escaparHtml(denuncia.id)}">Arquivar</button>` : ""}
+              ${estado.podeModerar && estaArquivada(denuncia) ? `
+                <button type="button" class="admin-btn-secundario" data-admin-acao="restaurar-denuncia"
+                  data-denuncia-id="${escaparHtml(denuncia.id)}">Restaurar</button>
+                <button type="button" class="admin-btn-perigo" data-admin-acao="excluir-denuncia"
+                  data-denuncia-id="${escaparHtml(denuncia.id)}" data-clube="${escaparHtml(texto(denuncia.clube, "Clube"))}">Excluir definitivamente</button>` : ""}
             </div>
           </article>`;
       }).join("")
     : '<div class="admin-vazio">Nenhuma denúncia neste filtro.</div>';
 }
 
+function renderizarManutencao() {
+  const lista = porId("admin-lista-invalidos");
+  if (!lista) return;
+  const invalidos = registrosInvalidos();
+  const contagem = porId("admin-contagem-invalidos");
+  if (contagem) contagem.textContent = `${invalidos.length} registro(s)`;
+  const limparTodos = porId("admin-limpar-invalidos");
+  if (limparTodos) limparTodos.hidden = !estado.podeModerar || invalidos.length === 0;
+  lista.innerHTML = invalidos.length
+    ? invalidos.map((item) => {
+        const problemas = [
+          !uidValido(item.jogadorUid) ? "jogadorUid inválido" : "",
+          !uidValido(item.capitaoUid) ? "capitaoUid inválido" : "",
+          item.colecao === "candidaturas" && !texto(item.vagaId, "") ? "vagaId ausente" : "",
+        ].filter(Boolean);
+        return `
+          <article class="admin-registro">
+            <div class="admin-registro-topo">
+              <h3>${escaparHtml(item.tipoRegistro)} antiga</h3>
+              <span class="admin-badge vermelho">Inválida</span>
+            </div>
+            <div class="admin-registro-meta">
+              ${problemas.map((problema) => `<span class="admin-badge">${escaparHtml(problema)}</span>`).join("")}
+            </div>
+            <p>Registro ${escaparHtml(item.id)} não consegue concluir o fluxo de negociação e pode ser removido com segurança.</p>
+            <div class="admin-registro-acoes">
+              ${estado.podeModerar ? `
+                <button type="button" class="admin-btn-perigo" data-admin-acao="excluir-registro-invalido"
+                  data-registro-id="${escaparHtml(item.id)}" data-colecao="${escaparHtml(item.colecao)}"
+                  data-tipo="${escaparHtml(item.tipoRegistro)}">Excluir registro inválido</button>` : ""}
+            </div>
+          </article>`;
+      }).join("")
+    : '<div class="admin-vazio">Nenhum registro antigo inválido foi encontrado.</div>';
+}
+
 function rotuloAcao(acao) {
   const rotulos = {
     denuncia_analisada: "Denúncia marcada como analisada",
+    denuncia_descartada: "Denúncia descartada",
+    denuncia_arquivada: "Denúncia arquivada",
+    denuncia_restaurada: "Denúncia restaurada",
+    denuncia_excluida: "Denúncia excluída definitivamente",
     vaga_removida: "Vaga removida pela moderação",
+    jogador_suspenso: "Jogador suspenso",
+    jogador_reativado: "Jogador reativado",
+    clube_verificado: "Clube verificado",
+    verificacao_clube_removida: "Verificação de clube removida",
+    clube_bloqueado: "Clube bloqueado",
+    clube_desbloqueado: "Clube desbloqueado",
+    registro_invalido_excluido: "Registro inválido excluído",
   };
   return rotulos[acao] || texto(acao, "Ação administrativa").replaceAll("_", " ");
 }
@@ -494,6 +689,7 @@ function renderizarTudo() {
   renderizarClubes();
   renderizarVagas();
   renderizarDenuncias();
+  renderizarManutencao();
   renderizarAtividade();
 }
 
@@ -574,13 +770,13 @@ async function removerVaga(vagaId, nomeClube, denunciaId, botao) {
     return;
   }
 
-  const confirmado = await confirmModal({
+  const motivo = await solicitarMotivo({
     titulo: "Remover vaga",
-    mensagem: `Remover a vaga do clube “${nomeClube}”? Essa ação não pode ser desfeita.`,
-    textoConfirmar: "Remover vaga",
+    mensagem: `Explique por que a vaga do clube “${nomeClube}” deve ser removida. Essa ação não pode ser desfeita.`,
+    confirmar: "Remover vaga",
     destrutivo: true,
   });
-  if (!confirmado) return;
+  if (!motivo) return;
 
   botao.disabled = true;
   try {
@@ -590,12 +786,14 @@ async function removerVaga(vagaId, nomeClube, denunciaId, botao) {
     if (denunciaId) {
       await updateDoc(doc(db, "denuncias", denunciaId), {
         status: "resolvida",
+        motivoModeracao: motivo,
         resolvidaPor: estado.usuario.uid,
         resolvidaEm: serverTimestamp(),
       });
       const denuncia = estado.dados.denuncias.find((item) => item.id === denunciaId);
       if (denuncia) {
         denuncia.status = "resolvida";
+        denuncia.motivoModeracao = motivo;
         denuncia.resolvidaPor = estado.usuario.uid;
         denuncia.resolvidaEm = new Date();
       }
@@ -606,13 +804,293 @@ async function removerVaga(vagaId, nomeClube, denunciaId, botao) {
       "vaga_removida",
       "vaga",
       vagaId,
-      `Vaga do clube ${nomeClube} removida`,
+      `Vaga do clube ${nomeClube} removida: ${motivo}`,
     );
     toast("Vaga removida com sucesso.");
   } catch (erro) {
     console.error("Erro ao remover vaga:", erro);
     if (botao.isConnected) botao.disabled = false;
     toast("Não foi possível remover a vaga. Confira as permissões do Firestore.", "erro");
+  }
+}
+
+async function descartarDenuncia(denunciaId, clube, botao) {
+  if (!estado.podeModerar) return toast("Sua conta possui somente acesso de leitura.", "erro");
+  const motivo = await solicitarMotivo({
+    titulo: "Descartar denúncia",
+    mensagem: `Explique por que a denúncia relacionada a “${clube}” não exige remoção de conteúdo.`,
+    confirmar: "Descartar denúncia",
+  });
+  if (!motivo) return;
+  botao.disabled = true;
+  try {
+    await updateDoc(doc(db, "denuncias", denunciaId), {
+      status: "descartada",
+      motivoModeracao: motivo,
+      descartadaPor: estado.usuario.uid,
+      descartadaEm: serverTimestamp(),
+    });
+    const denuncia = estado.dados.denuncias.find((item) => item.id === denunciaId);
+    if (denuncia) Object.assign(denuncia, {
+      status: "descartada",
+      motivoModeracao: motivo,
+      descartadaPor: estado.usuario.uid,
+      descartadaEm: new Date(),
+    });
+    renderizarTudo();
+    await registrarLog("denuncia_descartada", "denuncia", denunciaId, `${clube}: ${motivo}`);
+    toast("Denúncia descartada e registrada no histórico.");
+  } catch (erro) {
+    console.error("Erro ao descartar denúncia:", erro);
+    if (botao.isConnected) botao.disabled = false;
+    toast("Não foi possível descartar a denúncia.", "erro");
+  }
+}
+
+async function arquivarDenuncia(denunciaId, botao) {
+  const confirmado = await confirmModal({
+    titulo: "Arquivar denúncia",
+    mensagem: "A denúncia sairá das listas ativas, mas continuará disponível no filtro Arquivadas.",
+    textoConfirmar: "Arquivar",
+  });
+  if (!confirmado) return;
+  botao.disabled = true;
+  try {
+    await updateDoc(doc(db, "denuncias", denunciaId), {
+      arquivada: true,
+      arquivadaPor: estado.usuario.uid,
+      arquivadaEm: serverTimestamp(),
+    });
+    const denuncia = estado.dados.denuncias.find((item) => item.id === denunciaId);
+    if (denuncia) Object.assign(denuncia, { arquivada: true, arquivadaPor: estado.usuario.uid, arquivadaEm: new Date() });
+    renderizarTudo();
+    await registrarLog("denuncia_arquivada", "denuncia", denunciaId, "Denúncia movida para o arquivo");
+    toast("Denúncia arquivada.");
+  } catch (erro) {
+    console.error("Erro ao arquivar denúncia:", erro);
+    if (botao.isConnected) botao.disabled = false;
+    toast("Não foi possível arquivar a denúncia.", "erro");
+  }
+}
+
+async function restaurarDenuncia(denunciaId, botao) {
+  botao.disabled = true;
+  try {
+    await updateDoc(doc(db, "denuncias", denunciaId), {
+      arquivada: false,
+      restauradaPor: estado.usuario.uid,
+      restauradaEm: serverTimestamp(),
+    });
+    const denuncia = estado.dados.denuncias.find((item) => item.id === denunciaId);
+    if (denuncia) Object.assign(denuncia, { arquivada: false, restauradaPor: estado.usuario.uid, restauradaEm: new Date() });
+    renderizarTudo();
+    await registrarLog("denuncia_restaurada", "denuncia", denunciaId, "Denúncia restaurada do arquivo");
+    toast("Denúncia restaurada.");
+  } catch (erro) {
+    console.error("Erro ao restaurar denúncia:", erro);
+    if (botao.isConnected) botao.disabled = false;
+    toast("Não foi possível restaurar a denúncia.", "erro");
+  }
+}
+
+async function excluirDenuncia(denunciaId, clube, botao) {
+  const confirmado = await confirmModal({
+    titulo: "Excluir denúncia definitivamente",
+    mensagem: `Excluir a denúncia relacionada a “${clube}”? O registro de atividade administrativa será preservado.`,
+    textoConfirmar: "Excluir definitivamente",
+    destrutivo: true,
+  });
+  if (!confirmado) return;
+  botao.disabled = true;
+  try {
+    await deleteDoc(doc(db, "denuncias", denunciaId));
+    estado.dados.denuncias = estado.dados.denuncias.filter((item) => item.id !== denunciaId);
+    renderizarTudo();
+    await registrarLog("denuncia_excluida", "denuncia", denunciaId, `Denúncia relacionada a ${clube} excluída`);
+    toast("Denúncia excluída definitivamente.");
+  } catch (erro) {
+    console.error("Erro ao excluir denúncia:", erro);
+    if (botao.isConnected) botao.disabled = false;
+    toast("Não foi possível excluir a denúncia.", "erro");
+  }
+}
+
+async function alterarSuspensaoJogador(jogadorId, nome, suspender, botao) {
+  const motivo = await solicitarMotivo({
+    titulo: suspender ? "Suspender jogador" : "Reativar jogador",
+    mensagem: suspender
+      ? `Informe por que “${nome}” será impedido de aparecer no mercado.`
+      : `Informe por que o acesso de “${nome}” será reativado.`,
+    confirmar: suspender ? "Suspender" : "Reativar",
+    destrutivo: suspender,
+  });
+  if (!motivo) return;
+  botao.disabled = true;
+  try {
+    const dados = suspender
+      ? {
+          suspenso: true,
+          procurandoClube: false,
+          suspensoPor: estado.usuario.uid,
+          suspensoEm: serverTimestamp(),
+          motivoSuspensao: motivo,
+        }
+      : {
+          suspenso: false,
+          motivoSuspensao: null,
+          reativadoPor: estado.usuario.uid,
+          reativadoEm: serverTimestamp(),
+        };
+    await updateDoc(doc(db, "jogadores", jogadorId), dados);
+    const jogador = estado.dados.jogadores.find((item) => item.id === jogadorId);
+    if (jogador) Object.assign(jogador, dados, suspender ? { suspensoEm: new Date() } : { reativadoEm: new Date() });
+    renderizarTudo();
+    await registrarLog(
+      suspender ? "jogador_suspenso" : "jogador_reativado",
+      "jogador",
+      jogadorId,
+      `${nome}: ${motivo}`,
+    );
+    toast(suspender ? "Jogador suspenso." : "Jogador reativado.");
+  } catch (erro) {
+    console.error("Erro ao alterar suspensão do jogador:", erro);
+    if (botao.isConnected) botao.disabled = false;
+    toast("Não foi possível atualizar o jogador.", "erro");
+  }
+}
+
+async function alternarVerificacaoClube(clubeId, nome, verificado, botao) {
+  const proximoValor = !verificado;
+  const motivo = await solicitarMotivo({
+    titulo: proximoValor ? "Verificar clube" : "Remover verificação",
+    mensagem: `Registre o motivo desta decisão sobre “${nome}”.`,
+    confirmar: proximoValor ? "Verificar" : "Remover selo",
+  });
+  if (!motivo) return;
+  botao.disabled = true;
+  try {
+    await updateDoc(doc(db, "clubes", clubeId), {
+      verificado: proximoValor,
+      verificacaoAtualizadaPor: estado.usuario.uid,
+      verificacaoAtualizadaEm: serverTimestamp(),
+      motivoVerificacao: motivo,
+    });
+    const clube = estado.dados.clubes.find((item) => item.id === clubeId);
+    if (clube) Object.assign(clube, { verificado: proximoValor, motivoVerificacao: motivo, verificacaoAtualizadaEm: new Date() });
+    renderizarTudo();
+    await registrarLog(
+      proximoValor ? "clube_verificado" : "verificacao_clube_removida",
+      "clube",
+      clubeId,
+      `${nome}: ${motivo}`,
+    );
+    toast(proximoValor ? "Clube verificado." : "Selo de verificação removido.");
+  } catch (erro) {
+    console.error("Erro ao alterar verificação do clube:", erro);
+    if (botao.isConnected) botao.disabled = false;
+    toast("Não foi possível atualizar a verificação.", "erro");
+  }
+}
+
+async function alterarBloqueioClube(clubeId, nome, bloquear, botao) {
+  const motivo = await solicitarMotivo({
+    titulo: bloquear ? "Bloquear clube" : "Desbloquear clube",
+    mensagem: bloquear
+      ? `O clube “${nome}” deixará de aparecer nas áreas públicas e não poderá publicar vagas.`
+      : `O clube “${nome}” voltará a aparecer e publicar vagas.`,
+    confirmar: bloquear ? "Bloquear clube" : "Desbloquear clube",
+    destrutivo: bloquear,
+  });
+  if (!motivo) return;
+  botao.disabled = true;
+  try {
+    const dados = bloquear
+      ? {
+          suspenso: true,
+          suspensoPor: estado.usuario.uid,
+          suspensoEm: serverTimestamp(),
+          motivoSuspensao: motivo,
+        }
+      : {
+          suspenso: false,
+          motivoSuspensao: null,
+          desbloqueadoPor: estado.usuario.uid,
+          desbloqueadoEm: serverTimestamp(),
+        };
+    await updateDoc(doc(db, "clubes", clubeId), dados);
+    const clube = estado.dados.clubes.find((item) => item.id === clubeId);
+    if (clube) Object.assign(clube, dados, bloquear ? { suspensoEm: new Date() } : { desbloqueadoEm: new Date() });
+    renderizarTudo();
+    await registrarLog(
+      bloquear ? "clube_bloqueado" : "clube_desbloqueado",
+      "clube",
+      clubeId,
+      `${nome}: ${motivo}`,
+    );
+    toast(bloquear ? "Clube bloqueado." : "Clube desbloqueado.");
+  } catch (erro) {
+    console.error("Erro ao alterar bloqueio do clube:", erro);
+    if (botao.isConnected) botao.disabled = false;
+    toast("Não foi possível atualizar o clube.", "erro");
+  }
+}
+
+async function excluirRegistroInvalido(colecaoEstado, registroId, tipo, botao) {
+  const colecaoFirestore = colecaoEstado === "convites" ? "convitesClube" : "candidaturas";
+  const confirmado = await confirmModal({
+    titulo: "Excluir registro inválido",
+    mensagem: `Excluir ${tipo.toLowerCase()} ${registroId}? Esta ação é indicada apenas para registros antigos quebrados.`,
+    textoConfirmar: "Excluir registro",
+    destrutivo: true,
+  });
+  if (!confirmado) return;
+  botao.disabled = true;
+  try {
+    await deleteDoc(doc(db, colecaoFirestore, registroId));
+    estado.dados[colecaoEstado] = estado.dados[colecaoEstado].filter((item) => item.id !== registroId);
+    renderizarTudo();
+    await registrarLog("registro_invalido_excluido", colecaoFirestore, registroId, `${tipo} inválida removida`);
+    toast("Registro inválido excluído.");
+  } catch (erro) {
+    console.error("Erro ao excluir registro inválido:", erro);
+    if (botao.isConnected) botao.disabled = false;
+    toast("Não foi possível excluir o registro inválido.", "erro");
+  }
+}
+
+async function limparRegistrosInvalidos(botao) {
+  const invalidos = registrosInvalidos();
+  if (!invalidos.length) return toast("Nenhum registro inválido foi encontrado.");
+  const confirmado = await confirmModal({
+    titulo: "Limpar todos os registros inválidos",
+    mensagem: `Excluir ${invalidos.length} registro(s) antigo(s) que não possuem os identificadores necessários?`,
+    textoConfirmar: "Limpar registros",
+    destrutivo: true,
+  });
+  if (!confirmado) return;
+  botao.disabled = true;
+  try {
+    await Promise.all(invalidos.map((item) => deleteDoc(doc(
+      db,
+      item.colecao === "convites" ? "convitesClube" : "candidaturas",
+      item.id,
+    ))));
+    const idsCandidaturas = new Set(invalidos.filter((item) => item.colecao === "candidaturas").map((item) => item.id));
+    const idsConvites = new Set(invalidos.filter((item) => item.colecao === "convites").map((item) => item.id));
+    estado.dados.candidaturas = estado.dados.candidaturas.filter((item) => !idsCandidaturas.has(item.id));
+    estado.dados.convites = estado.dados.convites.filter((item) => !idsConvites.has(item.id));
+    renderizarTudo();
+    await registrarLog(
+      "registro_invalido_excluido",
+      "manutencao",
+      "lote",
+      `${invalidos.length} registro(s) inválido(s) removido(s)`,
+    );
+    toast(`${invalidos.length} registro(s) inválido(s) removido(s).`);
+  } catch (erro) {
+    console.error("Erro ao limpar registros inválidos:", erro);
+    botao.disabled = false;
+    toast("A limpeza não foi concluída. Atualize os dados antes de tentar novamente.", "erro");
   }
 }
 
@@ -631,22 +1109,36 @@ function configurarEventos() {
   porId("admin-busca-vagas")?.addEventListener("input", renderizarVagas);
   porId("admin-filtro-denuncias")?.addEventListener("change", renderizarDenuncias);
   porId("admin-atualizar")?.addEventListener("click", carregarDados);
+  porId("admin-limpar-invalidos")?.addEventListener("click", (evento) => limparRegistrosInvalidos(evento.currentTarget));
 
   document.addEventListener("click", (evento) => {
     const botao = evento.target.closest("[data-admin-acao]");
     if (!(botao instanceof HTMLButtonElement)) return;
-
-    if (botao.dataset.adminAcao === "analisar-denuncia") {
-      marcarDenunciaAnalisada(botao.dataset.denunciaId, botao);
+    const acao = botao.dataset.adminAcao;
+    if (acao === "analisar-denuncia") marcarDenunciaAnalisada(botao.dataset.denunciaId, botao);
+    if (acao === "descartar-denuncia") descartarDenuncia(botao.dataset.denunciaId, botao.dataset.clube || "Clube", botao);
+    if (acao === "arquivar-denuncia") arquivarDenuncia(botao.dataset.denunciaId, botao);
+    if (acao === "restaurar-denuncia") restaurarDenuncia(botao.dataset.denunciaId, botao);
+    if (acao === "excluir-denuncia") excluirDenuncia(botao.dataset.denunciaId, botao.dataset.clube || "Clube", botao);
+    if (acao === "remover-vaga") {
+      removerVaga(botao.dataset.vagaId, botao.dataset.clube || "este clube", botao.dataset.denunciaId || "", botao);
     }
-
-    if (botao.dataset.adminAcao === "remover-vaga") {
-      removerVaga(
-        botao.dataset.vagaId,
-        botao.dataset.clube || "este clube",
-        botao.dataset.denunciaId || "",
+    if (acao === "suspender-jogador" || acao === "reativar-jogador") {
+      alterarSuspensaoJogador(botao.dataset.jogadorId, botao.dataset.nome || "Jogador", acao === "suspender-jogador", botao);
+    }
+    if (acao === "alternar-verificacao-clube") {
+      alternarVerificacaoClube(
+        botao.dataset.clubeId,
+        botao.dataset.nome || "Clube",
+        botao.dataset.verificado === "true",
         botao,
       );
+    }
+    if (acao === "bloquear-clube" || acao === "desbloquear-clube") {
+      alterarBloqueioClube(botao.dataset.clubeId, botao.dataset.nome || "Clube", acao === "bloquear-clube", botao);
+    }
+    if (acao === "excluir-registro-invalido") {
+      excluirRegistroInvalido(botao.dataset.colecao, botao.dataset.registroId, botao.dataset.tipo || "Registro", botao);
     }
   });
 }

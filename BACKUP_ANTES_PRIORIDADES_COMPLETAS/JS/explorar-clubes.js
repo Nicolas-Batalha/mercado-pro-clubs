@@ -97,17 +97,13 @@ function preencherSelect(id, valores) {
 }
 
 function montarClubes(clubesDocs, jogadoresDocs, vagasDocs) {
-  const clubesAtivosDocs = clubesDocs.filter((clubeDoc) => clubeDoc.data().suspenso !== true);
-  const clubesAtivosIds = new Set(clubesAtivosDocs.map((clubeDoc) => clubeDoc.id));
-  const jogadores = jogadoresDocs
-    .map((jogadorDoc) => ({ uid: jogadorDoc.id, ...jogadorDoc.data() }))
-    .filter((jogador) => jogador.suspenso !== true);
+  const jogadores = jogadoresDocs.map((jogadorDoc) => ({ uid: jogadorDoc.id, ...jogadorDoc.data() }));
   const jogadoresPorUid = new Map(jogadores.map((jogador) => [jogador.uid, jogador]));
   const vagasAtivas = vagasDocs
     .map((vagaDoc) => ({ id: vagaDoc.id, ...vagaDoc.data() }))
-    .filter((vaga) => vagaAtiva(vaga) && clubesAtivosIds.has(vaga.capitaoUid));
+    .filter(vagaAtiva);
 
-  clubesCarregados = clubesAtivosDocs.map((clubeDoc) => {
+  clubesCarregados = clubesDocs.map((clubeDoc) => {
     const dados = clubeDoc.data();
     const capitaoUid = uidValido(dados.capitaoUid) ? dados.capitaoUid : clubeDoc.id;
     const nome = dados.nome || jogadoresPorUid.get(capitaoUid)?.clube || "Clube sem nome";

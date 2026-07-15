@@ -321,9 +321,7 @@ async function carregarJogadoresDisponiveis() {
       where("procurandoClube", "==", true)
     ));
     if (numeroRequisicao !== requisicaoJogadoresAtual) return;
-    jogadoresDisponiveisAtuais = snap.docs
-      .map((perfilDoc) => ({ uid: perfilDoc.id, ...perfilDoc.data() }))
-      .filter((jogador) => jogador.suspenso !== true && !jogador.clubeAtualId);
+    jogadoresDisponiveisAtuais = snap.docs.map((perfilDoc) => ({ uid: perfilDoc.id, ...perfilDoc.data() }));
     aplicarFiltrosJogadores();
   } catch (err) {
     if (numeroRequisicao !== requisicaoJogadoresAtual) return;
@@ -704,19 +702,12 @@ async function carregarVagas() {
   const soMeuNivel = document.getElementById("filtro-meu-nivel")?.checked || false;
 
   try {
-    const [snap, clubesSnap] = await Promise.all([
-      getDocs(query(collection(db, "vagas"), orderBy("criadoEm", "desc"))),
-      getDocs(collection(db, "clubes")),
-    ]);
-    const clubesSuspensos = new Set(
-      clubesSnap.docs.filter((clubeDoc) => clubeDoc.data().suspenso === true).map((clubeDoc) => clubeDoc.id),
-    );
+    const snap  = await getDocs(query(collection(db, "vagas"), orderBy("criadoEm", "desc")));
     const agora = Date.now();
     const validas = [];
 
     snap.docs.forEach(d => {
       const dados    = { id: d.id, ...d.data() };
-      if (clubesSuspensos.has(dados.capitaoUid)) return;
       const criadoMs = dados.criadoEm?.toMillis?.() || 0;
       if (criadoMs && agora - criadoMs >= EXPIRACAO_MS) {
         if (usuarioAtual?.uid === dados.capitaoUid) {
@@ -995,93 +986,20 @@ async function compartilharVaga(vagaId) {
 }
 
 // ─── Denunciar vaga ────────────────────────────────────────────────────────────
-function solicitarDetalhesDenuncia(clube) {
-  return new Promise((resolve) => {
-    document.getElementById("modal-denuncia")?.remove();
-    const focoAnterior = document.activeElement;
-    const overlay = document.createElement("div");
-    overlay.id = "modal-denuncia";
-    overlay.className = "modal-overlay";
-    overlay.innerHTML = `
-      <form class="modal-confirm-box denuncia-modal-box" role="dialog" aria-modal="true" aria-labelledby="denuncia-modal-titulo">
-        <h3 id="denuncia-modal-titulo" class="modal-confirm-titulo">Denunciar vaga</h3>
-        <p class="modal-confirm-mensagem">Informe o motivo da denúncia sobre “${escHtml(clube)}”. A equipe administrativa receberá os detalhes.</p>
-        <label class="denuncia-modal-campo" for="denuncia-motivo">
-          <span>Motivo</span>
-          <select id="denuncia-motivo" required>
-            <option value="">Selecione um motivo</option>
-            <option value="spam">Spam ou anúncio repetido</option>
-            <option value="ofensivo">Conteúdo ofensivo ou discriminatório</option>
-            <option value="falso">Informação falsa ou enganosa</option>
-            <option value="golpe">Suspeita de golpe</option>
-            <option value="inadequado">Conteúdo inadequado</option>
-            <option value="outro">Outro motivo</option>
-          </select>
-        </label>
-        <label class="denuncia-modal-campo" for="denuncia-detalhes">
-          <span>Detalhes <small>(opcional)</small></span>
-          <textarea id="denuncia-detalhes" maxlength="500" placeholder="Explique o que aconteceu para ajudar na análise."></textarea>
-          <small id="denuncia-contador">0/500</small>
-        </label>
-        <div class="modal-confirm-acoes">
-          <button type="button" class="modal-confirm-cancelar">Cancelar</button>
-          <button type="submit" class="modal-confirm-confirmar destrutivo" disabled>Enviar denúncia</button>
-        </div>
-      </form>`;
-    document.body.appendChild(overlay);
-    const form = overlay.querySelector("form");
-    const motivo = overlay.querySelector("select");
-    const detalhes = overlay.querySelector("textarea");
-    const contador = overlay.querySelector("#denuncia-contador");
-    const confirmar = overlay.querySelector("button[type='submit']");
-    const cancelar = overlay.querySelector(".modal-confirm-cancelar");
-    let finalizado = false;
-
-    const finalizar = (resultado) => {
-      if (finalizado) return;
-      finalizado = true;
-      document.removeEventListener("keydown", aoTeclar);
-      overlay.remove();
-      if (focoAnterior instanceof HTMLElement && focoAnterior.isConnected) focoAnterior.focus();
-      resolve(resultado);
-    };
-    const aoTeclar = (evento) => {
-      if (evento.key === "Escape") finalizar(null);
-    };
-    motivo.addEventListener("change", () => { confirmar.disabled = !motivo.value; });
-    detalhes.addEventListener("input", () => { contador.textContent = `${detalhes.value.length}/500`; });
-    cancelar.addEventListener("click", () => finalizar(null));
-    overlay.addEventListener("click", (evento) => { if (evento.target === overlay) finalizar(null); });
-    form.addEventListener("submit", (evento) => {
-      evento.preventDefault();
-      if (!motivo.value) return;
-      finalizar({ motivo: motivo.value, detalhes: detalhes.value.trim() });
-    });
-    document.addEventListener("keydown", aoTeclar);
-    motivo.focus();
-  });
-}
-
 async function denunciarVaga(vagaId, clube, capitaoUid) {
   const usuario = usuarioAtual;
   if (!usuario) { toast("Faça login para denunciar.", "erro"); return; }
-  const dados = await solicitarDetalhesDenuncia(clube);
-  if (!dados) return;
+  const ok = await confirmModal({
+    titulo: "Denunciar vaga",
+    mensagem: `Denunciar a vaga do clube "${clube}"? Nossa equipe vai revisar.`,
+    textoConfirmar: "Denunciar",
+    destrutivo: true,
+  });
+  if (!ok) return;
   try {
-    const referencia = doc(db, "denuncias", `${usuario.uid}_${vagaId}`);
-    const existente = await getDoc(referencia);
-    if (existente.exists()) {
-      toast("Você já denunciou esta vaga. A equipe administrativa fará a análise.", "erro");
-      return;
-    }
-    await setDoc(referencia, {
-      vagaId,
-      clube,
-      capitaoUid: capitaoUid || "",
+    await addDoc(collection(db, "denuncias"), {
+      vagaId, clube, capitaoUid,
       denuncianteUid: usuario.uid,
-      motivo: dados.motivo,
-      detalhes: dados.detalhes,
-      status: "pendente",
       criadoEm: serverTimestamp(),
     });
     toast("🚩 Denúncia enviada. Obrigado por ajudar a manter o mercado seguro!");

@@ -74,9 +74,6 @@
           <button type="button" class="admin-nav-item" data-admin-painel="denuncias">
             <span>⚑</span> Denúncias <b id="admin-nav-denuncias" hidden>0</b>
           </button>
-          <button type="button" class="admin-nav-item" data-admin-painel="manutencao">
-            <span>⚙</span> Manutenção <b id="admin-nav-invalidos" hidden>0</b>
-          </button>
           <button type="button" class="admin-nav-item" data-admin-painel="atividade">
             <span>◷</span> Atividade
           </button>
@@ -99,7 +96,6 @@
               <article class="admin-metrica"><span>Vagas</span><strong id="admin-total-vagas">—</strong><small>anúncios publicados</small></article>
               <article class="admin-metrica alerta"><span>Denúncias</span><strong id="admin-total-denuncias">—</strong><small>aguardando análise</small></article>
               <article class="admin-metrica"><span>Convites</span><strong id="admin-total-convites">—</strong><small>convites pendentes</small></article>
-              <article class="admin-metrica alerta"><span>Dados antigos</span><strong id="admin-total-invalidos">—</strong><small>registros que precisam de limpeza</small></article>
             </div>
 
             <div class="admin-resumo-grid">
@@ -177,29 +173,10 @@
               <select id="admin-filtro-denuncias">
                 <option value="pendentes">Aguardando análise</option>
                 <option value="analisadas">Analisadas</option>
-                <option value="resolvidas">Resolvidas ou descartadas</option>
-                <option value="arquivadas">Arquivadas</option>
                 <option value="todas">Todas as denúncias</option>
               </select>
             </div>
             <div id="admin-lista-denuncias" class="admin-grid-registros"></div>
-          </section>
-
-          <section id="admin-painel-manutencao" class="admin-painel" aria-labelledby="admin-titulo-manutencao" hidden>
-            <div class="admin-secao-cabecalho">
-              <div>
-                <h2 id="admin-titulo-manutencao">Manutenção de dados</h2>
-                <p>Localize candidaturas e convites antigos com identificadores ausentes ou inválidos.</p>
-              </div>
-              <div class="admin-acoes-inline">
-                <span id="admin-contagem-invalidos" class="admin-contagem"></span>
-                <button type="button" id="admin-limpar-invalidos" class="admin-btn-perigo" hidden>Limpar todos</button>
-              </div>
-            </div>
-            <div class="admin-aviso admin-aviso-neutro">
-              Esta área não altera perfis, imagens, overall ou level. Apenas remove registros de negociação que não conseguem mais funcionar.
-            </div>
-            <div id="admin-lista-invalidos" class="admin-grid-registros"></div>
           </section>
 
           <section id="admin-painel-atividade" class="admin-painel" aria-labelledby="admin-titulo-atividade" hidden>

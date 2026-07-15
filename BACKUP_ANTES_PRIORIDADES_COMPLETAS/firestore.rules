@@ -86,42 +86,11 @@ service cloud.firestore {
         );
     }
 
-    function chatArchiveOnlyOwnUid() {
-      let before = resource.data.get('arquivadoPor', []);
-      let after = request.resource.data.get('arquivadoPor', []);
-      return before is list
-        && after is list
-        && after.toSet().difference(before.toSet()).hasOnly([request.auth.uid])
-        && before.toSet().difference(after.toSet()).hasOnly([request.auth.uid]);
-    }
-
     match /jogadores/{uid} {
       allow read: if true;
-      allow create: if signedIn()
-        && request.auth.uid == uid
-        && !request.resource.data.keys().hasAny([
-          'suspenso', 'suspensoPor', 'suspensoEm', 'motivoSuspensao',
-          'reativadoPor', 'reativadoEm'
-        ]);
+      allow create: if signedIn() && request.auth.uid == uid;
       allow update: if signedIn() && (
-        (
-          request.auth.uid == uid
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-            'suspenso', 'suspensoPor', 'suspensoEm', 'motivoSuspensao',
-            'reativadoPor', 'reativadoEm'
-          ])
-          && (
-            resource.data.get('suspenso', false) != true
-            || request.resource.data.get('procurandoClube', false) != true
-          )
-        )
-        || (
-          canModerate()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'suspenso', 'procurandoClube', 'suspensoPor', 'suspensoEm',
-            'motivoSuspensao', 'reativadoPor', 'reativadoEm'
-          ])
-        )
+        request.auth.uid == uid
         || (
           resource.data.clubeAtualId == request.auth.uid
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -131,55 +100,31 @@ service cloud.firestore {
           && request.resource.data.clubeAtualNome == null
         )
       );
-      allow delete: if signedIn()
-        && request.auth.uid == uid
-        && resource.data.get('suspenso', false) != true;
+      allow delete: if signedIn() && request.auth.uid == uid;
     }
 
     match /clubes/{clubeId} {
       allow read: if true;
       allow create: if signedIn()
         && request.auth.uid == clubeId
-        && !request.resource.data.keys().hasAny([
-          'verificado', 'verificacaoAtualizadaPor', 'verificacaoAtualizadaEm',
-          'motivoVerificacao', 'suspenso', 'suspensoPor', 'suspensoEm',
-          'motivoSuspensao', 'desbloqueadoPor', 'desbloqueadoEm'
-        ]);
+        && !request.resource.data.keys().hasAny(['verificado']);
       allow update: if (
         signedIn()
         && request.auth.uid == clubeId
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-          'verificado', 'verificacaoAtualizadaPor', 'verificacaoAtualizadaEm',
-          'motivoVerificacao', 'suspenso', 'suspensoPor', 'suspensoEm',
-          'motivoSuspensao', 'desbloqueadoPor', 'desbloqueadoEm'
-        ])
-      ) || (
-        canModerate()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'verificado', 'verificacaoAtualizadaPor', 'verificacaoAtualizadaEm',
-          'motivoVerificacao', 'suspenso', 'suspensoPor', 'suspensoEm',
-          'motivoSuspensao', 'desbloqueadoPor', 'desbloqueadoEm'
-        ])
-      );
-      allow delete: if (
-        signedIn()
-        && request.auth.uid == clubeId
-        && resource.data.get('suspenso', false) != true
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['verificado'])
       ) || canModerate();
+      allow delete: if (signedIn() && request.auth.uid == clubeId) || canModerate();
     }
 
     match /vagas/{vagaId} {
       allow read: if true;
       allow create: if signedIn()
         && request.resource.data.capitaoUid == request.auth.uid
-        && request.resource.data.clube is string
-        && exists(/databases/$(database)/documents/clubes/$(request.auth.uid))
-        && get(/databases/$(database)/documents/clubes/$(request.auth.uid)).data.get('suspenso', false) != true;
+        && request.resource.data.clube is string;
       allow update: if (
         signedIn()
         && resource.data.capitaoUid == request.auth.uid
         && request.resource.data.capitaoUid == request.auth.uid
-        && get(/databases/$(database)/documents/clubes/$(request.auth.uid)).data.get('suspenso', false) != true
       ) || canModerate();
       allow delete: if (
         signedIn() && resource.data.capitaoUid == request.auth.uid
@@ -191,11 +136,9 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.jogadorUid == request.auth.uid
         && validUid(request.resource.data.capitaoUid)
-        && exists(/databases/$(database)/documents/jogadores/$(request.auth.uid))
-        && get(/databases/$(database)/documents/jogadores/$(request.auth.uid)).data.get('suspenso', false) != true
         && request.resource.data.status == 'pendente';
       allow update: if playerCanUpdateApplication() || captainCanAnswerApplication();
-      allow delete: if canModerate();
+      allow delete: if false;
     }
 
     match /convitesClube/{conviteId} {
@@ -204,26 +147,9 @@ service cloud.firestore {
         && request.resource.data.capitaoUid == request.auth.uid
         && request.resource.data.jogadorUid != request.auth.uid
         && request.resource.data.status == 'pendente'
-        && exists(/databases/$(database)/documents/clubes/$(request.auth.uid))
-        && get(/databases/$(database)/documents/clubes/$(request.auth.uid)).data.get('suspenso', false) != true
-        && exists(/databases/$(database)/documents/jogadores/$(request.resource.data.jogadorUid))
-        && get(/databases/$(database)/documents/jogadores/$(request.resource.data.jogadorUid)).data.get('suspenso', false) != true;
+        && exists(/databases/$(database)/documents/clubes/$(request.auth.uid));
       allow update: if inviteCanBeUpdated();
-      allow delete: if canModerate();
-    }
-
-    match /negociacoesArquivadas/{arquivoId} {
-      allow read: if signedIn() && resource.data.usuarioUid == request.auth.uid;
-      allow create: if signedIn()
-        && request.resource.data.usuarioUid == request.auth.uid
-        && request.resource.data.tipo in ['candidatura', 'convite']
-        && request.resource.data.registroId is string
-        && request.resource.data.registroId.size() > 5
-        && request.resource.data.keys().hasOnly([
-          'usuarioUid', 'tipo', 'registroId', 'criadoEm'
-        ]);
-      allow update: if false;
-      allow delete: if signedIn() && resource.data.usuarioUid == request.auth.uid;
+      allow delete: if false;
     }
 
     match /chats/{chatId} {
@@ -235,7 +161,6 @@ service cloud.firestore {
       allow update: if signedIn()
         && request.auth.uid in resource.data.participantes
         && request.resource.data.participantes == resource.data.participantes
-        && chatArchiveOnlyOwnUid()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'clube', 'tipo', 'criadoEm', 'ultimaMensagemTexto',
           'ultimaMensagemAutorUid', 'ultimaMensagemEm', 'lidoPor', 'arquivadoPor'
@@ -257,27 +182,8 @@ service cloud.firestore {
 
     match /denuncias/{denunciaId} {
       allow create: if signedIn()
-        && request.resource.data.denuncianteUid == request.auth.uid
-        && denunciaId == request.auth.uid + '_' + request.resource.data.vagaId
-        && request.resource.data.keys().hasOnly([
-          'vagaId', 'clube', 'capitaoUid', 'denuncianteUid',
-          'motivo', 'detalhes', 'status', 'criadoEm'
-        ])
-        && request.resource.data.vagaId is string
-        && request.resource.data.vagaId.size() > 5
-        && request.resource.data.clube is string
-        && request.resource.data.capitaoUid is string
-        && request.resource.data.motivo in [
-          'spam', 'ofensivo', 'falso', 'golpe', 'inadequado', 'outro'
-        ]
-        && request.resource.data.detalhes is string
-        && request.resource.data.detalhes.size() <= 500
-        && request.resource.data.status == 'pendente'
-        && exists(/databases/$(database)/documents/vagas/$(request.resource.data.vagaId))
-        && request.resource.data.capitaoUid == get(/databases/$(database)/documents/vagas/$(request.resource.data.vagaId)).data.capitaoUid
-        && request.resource.data.clube == get(/databases/$(database)/documents/vagas/$(request.resource.data.vagaId)).data.clube;
-      allow read: if isAdmin()
-        || (signedIn() && resource.data.denuncianteUid == request.auth.uid);
+        && request.resource.data.denuncianteUid == request.auth.uid;
+      allow read: if isAdmin();
       allow update, delete: if canModerate();
     }
 

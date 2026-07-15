@@ -948,10 +948,6 @@ async function carregarModoVisitante(uidClube) {
       getDocs(query(collection(db, "vagas"), where("capitaoUid", "==", uidClube))),
     ]);
     const clube = clubeSnap.data();
-    if (clube.suspenso === true) {
-      mostrarErroClubePublico("Este clube está temporariamente indisponível para revisão da moderação.");
-      return;
-    }
     const perfilCapitao = perfilCapitaoSnap.exists() ? perfilCapitaoSnap.data() : {};
     const agora = Date.now();
     const vagas = vagasSnap.docs
@@ -962,8 +958,7 @@ async function carregarModoVisitante(uidClube) {
       })
       .sort((a, b) => (b.criadoEm?.toMillis?.() || 0) - (a.criadoEm?.toMillis?.() || 0));
 
-    const elencoPublico = elenco.filter(jogador => jogador.suspenso !== true);
-    renderizarPerfilPublico(clube, perfilCapitao, elencoPublico, vagas, uidClube);
+    renderizarPerfilPublico(clube, perfilCapitao, elenco, vagas, uidClube);
   } catch (err) {
     console.error("Erro ao carregar clube público:", err);
     mostrarErroClubePublico("Não foi possível carregar este clube. Atualize a página e tente novamente.");

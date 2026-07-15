@@ -62,10 +62,6 @@
             <span>Conversas ativas</span>
             <strong id="neg-metrica-conversas">0</strong>
           </article>
-          <article>
-            <span>Itens arquivados</span>
-            <strong id="neg-metrica-arquivadas">0</strong>
-          </article>
         </section>
 
         <nav class="negociacoes-abas" role="tablist" aria-label="Áreas das negociações">
@@ -80,10 +76,6 @@
           <button type="button" class="negociacoes-aba" role="tab" aria-selected="false"
             aria-controls="neg-painel-conversas" data-neg-tab="conversas" tabindex="-1">
             Conversas <span id="neg-badge-conversas">0</span>
-          </button>
-          <button type="button" class="negociacoes-aba" role="tab" aria-selected="false"
-            aria-controls="neg-painel-arquivadas" data-neg-tab="arquivadas" tabindex="-1">
-            Arquivadas <span id="neg-badge-arquivadas">0</span>
           </button>
         </nav>
 
@@ -120,18 +112,6 @@
             <p>Abra uma conversa para combinar teste, horário e entrada no elenco.</p>
           </div>
           <div id="neg-lista-conversas" class="negociacoes-lista negociacoes-lista-conversas" aria-live="polite"></div>
-        </section>
-
-        <section id="neg-painel-arquivadas" class="negociacoes-painel" role="tabpanel"
-          data-neg-painel="arquivadas" hidden>
-          <div class="negociacoes-secao-topo">
-            <div>
-              <span class="negociacoes-kicker">ORGANIZAÇÃO</span>
-              <h2>Negociações arquivadas</h2>
-            </div>
-            <p>Itens arquivados somem das listas principais apenas para você e podem ser restaurados.</p>
-          </div>
-          <div id="neg-lista-arquivadas" class="negociacoes-lista" aria-live="polite"></div>
         </section>
       </div>
     </main>

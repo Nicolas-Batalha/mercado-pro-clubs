@@ -485,11 +485,6 @@ async function carregarModoVisitantePerfil(uid) {
     }
     const dados = snap.data();
 
-    if (dados.suspenso === true) {
-      mostrarMensagemPrincipal("Este perfil está temporariamente indisponível.");
-      return;
-    }
-
     atualizarTopo(dados);
     preencherForm(dados);
     ativarModoSomenteLeituraPerfil(dados);

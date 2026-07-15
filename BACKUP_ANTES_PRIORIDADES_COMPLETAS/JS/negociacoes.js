@@ -2,10 +2,7 @@ import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
   addDoc,
-  arrayRemove,
-  arrayUnion,
   collection,
-  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -26,7 +23,6 @@ const estado = {
   convitesRecebidos: [],
   convitesEnviados: [],
   chats: [],
-  arquivados: [],
   carregamento: 0,
 };
 
@@ -112,27 +108,6 @@ function acaoLink(href, texto, classe = "") {
   return `<a class="negociacao-acao ${classe}" href="${escHtml(href)}">${escHtml(texto)}</a>`;
 }
 
-function chaveArquivo(tipo, id) {
-  return `${tipo}|${id}`;
-}
-
-function idDocumentoArquivo(tipo, id) {
-  return `${estado.usuario.uid}__${tipo}__${id}`;
-}
-
-function estaArquivado(tipo, id) {
-  return estado.arquivados.some((item) => item.tipo === tipo && item.registroId === id);
-}
-
-function alvoArquivo(valor) {
-  const separador = String(valor || "").indexOf("|");
-  if (separador < 1) return { tipo: "", id: "" };
-  return {
-    tipo: valor.slice(0, separador),
-    id: valor.slice(separador + 1),
-  };
-}
-
 function cardBase({ tipo, titulo, status, resumo, meta = [], data, acoes = [], classe = "" }) {
   return `<article class="negociacao-card ${escHtml(classe)}">
     <div class="negociacao-card-topo">
@@ -161,9 +136,6 @@ function cardCandidaturaJogador(item) {
     acoes.push(acaoBotao("reenviar-candidatura", item.id, "Candidatar novamente", "primaria"));
   } else if (status === "aceito" && item.chatId) {
     acoes.push(acaoLink(`./mercado.html?chat=${encodeURIComponent(item.chatId)}`, "Abrir conversa", "primaria"));
-  }
-  if (status !== "pendente") {
-    acoes.push(acaoBotao("arquivar-item", chaveArquivo("candidatura", item.id), "Arquivar", "arquivar"));
   }
   return cardBase({
     tipo: "Candidatura enviada",
@@ -194,9 +166,6 @@ function cardConviteRecebido(item) {
   } else if (status === "aceito" && item.chatId) {
     acoes.push(acaoLink(`./mercado.html?chat=${encodeURIComponent(item.chatId)}`, "Abrir conversa", "primaria"));
   }
-  if (status !== "pendente") {
-    acoes.push(acaoBotao("arquivar-item", chaveArquivo("convite", item.id), "Arquivar", "arquivar"));
-  }
   return cardBase({
     tipo: "Convite recebido",
     titulo: item.clube || "Clube",
@@ -224,9 +193,6 @@ function cardCandidaturaCapitao(item) {
   } else if (status === "aceito" && item.chatId) {
     acoes.push(acaoLink(`./mercado.html?chat=${encodeURIComponent(item.chatId)}`, "Abrir conversa", "primaria"));
   }
-  if (status !== "pendente") {
-    acoes.push(acaoBotao("arquivar-item", chaveArquivo("candidatura", item.id), "Arquivar", "arquivar"));
-  }
   return cardBase({
     tipo: "Candidato ao clube",
     titulo: item.jogadorNome || "Jogador",
@@ -247,9 +213,6 @@ function cardConviteEnviado(item) {
     acoes.push(acaoBotao("cancelar-convite", item.id, "Cancelar convite", "perigo"));
   } else if (status === "aceito" && item.chatId) {
     acoes.push(acaoLink(`./mercado.html?chat=${encodeURIComponent(item.chatId)}`, "Abrir conversa", "primaria"));
-  }
-  if (status !== "pendente") {
-    acoes.push(acaoBotao("arquivar-item", chaveArquivo("convite", item.id), "Arquivar", "arquivar"));
   }
   return cardBase({
     tipo: "Convite enviado",
@@ -279,75 +242,32 @@ function cardChat(item) {
     resumo: item.ultimaMensagemTexto || "Conversa criada. Envie uma mensagem para combinar os detalhes.",
     meta: [item.tipo === "convite-clube" ? "Convite de clube" : "Candidatura"],
     data: formatarData(item),
-    acoes: [
-      acaoLink(`./mercado.html?chat=${encodeURIComponent(item.id)}`, "Abrir conversa", "primaria"),
-      acaoBotao("arquivar-item", chaveArquivo("chat", item.id), "Arquivar", "arquivar"),
-    ],
+    acoes: [acaoLink(`./mercado.html?chat=${encodeURIComponent(item.id)}`, "Abrir conversa", "primaria")],
     classe: naoLido ? "nao-lido" : "",
   });
 }
 
-function cardArquivado(tipo, item, papel) {
-  const ehChat = tipo === "chat";
-  const status = ehChat ? "aceito" : statusItem(item);
-  const titulo = ehChat
-    ? (item.clube || "Conversa")
-    : papel === "jogador"
-      ? (item.clube || "Clube")
-      : (item.jogadorNome || "Jogador");
-  const rotulo = ehChat
-    ? "Conversa arquivada"
-    : tipo === "candidatura"
-      ? (papel === "jogador" ? "Candidatura arquivada" : "Candidato arquivado")
-      : (papel === "jogador" ? "Convite recebido arquivado" : "Convite enviado arquivado");
-  return cardBase({
-    tipo: rotulo,
-    titulo,
-    status,
-    resumo: "Este item está fora das listas principais apenas para você.",
-    meta: [ehChat ? "Conversa" : tipo === "candidatura" ? "Candidatura" : "Convite"],
-    data: formatarData(item),
-    acoes: [acaoBotao("restaurar-item", chaveArquivo(tipo, item.id), "Restaurar", "primaria")],
-  });
-}
-
 function renderizar() {
-  const jogadorTodos = ordenar([
+  const jogadorItens = ordenar([
     ...estado.candidaturasEnviadas.map((item) => ({ ...item, categoria: "candidatura" })),
     ...estado.convitesRecebidos.map((item) => ({ ...item, categoria: "convite" })),
   ]);
-  const capitaoTodos = ordenar([
+  const capitaoItens = ordenar([
     ...estado.candidaturasRecebidas.map((item) => ({ ...item, categoria: "candidatura" })),
     ...estado.convitesEnviados.map((item) => ({ ...item, categoria: "convite" })),
   ]);
-  const jogadorItens = jogadorTodos.filter((item) => !estaArquivado(item.categoria, item.id));
-  const capitaoItens = capitaoTodos.filter((item) => !estaArquivado(item.categoria, item.id));
   const chatsVisiveis = ordenar(estado.chats.filter((chat) => (
     !(Array.isArray(chat.arquivadoPor) ? chat.arquivadoPor : []).includes(estado.usuario.uid)
   )));
-  const chatsArquivados = estado.chats.filter((chat) => (
-    (Array.isArray(chat.arquivadoPor) ? chat.arquivadoPor : []).includes(estado.usuario.uid)
-  ));
-  const itensArquivados = ordenar([
-    ...jogadorTodos
-      .filter((item) => estaArquivado(item.categoria, item.id))
-      .map((item) => ({ ...item, tipoArquivo: item.categoria, papel: "jogador" })),
-    ...capitaoTodos
-      .filter((item) => estaArquivado(item.categoria, item.id))
-      .map((item) => ({ ...item, tipoArquivo: item.categoria, papel: "capitao" })),
-    ...chatsArquivados.map((item) => ({ ...item, tipoArquivo: "chat", papel: "jogador" })),
-  ]);
 
   const pendenciasJogador = jogadorItens.filter((item) => statusItem(item) === "pendente").length;
   const pendenciasCapitao = capitaoItens.filter((item) => statusItem(item) === "pendente").length;
   document.getElementById("neg-metrica-jogador").textContent = String(pendenciasJogador);
   document.getElementById("neg-metrica-capitao").textContent = String(pendenciasCapitao);
   document.getElementById("neg-metrica-conversas").textContent = String(chatsVisiveis.length);
-  document.getElementById("neg-metrica-arquivadas").textContent = String(itensArquivados.length);
   document.getElementById("neg-badge-jogador").textContent = String(jogadorItens.length);
   document.getElementById("neg-badge-capitao").textContent = String(capitaoItens.length);
   document.getElementById("neg-badge-conversas").textContent = String(chatsVisiveis.length);
-  document.getElementById("neg-badge-arquivadas").textContent = String(itensArquivados.length);
 
   const listaJogador = document.getElementById("neg-lista-jogador");
   listaJogador.innerHTML = jogadorItens.length
@@ -387,14 +307,6 @@ function renderizar() {
       "Nenhuma conversa ativa.",
       "Uma conversa aparece quando uma candidatura ou convite é aceito.",
     );
-
-  const listaArquivadas = document.getElementById("neg-lista-arquivadas");
-  listaArquivadas.innerHTML = itensArquivados.length
-    ? itensArquivados.map((item) => cardArquivado(item.tipoArquivo, item, item.papel)).join("")
-    : vazio(
-      "Nenhuma negociação arquivada.",
-      "Use Arquivar nos itens encerrados ou nas conversas que não deseja manter nas listas principais.",
-    );
 }
 
 async function carregarDados() {
@@ -405,7 +317,7 @@ async function carregarDados() {
   try {
     const uid = estado.usuario.uid;
     const [perfilSnap, clubeSnap, candidaturasEnviadas, candidaturasRecebidas,
-      convitesRecebidos, convitesEnviados, chats, arquivados] = await Promise.all([
+      convitesRecebidos, convitesEnviados, chats] = await Promise.all([
       getDoc(doc(db, "jogadores", uid)),
       getDoc(doc(db, "clubes", uid)),
       getDocs(query(collection(db, "candidaturas"), where("jogadorUid", "==", uid))),
@@ -413,7 +325,6 @@ async function carregarDados() {
       getDocs(query(collection(db, "convitesClube"), where("jogadorUid", "==", uid))),
       getDocs(query(collection(db, "convitesClube"), where("capitaoUid", "==", uid))),
       getDocs(query(collection(db, "chats"), where("participantes", "array-contains", uid))),
-      getDocs(query(collection(db, "negociacoesArquivadas"), where("usuarioUid", "==", uid))),
     ]);
     if (carregamento !== estado.carregamento || auth.currentUser?.uid !== uid) return;
     estado.perfil = perfilSnap.exists() ? perfilSnap.data() : {};
@@ -423,7 +334,6 @@ async function carregarDados() {
     estado.convitesRecebidos = convitesRecebidos.docs.map((item) => ({ id: item.id, ...item.data() }));
     estado.convitesEnviados = convitesEnviados.docs.map((item) => ({ id: item.id, ...item.data() }));
     estado.chats = chats.docs.map((item) => ({ id: item.id, ...item.data() }));
-    estado.arquivados = arquivados.docs.map((item) => ({ id: item.id, ...item.data() }));
     document.getElementById("negociacoes-boas-vindas").textContent =
       `Olá, ${estado.perfil.nickname || estado.usuario.displayName || "jogador"}. Acompanhe tudo que está acontecendo entre você e os clubes.`;
     renderizar();
@@ -602,39 +512,6 @@ async function cancelarConvite(id) {
   return true;
 }
 
-async function arquivarItem(valor) {
-  const { tipo, id } = alvoArquivo(valor);
-  if (!id || !["candidatura", "convite", "chat"].includes(tipo)) {
-    throw new Error("Não foi possível identificar esta negociação.");
-  }
-  if (tipo === "chat") {
-    await updateDoc(doc(db, "chats", id), { arquivadoPor: arrayUnion(estado.usuario.uid) });
-  } else {
-    await setDoc(doc(db, "negociacoesArquivadas", idDocumentoArquivo(tipo, id)), {
-      usuarioUid: estado.usuario.uid,
-      tipo,
-      registroId: id,
-      criadoEm: serverTimestamp(),
-    });
-  }
-  toast("Negociação arquivada apenas para você.");
-  return true;
-}
-
-async function restaurarItem(valor) {
-  const { tipo, id } = alvoArquivo(valor);
-  if (!id || !["candidatura", "convite", "chat"].includes(tipo)) {
-    throw new Error("Não foi possível identificar esta negociação.");
-  }
-  if (tipo === "chat") {
-    await updateDoc(doc(db, "chats", id), { arquivadoPor: arrayRemove(estado.usuario.uid) });
-  } else {
-    await deleteDoc(doc(db, "negociacoesArquivadas", idDocumentoArquivo(tipo, id)));
-  }
-  toast("Negociação restaurada.");
-  return true;
-}
-
 const ACOES = {
   "cancelar-candidatura": cancelarCandidatura,
   "reenviar-candidatura": reenviarCandidatura,
@@ -643,8 +520,6 @@ const ACOES = {
   "aceitar-convite": aceitarConvite,
   "recusar-convite": recusarConvite,
   "cancelar-convite": cancelarConvite,
-  "arquivar-item": arquivarItem,
-  "restaurar-item": restaurarItem,
 };
 
 document.getElementById("negociacoes-app")?.addEventListener("click", async (evento) => {
