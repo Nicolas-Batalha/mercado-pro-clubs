@@ -808,6 +808,321 @@ tr .admin-vazio {
   color: #bbf7d0 !important;
 }
 
+/* Torneios */
+.admin-torneio-form {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid #303832;
+  border-radius: 13px;
+  background: #121613;
+}
+
+.admin-torneio-form-topo,
+.admin-torneio-form-acoes,
+.admin-torneio-card-topo,
+.admin-torneio-card-rodape,
+.admin-torneio-inscricao,
+.admin-torneio-partida-times {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-torneio-form-topo {
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.admin-torneio-form-topo h3 {
+  margin: 2px 0 0;
+  font-size: 1.1rem;
+}
+
+.admin-torneio-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-form-campo {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.admin-form-campo-largo {
+  grid-column: 1 / -1;
+}
+
+.admin-form-campo span {
+  color: #b9c0ba;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.admin-form-campo input,
+.admin-form-campo select,
+.admin-form-campo textarea,
+.admin-placar-input {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 11px;
+  border: 1px solid #364039;
+  border-radius: 8px;
+  outline: none;
+  background: #0b0e0c;
+  color: #f1f5f2;
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.admin-form-campo textarea {
+  resize: vertical;
+}
+
+.admin-form-campo input:focus,
+.admin-form-campo select:focus,
+.admin-form-campo textarea:focus,
+.admin-placar-input:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.admin-torneio-form-acoes {
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.admin-torneios-lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.admin-torneio-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid #303832;
+  border-radius: 12px;
+  background: #151a16;
+}
+
+.admin-torneio-card h3 {
+  margin: 11px 0 4px;
+  color: #f3f6f4;
+  font-size: 1rem;
+}
+
+.admin-torneio-card > p {
+  margin: 0;
+  color: #8f9991;
+  font-size: 0.75rem;
+}
+
+.admin-torneio-status,
+.admin-torneio-chip {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 8px;
+  border: 1px solid #3d4840;
+  border-radius: 999px;
+  color: #cbd4cd;
+  font-size: 0.66rem;
+  font-weight: 850;
+}
+
+.admin-torneio-status.aberto,
+.admin-torneio-status.aprovada {
+  border-color: rgba(34, 197, 94, 0.55);
+  color: #4ade80;
+}
+
+.admin-torneio-status.andamento,
+.admin-torneio-status.pendente {
+  border-color: rgba(250, 204, 21, 0.55);
+  color: #fde047;
+}
+
+.admin-torneio-status.finalizado {
+  border-color: rgba(96, 165, 250, 0.55);
+  color: #93c5fd;
+}
+
+.admin-torneio-status.rejeitada,
+.admin-torneio-status.cancelado {
+  border-color: rgba(248, 113, 113, 0.55);
+  color: #fca5a5;
+}
+
+.admin-torneio-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 13px 0;
+}
+
+.admin-torneio-card-rodape {
+  align-items: flex-end;
+  margin-top: auto;
+  padding-top: 13px;
+  border-top: 1px solid #29302b;
+}
+
+.admin-torneio-card-rodape small {
+  color: #9ca59e;
+  line-height: 1.5;
+}
+
+.admin-torneio-card-acoes,
+.admin-torneio-inscricao-acoes,
+.admin-torneio-partida-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.admin-torneio-card-acoes button,
+.admin-torneio-inscricao-acoes button,
+.admin-torneio-partida-acoes button {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 0.7rem;
+}
+
+.admin-torneio-modal-overlay {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(5px);
+}
+
+.admin-torneio-modal-overlay[hidden] {
+  display: none;
+}
+
+.admin-torneio-modal {
+  position: relative;
+  width: min(820px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 23px;
+  border: 1px solid #3a443d;
+  border-radius: 14px;
+  background: #101411;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7);
+}
+
+.admin-torneio-modal-fechar {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid #3a443d;
+  border-radius: 50%;
+  background: #181d19;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.admin-torneio-modal h2 {
+  margin: 0 50px 4px 0;
+  color: #4ade80;
+}
+
+.admin-torneio-modal-subtitulo {
+  margin: 0 50px 18px 0;
+  color: #929c94;
+  font-size: 0.78rem;
+}
+
+.admin-torneio-modal-bloco {
+  margin-top: 15px;
+  padding: 14px;
+  border: 1px solid #303832;
+  border-radius: 10px;
+  background: #151a16;
+}
+
+.admin-torneio-modal-bloco h3 {
+  margin: 0 0 11px;
+  font-size: 0.92rem;
+}
+
+.admin-torneio-inscricoes,
+.admin-torneio-partidas {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-torneio-inscricao,
+.admin-torneio-partida-admin {
+  padding: 10px;
+  border: 1px solid #2e3730;
+  border-radius: 8px;
+  background: #0d110e;
+}
+
+.admin-torneio-inscricao-info {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.admin-torneio-inscricao-info strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+.admin-torneio-inscricao-info small,
+.admin-torneio-partida-admin small {
+  color: #8e9990;
+}
+
+.admin-torneio-partida-times {
+  margin-bottom: 9px;
+}
+
+.admin-torneio-partida-times span {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.admin-placar-input {
+  width: 58px;
+  min-height: 38px;
+  padding: 7px;
+  text-align: center;
+}
+
+.admin-torneio-partida-acoes {
+  justify-content: flex-end;
+}
+
+.admin-torneio-vazio {
+  padding: 22px;
+  border: 1px dashed #3b463e;
+  border-radius: 10px;
+  color: #929c94;
+  text-align: center;
+}
+
 @media (max-width: 1050px) {
   .admin-layout {
     grid-template-columns: 1fr;
@@ -856,8 +1171,13 @@ tr .admin-vazio {
   }
 
   .admin-resumo-grid,
-  .admin-grid-registros {
+  .admin-grid-registros,
+  .admin-torneios-lista {
     grid-template-columns: 1fr;
+  }
+
+  .admin-torneio-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -895,6 +1215,39 @@ tr .admin-vazio {
   .admin-secao-cabecalho {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-torneio-form {
+    padding: 14px;
+  }
+
+  .admin-torneio-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-form-campo-largo {
+    grid-column: auto;
+  }
+
+  .admin-torneio-form-topo,
+  .admin-torneio-card-rodape,
+  .admin-torneio-inscricao {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-torneio-card-acoes > *,
+  .admin-torneio-inscricao-acoes > * {
+    flex: 1 1 100%;
+  }
+
+  .admin-torneio-modal-overlay {
+    padding: 8px;
+  }
+
+  .admin-torneio-modal {
+    max-height: 96vh;
+    padding: 18px 13px;
   }
 
   .admin-registro-acoes > * {

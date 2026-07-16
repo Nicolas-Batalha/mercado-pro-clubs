@@ -79,6 +79,19 @@
   border-color: rgba(18, 224, 108, 0.35);
   transform: translateY(-1px);
 }
+.lista-links a.ativo,
+.lista-links a[aria-current="page"] {
+  color: #12e06c;
+  border-color: rgba(18, 224, 108, 0.72);
+  background: rgba(18, 224, 108, 0.12);
+  box-shadow: 0 0 16px rgba(18, 224, 108, 0.16);
+}
+.lista-links a.ativo:hover,
+.lista-links a[aria-current="page"]:hover {
+  color: #12e06c;
+  border-color: #12e06c;
+  background: rgba(18, 224, 108, 0.16);
+}
 .notification-icon{
   display: flex;
   align-items: center;
@@ -98,6 +111,16 @@
   justify-content: flex-end;
   justify-self: end;
   min-width: 0;
+}
+
+/* Corrige o pequeno deslocamento vertical causado pela altura visual do logo. */
+@media (min-width: 769px) {
+  .main-header > .logo,
+  .main-header > .menu-carrossel,
+  .main-header > .login-header {
+    position: relative;
+    top: -8px;
+  }
 }
 .notification-badge {
   position: absolute;

@@ -20,7 +20,9 @@
       <nav aria-label="Navegação administrativa">
         <ul class="lista-links">
           <li><a href="./mercado.html">Vagas e jogadores</a></li>
+          <li><a href="./negociacoes.html">Minhas negociações</a></li>
           <li><a href="./explorar-clubes.html">Explorar clubes</a></li>
+          <li><a href="./torneio.html">Torneios</a></li>
         </ul>
       </nav>
     </div>
@@ -71,6 +73,9 @@
           <button type="button" class="admin-nav-item" data-admin-painel="vagas">
             <span>⌖</span> Vagas
           </button>
+          <button type="button" class="admin-nav-item" data-admin-painel="torneios">
+            <span>♛</span> Torneios <b id="admin-nav-inscricoes" hidden>0</b>
+          </button>
           <button type="button" class="admin-nav-item" data-admin-painel="denuncias">
             <span>⚑</span> Denúncias <b id="admin-nav-denuncias" hidden>0</b>
           </button>
@@ -97,6 +102,7 @@
               <article class="admin-metrica"><span>Disponíveis</span><strong id="admin-total-disponiveis">—</strong><small>procurando clube</small></article>
               <article class="admin-metrica"><span>Clubes</span><strong id="admin-total-clubes">—</strong><small>clubes cadastrados</small></article>
               <article class="admin-metrica"><span>Vagas</span><strong id="admin-total-vagas">—</strong><small>anúncios publicados</small></article>
+              <article class="admin-metrica"><span>Torneios</span><strong id="admin-total-torneios">—</strong><small>competições cadastradas</small></article>
               <article class="admin-metrica alerta"><span>Denúncias</span><strong id="admin-total-denuncias">—</strong><small>aguardando análise</small></article>
               <article class="admin-metrica"><span>Convites</span><strong id="admin-total-convites">—</strong><small>convites pendentes</small></article>
               <article class="admin-metrica alerta"><span>Dados antigos</span><strong id="admin-total-invalidos">—</strong><small>registros que precisam de limpeza</small></article>
@@ -167,6 +173,98 @@
             <div id="admin-lista-vagas" class="admin-grid-registros"></div>
           </section>
 
+          <section id="admin-painel-torneios" class="admin-painel" aria-labelledby="admin-titulo-torneios" hidden>
+            <div class="admin-secao-cabecalho">
+              <div>
+                <h2 id="admin-titulo-torneios">Torneios</h2>
+                <p>Crie competições, aprove clubes e publique a chave de confrontos.</p>
+              </div>
+              <span id="admin-contagem-torneios" class="admin-contagem"></span>
+            </div>
+
+            <form id="admin-form-torneio" class="admin-torneio-form">
+              <input type="hidden" id="admin-torneio-id">
+              <div class="admin-torneio-form-topo">
+                <div>
+                  <span class="admin-eyebrow">ORGANIZAÇÃO</span>
+                  <h3 id="admin-torneio-form-titulo">Criar novo torneio</h3>
+                </div>
+                <button type="button" id="admin-cancelar-edicao-torneio" class="admin-btn-secundario" hidden>Cancelar edição</button>
+              </div>
+              <div class="admin-torneio-form-grid">
+                <label class="admin-form-campo admin-form-campo-largo">
+                  <span>Nome do torneio *</span>
+                  <input type="text" id="admin-torneio-nome" maxlength="80" required placeholder="Ex.: Copa Mercado Pro Clubs">
+                </label>
+                <label class="admin-form-campo admin-form-campo-largo">
+                  <span>Descrição *</span>
+                  <textarea id="admin-torneio-descricao" maxlength="600" rows="3" required placeholder="Explique como será a competição."></textarea>
+                </label>
+                <label class="admin-form-campo">
+                  <span>Jogo *</span>
+                  <select id="admin-torneio-jogo" required>
+                    <option value="EA FC 26">EA FC 26</option>
+                    <option value="EA FC 25">EA FC 25</option>
+                    <option value="EA FC 24">EA FC 24</option>
+                  </select>
+                </label>
+                <label class="admin-form-campo">
+                  <span>Plataforma *</span>
+                  <select id="admin-torneio-plataforma" required>
+                    <option value="crossplay">Crossplay</option>
+                    <option value="ps5">PlayStation 5</option>
+                    <option value="xbox_series">Xbox Series</option>
+                    <option value="pc">PC</option>
+                  </select>
+                </label>
+                <label class="admin-form-campo">
+                  <span>Região *</span>
+                  <select id="admin-torneio-regiao" required>
+                    <option value="Brasil">Brasil</option>
+                    <option value="América do Sul">América do Sul</option>
+                    <option value="Todas">Todas</option>
+                  </select>
+                </label>
+                <label class="admin-form-campo">
+                  <span>Formato</span>
+                  <select id="admin-torneio-formato">
+                    <option value="Mata-mata">Mata-mata</option>
+                  </select>
+                </label>
+                <label class="admin-form-campo">
+                  <span>Máximo de clubes *</span>
+                  <select id="admin-torneio-max-clubes" required>
+                    <option value="2">2 clubes</option>
+                    <option value="4">4 clubes</option>
+                    <option value="8" selected>8 clubes</option>
+                    <option value="16">16 clubes</option>
+                  </select>
+                </label>
+                <label class="admin-form-campo">
+                  <span>Inscrições até *</span>
+                  <input type="datetime-local" id="admin-torneio-inscricoes-ate" required>
+                </label>
+                <label class="admin-form-campo">
+                  <span>Data de início *</span>
+                  <input type="datetime-local" id="admin-torneio-data-inicio" required>
+                </label>
+                <label class="admin-form-campo">
+                  <span>Prêmio (opcional)</span>
+                  <input type="text" id="admin-torneio-premio" maxlength="100" placeholder="Ex.: Troféu da comunidade">
+                </label>
+                <label class="admin-form-campo admin-form-campo-largo">
+                  <span>Regulamento *</span>
+                  <textarea id="admin-torneio-regulamento" maxlength="3000" rows="5" required placeholder="Regras, horários, W.O., critérios e contato da organização."></textarea>
+                </label>
+              </div>
+              <div class="admin-torneio-form-acoes">
+                <button type="submit" id="admin-salvar-torneio" class="admin-btn-primary">Publicar torneio</button>
+              </div>
+            </form>
+
+            <div id="admin-lista-torneios" class="admin-torneios-lista"></div>
+          </section>
+
           <section id="admin-painel-denuncias" class="admin-painel" aria-labelledby="admin-titulo-denuncias" hidden>
             <div class="admin-secao-cabecalho">
               <div><h2 id="admin-titulo-denuncias">Denúncias</h2><p>Analise os conteúdos sinalizados pela comunidade.</p></div>
@@ -212,6 +310,13 @@
       </div>
     </div>
   </main>
+
+  <div id="admin-torneio-modal" class="admin-torneio-modal-overlay" hidden>
+    <section class="admin-torneio-modal" role="dialog" aria-modal="true" aria-labelledby="admin-torneio-modal-titulo">
+      <button type="button" id="admin-torneio-modal-fechar" class="admin-torneio-modal-fechar" aria-label="Fechar">×</button>
+      <div id="admin-torneio-modal-conteudo"></div>
+    </section>
+  </div>
 
   <script src="../JS/script.js" defer></script>
   <script type="module" src="../JS/admin.js"></script>

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Encontre torneios de Pro Clubs, acompanhe confrontos e inscreva seu clube nas competições do Mercado Pro Clubs."
+    />
+    <link rel="canonical" href="https://www.mercadoproclubs.com/HTML/torneio.html" />
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml" />
+    <title>Torneios de Pro Clubs | Mercado Pro Clubs</title>
+  </head>
+  <body class="body-torneios">
+    <header class="main-header">
+      <div class="logo animar-scroll">
+        <a href="../index.html" title="Voltar para a página inicial">
+          <img src="../IMG/logo.svg" class="logo" alt="Mercado Pro Clubs" />
+        </a>
+      </div>
+      <div class="menu-carrossel">
+        <nav aria-label="Navegação principal">
+          <ul class="lista-links animar-scroll">
+            <li><a href="./mercado.html">Vagas e jogadores</a></li>
+            <li><a href="./negociacoes.html">Minhas negociações</a></li>
+            <li><a href="./explorar-clubes.html">Explorar clubes</a></li>
+            <li><a href="./torneio.html" class="ativo" aria-current="page">Torneios</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="login-header animar-scroll">
+        <div id="login-header"></div>
+      </div>
+    </header>
+
+    <main class="torneios-main">
+      <section class="torneios-hero" aria-labelledby="torneios-titulo">
+        <span class="torneios-kicker">COMPETIÇÕES DE PRO CLUBS</span>
+        <h1 id="torneios-titulo">Entre em campo e dispute o topo</h1>
+        <p>
+          Encontre campeonatos, inscreva seu clube e acompanhe confrontos e resultados
+          em um só lugar.
+        </p>
+        <div class="torneios-hero-acoes">
+          <a href="#torneios-listagem" class="torneio-btn torneio-btn-primario">Ver torneios</a>
+          <a href="./clubes.html" class="torneio-btn torneio-btn-secundario">Preparar meu clube</a>
+        </div>
+      </section>
+
+      <section class="torneios-metricas" aria-label="Resumo dos torneios">
+        <article><span>Inscrições abertas</span><strong id="torneios-total-abertos">—</strong></article>
+        <article><span>Em andamento</span><strong id="torneios-total-andamento">—</strong></article>
+        <article><span>Clubes inscritos</span><strong id="torneios-total-clubes">—</strong></article>
+      </section>
+
+      <section id="torneios-listagem" class="torneios-painel" aria-labelledby="torneios-listagem-titulo">
+        <div class="torneios-painel-topo">
+          <div>
+            <span class="torneios-kicker">CALENDÁRIO COMPETITIVO</span>
+            <h2 id="torneios-listagem-titulo">Torneios disponíveis</h2>
+          </div>
+          <p id="torneios-contagem" aria-live="polite">Carregando torneios...</p>
+        </div>
+
+        <div class="torneios-abas" role="tablist" aria-label="Situação dos torneios">
+          <button type="button" class="torneios-aba ativa" role="tab" aria-selected="true" data-torneio-aba="aberto">
+            Inscrições abertas
+          </button>
+          <button type="button" class="torneios-aba" role="tab" aria-selected="false" data-torneio-aba="andamento">
+            Em andamento
+          </button>
+          <button type="button" class="torneios-aba" role="tab" aria-selected="false" data-torneio-aba="finalizado">
+            Finalizados
+          </button>
+          <button type="button" class="torneios-aba" role="tab" aria-selected="false" data-torneio-aba="meus">
+            Meus torneios
+          </button>
+        </div>
+
+        <div class="torneios-filtros">
+          <label class="torneio-campo torneio-campo-busca" for="torneios-busca">
+            <span>Buscar</span>
+            <input id="torneios-busca" type="search" placeholder="Nome do torneio ou organizador" autocomplete="off" />
+          </label>
+          <label class="torneio-campo" for="torneios-filtro-jogo">
+            <span>Jogo</span>
+            <select id="torneios-filtro-jogo">
+              <option value="">Todos</option>
+              <option value="EA FC 26">EA FC 26</option>
+              <option value="EA FC 25">EA FC 25</option>
+              <option value="EA FC 24">EA FC 24</option>
+            </select>
+          </label>
+          <label class="torneio-campo" for="torneios-filtro-plataforma">
+            <span>Plataforma</span>
+            <select id="torneios-filtro-plataforma">
+              <option value="">Todas</option>
+              <option value="crossplay">Crossplay</option>
+              <option value="ps5">PlayStation 5</option>
+              <option value="xbox_series">Xbox Series</option>
+              <option value="pc">PC</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="torneios-grid" class="torneios-grid" aria-live="polite" aria-busy="true">
+          <div class="torneios-estado">
+            <span class="torneios-carregando" aria-hidden="true"></span>
+            <strong>Buscando competições...</strong>
+            <p>Estamos organizando o calendário de torneios.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="torneio-modal" class="torneio-modal-overlay" hidden>
+      <section class="torneio-modal" role="dialog" aria-modal="true" aria-labelledby="torneio-modal-titulo">
+        <button type="button" id="torneio-modal-fechar" class="torneio-modal-fechar" aria-label="Fechar detalhes">×</button>
+        <div id="torneio-modal-conteudo"></div>
+      </section>
+    </div>
+
+    <div id="torneios-toast" class="torneios-toast" role="status" aria-live="polite" hidden></div>
+
+    <footer class="main-footer">
+      <div class="footer-inner">
+        <div class="footer-divisor"></div>
+        <h2 class="footer-titulo">MERCADO PRO CLUBS</h2>
+        <p class="footer-texto">
+          Plataforma independente para aproximar jogadores, clubes e competições de Pro Clubs.<br />
+          Todas as marcas registradas pertencem a seus respectivos proprietários.
+        </p>
+      </div>
+    </footer>
+
+    <script src="../JS/script.js" defer></script>
+    <script type="module" src="../JS/torneio.js"></script>
+    <script type="module" src="../JS/header-auth.js"></script>
+  </body>
+</html>

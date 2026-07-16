@@ -14,6 +14,7 @@ import {
   getDoc,
   getDocs,
   serverTimestamp,
+  setDoc,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { confirmModal } from "./confirm-modal.js";
@@ -26,6 +27,7 @@ const NOMES_COLECOES = {
   candidaturas: "candidaturas",
   convites: "convitesClube",
   logs: "logsAdmin",
+  torneios: "torneios",
 };
 
 const ROTULOS_POSICAO = {
@@ -70,7 +72,11 @@ const estado = {
     candidaturas: [],
     convites: [],
     logs: [],
+    torneios: [],
   },
+  inscricoesTorneio: new Map(),
+  partidasTorneio: new Map(),
+  torneioModalId: "",
 };
 
 const porId = (id) => document.getElementById(id);
@@ -124,6 +130,51 @@ function formatarData(valor, incluirHora = true) {
     dateStyle: "short",
     ...(incluirHora ? { timeStyle: "short" } : {}),
   }).format(new Date(ms));
+}
+
+function dataParaInput(valor) {
+  const ms = timestampParaMs(valor);
+  if (!ms) return "";
+  const data = new Date(ms);
+  const local = new Date(data.getTime() - data.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+function numero(valor, fallback = 0) {
+  const convertido = Number(valor);
+  return Number.isFinite(convertido) ? convertido : fallback;
+}
+
+function statusTorneio(torneio) {
+  const status = normalizar(torneio?.status).replaceAll(" ", "_");
+  if (["andamento", "em_andamento", "iniciado"].includes(status)) return "andamento";
+  if (["finalizado", "encerrado", "concluido"].includes(status)) return "finalizado";
+  if (status === "cancelado") return "cancelado";
+  return "aberto";
+}
+
+function statusInscricaoTorneio(inscricao) {
+  const status = normalizar(inscricao?.status);
+  if (["aprovada", "aprovado", "aceita", "aceito"].includes(status)) return "aprovada";
+  if (["rejeitada", "rejeitado", "recusada", "recusado"].includes(status)) return "rejeitada";
+  return "pendente";
+}
+
+function inscricoesDoTorneio(torneioId) {
+  return estado.inscricoesTorneio.get(torneioId) || [];
+}
+
+function partidasDoTorneio(torneioId) {
+  return estado.partidasTorneio.get(torneioId) || [];
+}
+
+function rotuloStatusTorneio(status) {
+  return {
+    aberto: "Inscrições abertas",
+    andamento: "Em andamento",
+    finalizado: "Finalizado",
+    cancelado: "Cancelado",
+  }[status] || "Inscrições abertas";
 }
 
 function ordenarRecentes(lista) {
@@ -263,6 +314,31 @@ async function carregarColecao(chave) {
   }
 }
 
+async function carregarSubcolecaoTorneio(torneioId, nome) {
+  try {
+    const snap = await getDocs(collection(db, "torneios", torneioId, nome));
+    return snap.docs.map((item) => ({ id: item.id, ...item.data() }));
+  } catch (erro) {
+    console.error(`Erro ao carregar ${nome} do torneio ${torneioId}:`, erro);
+    return [];
+  }
+}
+
+async function carregarDadosInternosTorneios() {
+  estado.inscricoesTorneio = new Map();
+  estado.partidasTorneio = new Map();
+  await Promise.all(
+    estado.dados.torneios.map(async (torneio) => {
+      const [inscricoes, partidas] = await Promise.all([
+        carregarSubcolecaoTorneio(torneio.id, "inscricoes"),
+        carregarSubcolecaoTorneio(torneio.id, "partidas"),
+      ]);
+      estado.inscricoesTorneio.set(torneio.id, ordenarRecentes(inscricoes));
+      estado.partidasTorneio.set(torneio.id, partidas);
+    }),
+  );
+}
+
 async function carregarDados() {
   const requisicao = ++estado.carregamento;
   const botao = porId("admin-atualizar");
@@ -280,6 +356,9 @@ async function carregarDados() {
   resultados.forEach(({ chave, itens }) => {
     estado.dados[chave] = ordenarRecentes(itens);
   });
+
+  await carregarDadosInternosTorneios();
+  if (requisicao !== estado.carregamento || !estado.usuario) return;
 
   renderizarTudo();
   const falhas = resultados.filter((resultado) => resultado.erro);
@@ -311,6 +390,9 @@ function registrosInvalidos() {
 
 function renderizarMetricas() {
   const pendentes = estado.dados.denuncias.filter(estaPendente);
+  const inscricoesPendentes = [...estado.inscricoesTorneio.values()]
+    .flat()
+    .filter((inscricao) => statusInscricaoTorneio(inscricao) === "pendente");
   const invalidos = registrosInvalidos();
   const convitesPendentes = estado.dados.convites.filter(
     (convite) => normalizar(convite.status || "pendente") === "pendente",
@@ -323,6 +405,7 @@ function renderizarMetricas() {
   );
   preencherMetrica("admin-total-clubes", estado.dados.clubes.length);
   preencherMetrica("admin-total-vagas", estado.dados.vagas.length);
+  preencherMetrica("admin-total-torneios", estado.dados.torneios.length);
   preencherMetrica("admin-total-denuncias", pendentes.length);
   preencherMetrica("admin-total-convites", convitesPendentes.length);
   preencherMetrica("admin-total-invalidos", invalidos.length);
@@ -337,6 +420,12 @@ function renderizarMetricas() {
   if (contadorInvalidos) {
     contadorInvalidos.textContent = String(invalidos.length);
     contadorInvalidos.hidden = invalidos.length === 0;
+  }
+
+  const contadorInscricoes = porId("admin-nav-inscricoes");
+  if (contadorInscricoes) {
+    contadorInscricoes.textContent = String(inscricoesPendentes.length);
+    contadorInscricoes.hidden = inscricoesPendentes.length === 0;
   }
 
   const atualizacao = porId("admin-ultima-atualizacao");
@@ -661,6 +750,14 @@ function rotuloAcao(acao) {
     clube_bloqueado: "Clube bloqueado",
     clube_desbloqueado: "Clube desbloqueado",
     registro_invalido_excluido: "Registro inválido excluído",
+    torneio_criado: "Torneio criado",
+    torneio_editado: "Torneio editado",
+    torneio_excluido: "Torneio excluído",
+    torneio_iniciado: "Torneio iniciado",
+    torneio_finalizado: "Torneio finalizado",
+    inscricao_torneio_aprovada: "Clube aprovado no torneio",
+    inscricao_torneio_rejeitada: "Inscrição de torneio rejeitada",
+    resultado_torneio_salvo: "Resultado de torneio salvo",
   };
   return rotulos[acao] || texto(acao, "Ação administrativa").replaceAll("_", " ");
 }
@@ -682,12 +779,477 @@ function renderizarAtividade() {
     : '<div class="admin-vazio">Nenhuma ação administrativa registrada ainda.</div>';
 }
 
+function torneioCardAdmin(torneio) {
+  const status = statusTorneio(torneio);
+  const inscricoes = inscricoesDoTorneio(torneio.id);
+  const pendentes = inscricoes.filter((item) => statusInscricaoTorneio(item) === "pendente").length;
+  const aprovadas = inscricoes.filter((item) => statusInscricaoTorneio(item) === "aprovada").length;
+  const maximo = Math.max(2, numero(torneio.maxClubes, 8));
+  return `
+    <article class="admin-torneio-card">
+      <div class="admin-torneio-card-topo">
+        <span class="admin-torneio-status ${status}">${rotuloStatusTorneio(status)}</span>
+        ${pendentes ? `<span class="admin-torneio-status pendente">${pendentes} para analisar</span>` : ""}
+      </div>
+      <h3>${escaparHtml(texto(torneio.nome, "Torneio sem nome"))}</h3>
+      <p>${escaparHtml(texto(torneio.jogo, "EA FC"))} • ${escaparHtml(rotuloPlataforma(torneio.plataforma))} • ${escaparHtml(texto(torneio.formato, "Mata-mata"))}</p>
+      <div class="admin-torneio-meta">
+        <span class="admin-torneio-chip">${aprovadas}/${maximo} clubes</span>
+        <span class="admin-torneio-chip">Início: ${escaparHtml(formatarData(torneio.dataInicio, false))}</span>
+        <span class="admin-torneio-chip">${partidasDoTorneio(torneio.id).length} partidas</span>
+      </div>
+      <div class="admin-torneio-card-rodape">
+        <small>Inscrições até<br><strong>${escaparHtml(formatarData(torneio.inscricoesAte))}</strong></small>
+        <div class="admin-torneio-card-acoes">
+          <button type="button" class="admin-btn-secundario" data-admin-acao="gerenciar-torneio" data-torneio-id="${escaparHtml(torneio.id)}">Gerenciar</button>
+          ${status === "aberto" ? `<button type="button" class="admin-btn-link" data-admin-acao="editar-torneio" data-torneio-id="${escaparHtml(torneio.id)}">Editar</button>` : ""}
+          <button type="button" class="admin-btn-perigo" data-admin-acao="excluir-torneio" data-torneio-id="${escaparHtml(torneio.id)}" data-nome="${escaparHtml(texto(torneio.nome, "Torneio"))}" ${estado.podeModerar ? "" : "disabled"}>Excluir</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderizarTorneiosAdmin() {
+  const lista = porId("admin-lista-torneios");
+  if (!lista) return;
+  const torneios = [...estado.dados.torneios].sort((a, b) => {
+    const prioridade = { aberto: 0, andamento: 1, finalizado: 2, cancelado: 3 };
+    return prioridade[statusTorneio(a)] - prioridade[statusTorneio(b)]
+      || timestampParaMs(b.criadoEm) - timestampParaMs(a.criadoEm);
+  });
+  porId("admin-contagem-torneios").textContent = `${torneios.length} ${torneios.length === 1 ? "torneio" : "torneios"}`;
+  lista.innerHTML = torneios.length
+    ? torneios.map(torneioCardAdmin).join("")
+    : '<div class="admin-torneio-vazio">Nenhum torneio criado. Use o formulário acima para publicar o primeiro.</div>';
+
+  if (estado.torneioModalId) renderizarModalTorneio(estado.torneioModalId);
+}
+
+function limparFormularioTorneio() {
+  const form = porId("admin-form-torneio");
+  form?.reset();
+  porId("admin-torneio-id").value = "";
+  porId("admin-torneio-max-clubes").value = "8";
+  porId("admin-torneio-form-titulo").textContent = "Criar novo torneio";
+  porId("admin-salvar-torneio").textContent = "Publicar torneio";
+  porId("admin-cancelar-edicao-torneio").hidden = true;
+}
+
+function editarTorneio(torneioId) {
+  const torneio = estado.dados.torneios.find((item) => item.id === torneioId);
+  if (!torneio) return;
+  abrirPainel("torneios");
+  porId("admin-torneio-id").value = torneio.id;
+  porId("admin-torneio-nome").value = texto(torneio.nome, "");
+  porId("admin-torneio-descricao").value = texto(torneio.descricao, "");
+  porId("admin-torneio-jogo").value = texto(torneio.jogo, "EA FC 26");
+  porId("admin-torneio-plataforma").value = texto(torneio.plataforma, "crossplay");
+  porId("admin-torneio-regiao").value = texto(torneio.regiao, "Brasil");
+  porId("admin-torneio-formato").value = texto(torneio.formato, "Mata-mata");
+  porId("admin-torneio-max-clubes").value = String(Math.max(2, numero(torneio.maxClubes, 8)));
+  porId("admin-torneio-inscricoes-ate").value = dataParaInput(torneio.inscricoesAte);
+  porId("admin-torneio-data-inicio").value = dataParaInput(torneio.dataInicio);
+  porId("admin-torneio-premio").value = texto(torneio.premio, "");
+  porId("admin-torneio-regulamento").value = texto(torneio.regulamento, "");
+  porId("admin-torneio-form-titulo").textContent = "Editar torneio";
+  porId("admin-salvar-torneio").textContent = "Salvar alterações";
+  porId("admin-cancelar-edicao-torneio").hidden = false;
+  porId("admin-form-torneio").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function salvarTorneio(evento) {
+  evento.preventDefault();
+  if (!estado.podeModerar) {
+    toast("Sua conta não possui permissão para gerenciar torneios.", "erro");
+    return;
+  }
+
+  const id = porId("admin-torneio-id").value.trim();
+  const inscricoesAte = new Date(porId("admin-torneio-inscricoes-ate").value);
+  const dataInicio = new Date(porId("admin-torneio-data-inicio").value);
+  if (!Number.isFinite(inscricoesAte.getTime()) || !Number.isFinite(dataInicio.getTime())) {
+    toast("Informe datas válidas para inscrição e início.", "erro");
+    return;
+  }
+  if (dataInicio <= inscricoesAte) {
+    toast("A data de início precisa ser posterior ao fim das inscrições.", "erro");
+    return;
+  }
+
+  const dados = {
+    nome: porId("admin-torneio-nome").value.trim(),
+    descricao: porId("admin-torneio-descricao").value.trim(),
+    jogo: porId("admin-torneio-jogo").value,
+    plataforma: porId("admin-torneio-plataforma").value,
+    regiao: porId("admin-torneio-regiao").value,
+    formato: porId("admin-torneio-formato").value,
+    maxClubes: numero(porId("admin-torneio-max-clubes").value, 8),
+    inscricoesAte,
+    dataInicio,
+    premio: porId("admin-torneio-premio").value.trim(),
+    regulamento: porId("admin-torneio-regulamento").value.trim(),
+    organizadorUid: estado.usuario.uid,
+    organizadorNome: estado.config.nome || estado.usuario.displayName || "Mercado Pro Clubs",
+    atualizadoEm: serverTimestamp(),
+  };
+
+  const botao = porId("admin-salvar-torneio");
+  botao.disabled = true;
+  botao.textContent = "Salvando...";
+  try {
+    if (id) {
+      await updateDoc(doc(db, "torneios", id), dados);
+      await registrarLog("torneio_editado", "torneio", id, `Torneio “${dados.nome}” atualizado`);
+      toast("Torneio atualizado.");
+    } else {
+      const referencia = await addDoc(collection(db, "torneios"), {
+        ...dados,
+        status: "aberto",
+        criadoEm: serverTimestamp(),
+      });
+      await registrarLog("torneio_criado", "torneio", referencia.id, `Torneio “${dados.nome}” publicado`);
+      toast("Torneio publicado e inscrições abertas.");
+    }
+    limparFormularioTorneio();
+    await carregarDados();
+  } catch (erro) {
+    console.error("Erro ao salvar torneio:", erro);
+    toast("Não foi possível salvar o torneio. Confira as regras do Firestore.", "erro");
+  } finally {
+    botao.disabled = false;
+    botao.textContent = porId("admin-torneio-id").value ? "Salvar alterações" : "Publicar torneio";
+  }
+}
+
+async function excluirTorneio(torneioId, nome, botao) {
+  if (!estado.podeModerar) return;
+  const confirmado = await confirmModal({
+    titulo: "Excluir torneio",
+    mensagem: `Excluir “${nome}”, suas inscrições e partidas? Esta ação não pode ser desfeita.`,
+    textoConfirmar: "Excluir torneio",
+    destrutivo: true,
+  });
+  if (!confirmado) return;
+  botao.disabled = true;
+  try {
+    const [inscricoes, partidas] = await Promise.all([
+      getDocs(collection(db, "torneios", torneioId, "inscricoes")),
+      getDocs(collection(db, "torneios", torneioId, "partidas")),
+    ]);
+    await Promise.all([
+      ...inscricoes.docs.map((item) => deleteDoc(item.ref)),
+      ...partidas.docs.map((item) => deleteDoc(item.ref)),
+    ]);
+    await deleteDoc(doc(db, "torneios", torneioId));
+    estado.torneioModalId = "";
+    await registrarLog("torneio_excluido", "torneio", torneioId, `Torneio “${nome}” excluído`);
+    toast("Torneio excluído.");
+    await carregarDados();
+  } catch (erro) {
+    console.error("Erro ao excluir torneio:", erro);
+    botao.disabled = false;
+    toast("Não foi possível excluir o torneio.", "erro");
+  }
+}
+
+function partidaAdminHtml(torneioId, partida) {
+  return `
+    <article class="admin-torneio-partida-admin" data-partida-id="${escaparHtml(partida.id)}">
+      <div class="admin-torneio-partida-times">
+        <span>${escaparHtml(texto(partida.timeANome, "A definir"))}</span>
+        <input class="admin-placar-input" data-placar="a" type="number" min="0" max="99" value="${partida.placarA ?? ""}" aria-label="Gols do primeiro clube">
+        <strong>×</strong>
+        <input class="admin-placar-input" data-placar="b" type="number" min="0" max="99" value="${partida.placarB ?? ""}" aria-label="Gols do segundo clube">
+        <span>${escaparHtml(texto(partida.timeBNome, "A definir"))}</span>
+      </div>
+      <div class="admin-torneio-partida-acoes">
+        <small>Rodada ${numero(partida.rodada, 1)} • Jogo ${numero(partida.ordem, 0) + 1}</small>
+        <button type="button" class="admin-btn-primary" data-admin-acao="salvar-resultado" data-torneio-id="${escaparHtml(torneioId)}" data-partida-id="${escaparHtml(partida.id)}">${normalizar(partida.status) === "finalizado" ? "Atualizar placar" : "Salvar resultado"}</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderizarModalTorneio(torneioId) {
+  const torneio = estado.dados.torneios.find((item) => item.id === torneioId);
+  const conteudo = porId("admin-torneio-modal-conteudo");
+  if (!torneio || !conteudo) {
+    fecharModalTorneio();
+    return;
+  }
+  const status = statusTorneio(torneio);
+  const inscricoes = inscricoesDoTorneio(torneioId);
+  const aprovadas = inscricoes.filter((item) => statusInscricaoTorneio(item) === "aprovada");
+  const partidas = [...partidasDoTorneio(torneioId)].sort(
+    (a, b) => numero(a.rodada, 1) - numero(b.rodada, 1) || numero(a.ordem, 0) - numero(b.ordem, 0),
+  );
+
+  conteudo.innerHTML = `
+    <h2 id="admin-torneio-modal-titulo">${escaparHtml(texto(torneio.nome, "Torneio"))}</h2>
+    <p class="admin-torneio-modal-subtitulo">${rotuloStatusTorneio(status)} • ${aprovadas.length}/${Math.max(2, numero(torneio.maxClubes, 8))} clubes confirmados</p>
+    <section class="admin-torneio-modal-bloco">
+      <h3>Inscrições (${inscricoes.length})</h3>
+      <div class="admin-torneio-inscricoes">
+        ${inscricoes.length ? inscricoes.map((inscricao) => {
+          const statusAtual = statusInscricaoTorneio(inscricao);
+          return `
+            <article class="admin-torneio-inscricao">
+              <div class="admin-torneio-inscricao-info">
+                <strong>${escaparHtml(texto(inscricao.clubeNome, "Clube sem nome"))}</strong>
+                <small>${escaparHtml(texto(inscricao.plataforma, "Plataforma não informada"))} • ${escaparHtml(formatarData(inscricao.criadoEm))}</small>
+              </div>
+              <div class="admin-torneio-inscricao-acoes">
+                <span class="admin-torneio-status ${statusAtual}">${statusAtual}</span>
+                ${status === "aberto" && statusAtual !== "aprovada" ? `<button type="button" class="admin-btn-primary" data-admin-acao="status-inscricao-torneio" data-torneio-id="${escaparHtml(torneioId)}" data-inscricao-id="${escaparHtml(inscricao.id)}" data-status="aprovada">Aprovar</button>` : ""}
+                ${status === "aberto" && statusAtual !== "rejeitada" ? `<button type="button" class="admin-btn-perigo" data-admin-acao="status-inscricao-torneio" data-torneio-id="${escaparHtml(torneioId)}" data-inscricao-id="${escaparHtml(inscricao.id)}" data-status="rejeitada">Rejeitar</button>` : ""}
+              </div>
+            </article>`;
+        }).join("") : '<div class="admin-torneio-vazio">Nenhum clube se inscreveu ainda.</div>'}
+      </div>
+      ${status === "aberto" ? `<div class="admin-torneio-form-acoes"><button type="button" class="admin-btn-primary" data-admin-acao="iniciar-torneio" data-torneio-id="${escaparHtml(torneioId)}">Gerar chave e iniciar torneio</button></div>` : ""}
+    </section>
+    <section class="admin-torneio-modal-bloco">
+      <h3>Partidas e placares (${partidas.length})</h3>
+      <div class="admin-torneio-partidas">
+        ${partidas.length ? partidas.map((partida) => partidaAdminHtml(torneioId, partida)).join("") : '<div class="admin-torneio-vazio">A chave aparecerá aqui depois que o torneio for iniciado.</div>'}
+      </div>
+    </section>
+  `;
+}
+
+function abrirGerenciarTorneio(torneioId) {
+  estado.torneioModalId = torneioId;
+  renderizarModalTorneio(torneioId);
+  porId("admin-torneio-modal").hidden = false;
+  document.body.style.overflow = "hidden";
+  porId("admin-torneio-modal-fechar")?.focus();
+}
+
+function fecharModalTorneio() {
+  estado.torneioModalId = "";
+  const modal = porId("admin-torneio-modal");
+  if (modal) modal.hidden = true;
+  document.body.style.removeProperty("overflow");
+}
+
+async function alterarStatusInscricaoTorneio(torneioId, inscricaoId, novoStatus, botao) {
+  if (!estado.podeModerar) return;
+  const torneio = estado.dados.torneios.find((item) => item.id === torneioId);
+  const inscricao = inscricoesDoTorneio(torneioId).find((item) => item.id === inscricaoId);
+  if (!torneio || !inscricao || statusTorneio(torneio) !== "aberto") return;
+  const maximo = Math.max(2, numero(torneio.maxClubes, 8));
+  const aprovadas = inscricoesDoTorneio(torneioId).filter((item) => statusInscricaoTorneio(item) === "aprovada");
+  if (novoStatus === "aprovada" && statusInscricaoTorneio(inscricao) !== "aprovada" && aprovadas.length >= maximo) {
+    toast("O limite de clubes aprovados já foi atingido.", "erro");
+    return;
+  }
+  botao.disabled = true;
+  try {
+    await updateDoc(doc(db, "torneios", torneioId, "inscricoes", inscricaoId), {
+      status: novoStatus,
+      analisadaEm: serverTimestamp(),
+      analisadaPor: estado.usuario.uid,
+      atualizadoEm: serverTimestamp(),
+    });
+    inscricao.status = novoStatus;
+    inscricao.analisadaEm = new Date();
+    await registrarLog(
+      `inscricao_torneio_${novoStatus}`,
+      "inscricaoTorneio",
+      inscricaoId,
+      `${texto(inscricao.clubeNome, "Clube")} • ${texto(torneio.nome, "Torneio")}`,
+    );
+    renderizarTudo();
+    toast(novoStatus === "aprovada" ? "Clube aprovado no torneio." : "Inscrição rejeitada.");
+  } catch (erro) {
+    console.error("Erro ao analisar inscrição:", erro);
+    botao.disabled = false;
+    toast("Não foi possível atualizar a inscrição.", "erro");
+  }
+}
+
+function embaralhar(lista) {
+  const resultado = [...lista];
+  for (let i = resultado.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [resultado[i], resultado[j]] = [resultado[j], resultado[i]];
+  }
+  return resultado;
+}
+
+async function iniciarTorneio(torneioId, botao) {
+  if (!estado.podeModerar) return;
+  const torneio = estado.dados.torneios.find((item) => item.id === torneioId);
+  const aprovadas = inscricoesDoTorneio(torneioId).filter((item) => statusInscricaoTorneio(item) === "aprovada");
+  const quantidade = aprovadas.length;
+  if (!torneio || statusTorneio(torneio) !== "aberto") return;
+  if (quantidade < 2 || (quantidade & (quantidade - 1)) !== 0) {
+    toast("Para gerar a chave, aprove 2, 4, 8 ou 16 clubes.", "erro");
+    return;
+  }
+  if (quantidade > Math.max(2, numero(torneio.maxClubes, 8))) {
+    toast("Há mais clubes aprovados que o limite do torneio.", "erro");
+    return;
+  }
+  const confirmado = await confirmModal({
+    titulo: "Iniciar torneio",
+    mensagem: `Gerar a chave com ${quantidade} clubes? Depois disso, as inscrições serão encerradas.`,
+    textoConfirmar: "Gerar chave",
+  });
+  if (!confirmado) return;
+  botao.disabled = true;
+  try {
+    const clubes = embaralhar(aprovadas);
+    const totalRodadas = Math.log2(quantidade);
+    const novasPartidas = [];
+    for (let indice = 0; indice < clubes.length; indice += 2) {
+      const timeA = clubes[indice];
+      const timeB = clubes[indice + 1];
+      const dados = {
+        rodada: 1,
+        totalRodadas,
+        ordem: indice / 2,
+        timeAId: timeA.clubeId || timeA.capitaoUid || timeA.id,
+        timeANome: texto(timeA.clubeNome, "Clube A"),
+        timeAEscudo: String(timeA.clubeEscudo || ""),
+        timeBId: timeB.clubeId || timeB.capitaoUid || timeB.id,
+        timeBNome: texto(timeB.clubeNome, "Clube B"),
+        timeBEscudo: String(timeB.clubeEscudo || ""),
+        status: "pendente",
+        criadoEm: serverTimestamp(),
+        atualizadoEm: serverTimestamp(),
+      };
+      const referencia = await addDoc(collection(db, "torneios", torneioId, "partidas"), dados);
+      novasPartidas.push({ id: referencia.id, ...dados, criadoEm: new Date() });
+    }
+    await updateDoc(doc(db, "torneios", torneioId), {
+      status: "andamento",
+      iniciadoEm: serverTimestamp(),
+      totalRodadas,
+      atualizadoEm: serverTimestamp(),
+    });
+    estado.partidasTorneio.set(torneioId, novasPartidas);
+    torneio.status = "andamento";
+    torneio.totalRodadas = totalRodadas;
+    await registrarLog("torneio_iniciado", "torneio", torneioId, `Chave de “${texto(torneio.nome)}” gerada com ${quantidade} clubes`);
+    renderizarTudo();
+    toast("Chave gerada. O torneio está em andamento.");
+  } catch (erro) {
+    console.error("Erro ao iniciar torneio:", erro);
+    botao.disabled = false;
+    toast("Não foi possível gerar a chave.", "erro");
+  }
+}
+
+function vencedorDaPartida(partida) {
+  if (String(partida.vencedorId) === String(partida.timeAId)) {
+    return { id: partida.timeAId, nome: partida.timeANome, escudo: partida.timeAEscudo || "" };
+  }
+  return { id: partida.timeBId, nome: partida.timeBNome, escudo: partida.timeBEscudo || "" };
+}
+
+async function avancarChaveSePossivel(torneioId, rodada) {
+  const torneio = estado.dados.torneios.find((item) => item.id === torneioId);
+  const partidas = partidasDoTorneio(torneioId);
+  const rodadaAtual = partidas
+    .filter((item) => numero(item.rodada, 1) === rodada)
+    .sort((a, b) => numero(a.ordem, 0) - numero(b.ordem, 0));
+  if (!rodadaAtual.length || rodadaAtual.some((item) => normalizar(item.status) !== "finalizado")) return;
+  const totalRodadas = numero(torneio.totalRodadas, numero(rodadaAtual[0]?.totalRodadas, rodada));
+
+  if (rodada >= totalRodadas || rodadaAtual.length === 1) {
+    const campeao = vencedorDaPartida(rodadaAtual[0]);
+    await updateDoc(doc(db, "torneios", torneioId), {
+      status: "finalizado",
+      campeaoId: campeao.id,
+      campeaoNome: campeao.nome,
+      finalizadoEm: serverTimestamp(),
+      atualizadoEm: serverTimestamp(),
+    });
+    torneio.status = "finalizado";
+    torneio.campeaoId = campeao.id;
+    torneio.campeaoNome = campeao.nome;
+    await registrarLog("torneio_finalizado", "torneio", torneioId, `${campeao.nome} foi campeão de “${texto(torneio.nome)}”`);
+    toast(`Torneio finalizado. Campeão: ${campeao.nome}.`);
+    return;
+  }
+
+  const proximaRodada = rodada + 1;
+  if (partidas.some((item) => numero(item.rodada, 1) === proximaRodada)) return;
+  const vencedores = rodadaAtual.map(vencedorDaPartida);
+  const novasPartidas = [];
+  for (let indice = 0; indice < vencedores.length; indice += 2) {
+    const timeA = vencedores[indice];
+    const timeB = vencedores[indice + 1];
+    const dados = {
+      rodada: proximaRodada,
+      totalRodadas,
+      ordem: indice / 2,
+      timeAId: timeA.id,
+      timeANome: timeA.nome,
+      timeAEscudo: timeA.escudo,
+      timeBId: timeB.id,
+      timeBNome: timeB.nome,
+      timeBEscudo: timeB.escudo,
+      status: "pendente",
+      criadoEm: serverTimestamp(),
+      atualizadoEm: serverTimestamp(),
+    };
+    const referencia = await addDoc(collection(db, "torneios", torneioId, "partidas"), dados);
+    novasPartidas.push({ id: referencia.id, ...dados, criadoEm: new Date() });
+  }
+  estado.partidasTorneio.set(torneioId, [...partidas, ...novasPartidas]);
+  toast(`Rodada ${proximaRodada} criada automaticamente.`);
+}
+
+async function salvarResultado(torneioId, partidaId, botao) {
+  if (!estado.podeModerar) return;
+  const card = botao.closest(".admin-torneio-partida-admin");
+  const placarA = numero(card?.querySelector('[data-placar="a"]')?.value, -1);
+  const placarB = numero(card?.querySelector('[data-placar="b"]')?.value, -1);
+  if (placarA < 0 || placarB < 0) {
+    toast("Informe os dois placares.", "erro");
+    return;
+  }
+  if (placarA === placarB) {
+    toast("Em mata-mata o resultado não pode terminar empatado. Informe o placar após os critérios de desempate.", "erro");
+    return;
+  }
+  const partida = partidasDoTorneio(torneioId).find((item) => item.id === partidaId);
+  if (!partida) return;
+  const vencedorId = placarA > placarB ? partida.timeAId : partida.timeBId;
+  const vencedorNome = placarA > placarB ? partida.timeANome : partida.timeBNome;
+  botao.disabled = true;
+  try {
+    await updateDoc(doc(db, "torneios", torneioId, "partidas", partidaId), {
+      placarA,
+      placarB,
+      vencedorId,
+      vencedorNome,
+      status: "finalizado",
+      finalizadaEm: serverTimestamp(),
+      atualizadoEm: serverTimestamp(),
+    });
+    Object.assign(partida, { placarA, placarB, vencedorId, vencedorNome, status: "finalizado", finalizadaEm: new Date() });
+    await registrarLog("resultado_torneio_salvo", "partidaTorneio", partidaId, `${partida.timeANome} ${placarA} × ${placarB} ${partida.timeBNome}`);
+    await avancarChaveSePossivel(torneioId, numero(partida.rodada, 1));
+    renderizarTudo();
+    toast("Resultado salvo.");
+  } catch (erro) {
+    console.error("Erro ao salvar resultado:", erro);
+    botao.disabled = false;
+    toast("Não foi possível salvar o resultado.", "erro");
+  }
+}
+
 function renderizarTudo() {
   renderizarMetricas();
   renderizarResumos();
   renderizarUsuarios();
   renderizarClubes();
   renderizarVagas();
+  renderizarTorneiosAdmin();
   renderizarDenuncias();
   renderizarManutencao();
   renderizarAtividade();
@@ -1110,6 +1672,15 @@ function configurarEventos() {
   porId("admin-filtro-denuncias")?.addEventListener("change", renderizarDenuncias);
   porId("admin-atualizar")?.addEventListener("click", carregarDados);
   porId("admin-limpar-invalidos")?.addEventListener("click", (evento) => limparRegistrosInvalidos(evento.currentTarget));
+  porId("admin-form-torneio")?.addEventListener("submit", salvarTorneio);
+  porId("admin-cancelar-edicao-torneio")?.addEventListener("click", limparFormularioTorneio);
+  porId("admin-torneio-modal-fechar")?.addEventListener("click", fecharModalTorneio);
+  porId("admin-torneio-modal")?.addEventListener("click", (evento) => {
+    if (evento.target === evento.currentTarget) fecharModalTorneio();
+  });
+  document.addEventListener("keydown", (evento) => {
+    if (evento.key === "Escape" && !porId("admin-torneio-modal")?.hidden) fecharModalTorneio();
+  });
 
   document.addEventListener("click", (evento) => {
     const botao = evento.target.closest("[data-admin-acao]");
@@ -1140,6 +1711,21 @@ function configurarEventos() {
     if (acao === "excluir-registro-invalido") {
       excluirRegistroInvalido(botao.dataset.colecao, botao.dataset.registroId, botao.dataset.tipo || "Registro", botao);
     }
+    if (acao === "gerenciar-torneio") abrirGerenciarTorneio(botao.dataset.torneioId);
+    if (acao === "editar-torneio") editarTorneio(botao.dataset.torneioId);
+    if (acao === "excluir-torneio") {
+      excluirTorneio(botao.dataset.torneioId, botao.dataset.nome || "Torneio", botao);
+    }
+    if (acao === "status-inscricao-torneio") {
+      alterarStatusInscricaoTorneio(
+        botao.dataset.torneioId,
+        botao.dataset.inscricaoId,
+        botao.dataset.status,
+        botao,
+      );
+    }
+    if (acao === "iniciar-torneio") iniciarTorneio(botao.dataset.torneioId, botao);
+    if (acao === "salvar-resultado") salvarResultado(botao.dataset.torneioId, botao.dataset.partidaId, botao);
   });
 }
 
