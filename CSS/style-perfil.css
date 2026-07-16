@@ -30,6 +30,7 @@
   background: var(--perfil-fundo-card);
   border: 1px solid var(--perfil-borda);
   border-radius: 16px;
+  margin-top: 100px;
 }
 
 .body-perfil .perfil-menu-icon {
@@ -125,7 +126,10 @@
 /* Card de apresentação */
 .body-perfil .perfil-container-main {
   display: grid;
-  grid-template-columns: minmax(190px, 240px) minmax(300px, 1fr) minmax(280px, 340px);
+  grid-template-columns: minmax(190px, 240px) minmax(300px, 1fr) minmax(
+      280px,
+      340px
+    );
   align-items: center;
   gap: 24px;
   margin: 0 0 20px;
@@ -175,7 +179,9 @@
   border-radius: 50%;
   cursor: pointer;
   filter: none;
-  transition: transform 0.2s, background 0.2s;
+  transition:
+    transform 0.2s,
+    background 0.2s;
 }
 
 .body-perfil .btn-upload-foto img {
@@ -470,7 +476,9 @@
   outline: none;
   font-family: inherit;
   font-size: 13px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .body-perfil .perfil-campo-grupo textarea {
@@ -607,7 +615,9 @@
   background: #343434;
   border: 1px solid #4a4a4a;
   border-radius: 999px;
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
 }
 
 .body-perfil .perfil-switch span::after {
@@ -619,7 +629,9 @@
   height: 16px;
   background: #aaa;
   border-radius: 50%;
-  transition: transform 0.2s, background 0.2s;
+  transition:
+    transform 0.2s,
+    background 0.2s;
 }
 
 .body-perfil .perfil-switch input:checked + span {
@@ -747,7 +759,11 @@
   font-size: 12px;
   font-weight: 700;
   text-align: center;
-  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
 }
 
 .body-perfil .btn-posicao:hover,
@@ -822,7 +838,9 @@
   font-family: inherit;
   font-size: 14px;
   font-weight: 800;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 
 .body-perfil .btn-salvar:hover {

@@ -1,24 +1,24 @@
-.main-header{
+.main-header {
   display: flex;
-  justify-content:space-around;
+  justify-content: space-around;
   align-items: center;
   width: 100%;
   height: 120px;
-   position: sticky;
-    top: 0;
-    margin-bottom: 30px;
-    backdrop-filter: blur(6px);
+  position: sticky;
+  top: 0;
+  margin-bottom: 30px;
+  backdrop-filter: blur(6px);
 
-    border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
-    box-shadow:
-        0 1px 0 rgba(255,255,255,.03),
-        0 10px 30px rgba(0,0,0,.45);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03),
+    0 10px 30px rgba(0, 0, 0, 0.45);
 
-    z-index:1000;
+  z-index: 1000;
 }
 
-.logo{
+.logo {
   display: flex;
   align-items: center;
   flex-direction: row;
@@ -31,9 +31,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  
 }
-.lista-links{
+.lista-links {
   position: relative;
   display: flex;
   justify-content: center;
@@ -41,27 +40,29 @@
   gap: 20px;
   list-style: none;
 }
-.lista-links a{
-  
+.lista-links a {
   color: var(--cor-texto-claro);
   text-decoration: none;
   margin: 10px;
   font-size: 20px;
-  transition: transform 0.3s ease, background 0.3s, color 0.3s;
+  transition:
+    transform 0.3s ease,
+    background 0.3s,
+    color 0.3s;
   border-radius: 20px; /* Deixa com formato arredondado */
   padding: 8px 18px;
 }
-.lista-links a.ativo, 
+.lista-links a.ativo,
 .lista-links a:hover {
-  background: #12E06C; /* Verde Neon */
-  color: var(--cor-fundo-secundario); /* Texto escuro para dar contraste com o verde */
+  background: #12e06c; /* Verde Neon */
+  color: var(
+    --cor-fundo-secundario
+  ); /* Texto escuro para dar contraste com o verde */
   font-weight: bold;
   transform: scale(1.1);
 }
 
-
-
-.notification-icon{
+.notification-icon {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -93,17 +94,13 @@
   display: none;
 }
 
-
-
-
-
 .email-container {
-    display: flex;
+  display: flex;
   align-items: center;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  animation: balancar 2s ease-in-out infinite
+  animation: balancar 2s ease-in-out infinite;
 }
 
 .email-icon {
@@ -116,7 +113,7 @@
 /* Efeito Hover com CSS */
 .email-container:hover {
   transform: scale(1.2);
-  transform: rotate(15deg );
+  transform: rotate(15deg);
 }
 
 /* Classe de animação aplicada via JS */
@@ -124,28 +121,34 @@
   animation: shake 0.5s ease-in-out;
 }
 @keyframes balancar {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(10deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px) rotate(-5deg); }
-  50% { transform: translateX(4px) rotate(5deg); }
-  75% { transform: translateX(-4px) rotate(-5deg); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px) rotate(-5deg);
+  }
+  50% {
+    transform: translateX(4px) rotate(5deg);
+  }
+  75% {
+    transform: translateX(-4px) rotate(-5deg);
+  }
 }
 
-
-
-
-
-
-
-
-
-.login{
-  background-color:var(--cor-texto-claro);
-  color: #050B14;
+.login {
+  background-color: var(--cor-texto-claro);
+  color: #050b14;
   text-decoration: none;
   font-weight: bold;
   font-size: 18px;
@@ -155,10 +158,9 @@
   display: inline-block;
   box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */
 }
-.cadastra-se{
-  
-  background-color: #12E06C;
-  color: #050B14;
+.cadastra-se {
+  background-color: #12e06c;
+  color: #050b14;
   text-decoration: none;
   font-weight: bold;
   font-size: 18px;
@@ -168,14 +170,14 @@
   display: inline-block;
   box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */
 }
-.login-header button:hover{
-   transform: translateY(-5px); /* Sobe um pouquinho ao passar o mouse */
+.login-header button:hover {
+  transform: translateY(-5px); /* Sobe um pouquinho ao passar o mouse */
   box-shadow: 0 0 25px rgba(18, 224, 108, 0.7); /* Aumenta o brilho */
 }
 /* =====================================================
    HEADER AUTH — cole no seu style.css
    ===================================================== */
- 
+
 /* Wrapper que o JS injeta dentro de #login-header */
 .header-usuario {
   position: relative;
@@ -185,20 +187,20 @@
   cursor: pointer;
   user-select: none;
 }
- 
+
 /* Foto redonda */
 .hu-foto {
   width: 38px;
   height: 38px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #12E06C;
+  border: 2px solid #12e06c;
   transition: border-color 0.2s;
 }
 .header-usuario:hover .hu-foto {
   border-color: #fff;
 }
- 
+
 /* Bolinha verde de "online" */
 .hu-avatar-wrap {
   position: relative;
@@ -211,10 +213,10 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #12E06C;
-  border: 2px solid #0d0d0d;   /* combine com a cor de fundo do header */
+  background: #12e06c;
+  border: 2px solid #0d0d0d; /* combine com a cor de fundo do header */
 }
- 
+
 /* Nome ao lado da foto */
 .hu-nome {
   color: #fff;
@@ -225,10 +227,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
- 
+
 /* ── Dropdown ── */
 .hu-dropdown {
-  display: none;          /* escondido por padrão */
+  display: none; /* escondido por padrão */
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
@@ -237,39 +239,41 @@
   border-radius: 10px;
   min-width: 180px;
   padding: 6px 0;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   z-index: 999;
   flex-direction: column;
 }
 .hu-dropdown.aberto {
   display: flex;
 }
- 
+
 .hu-drop-item {
   display: block;
   padding: 10px 16px;
   color: #ddd;
   text-decoration: none;
   font-size: 0.88rem;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   background: transparent;
   border: none;
   width: 100%;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 .hu-drop-item:hover {
   background: #252525;
-  color: #12E06C;
+  color: #12e06c;
 }
- 
+
 .hu-drop-divider {
   height: 1px;
   background: #2a2a2a;
   margin: 4px 0;
 }
- 
+
 .hu-sair {
   color: #e06612 !important;
 }
@@ -281,13 +285,27 @@
    aba do meu perfil
    ===================================================== */
 
-   .main-header-perfil{
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    height: 150px;
-   }
+.main-header-perfil {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 150px;
+}
 
 /*============================================================
                       media queries para o headaer 
 ============================================================*/
+
+@media screen and (max-width: 425px) {
+  .main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999; /* Garante que o header fique na frente do restante do conteúdo */
+  }
+  .menu-carrossel {
+    display: flex;
+    justify-content: center;
+  }
+}

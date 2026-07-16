@@ -15,7 +15,11 @@
 .explorar-painel,
 .explorar-clube-card {
   border: 1px solid rgba(160, 170, 181, 0.16);
-  background: linear-gradient(145deg, rgba(15, 26, 44, 0.96), rgba(7, 16, 27, 0.96));
+  background: linear-gradient(
+    145deg,
+    rgba(15, 26, 44, 0.96),
+    rgba(7, 16, 27, 0.96)
+  );
   box-shadow: 0 22px 55px rgba(0, 0, 0, 0.24);
 }
 
@@ -93,7 +97,10 @@
   text-decoration: none;
   font-size: 0.84rem;
   font-weight: 850;
-  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
 }
 
 .explorar-btn:hover {
@@ -240,7 +247,9 @@
   flex-direction: column;
   padding: 20px;
   border-radius: 16px;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .explorar-clube-card:hover {
@@ -414,7 +423,9 @@
 }
 
 @keyframes explorar-girar {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 1080px) {
@@ -435,6 +446,7 @@
   .explorar-main {
     width: min(100% - 24px, 1180px);
     padding-top: 22px;
+    margin-top: 90px;
   }
 
   .explorar-hero {
