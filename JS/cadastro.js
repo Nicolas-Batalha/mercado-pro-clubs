@@ -67,11 +67,11 @@ campoSenha?.addEventListener("input", () => {
   const valor = campoSenha.value;
   forcaSenha.className = "cad-senha-dica";
   if (!valor) {
-    forcaSenha.textContent = "Use 8 ou mais caracteres.";
+    forcaSenha.textContent = "Use 10 ou mais caracteres, com maiúscula, minúscula, número e símbolo.";
     return;
   }
   const pontos = [
-    valor.length >= 8,
+    valor.length >= 10,
     /[a-z]/.test(valor) && /[A-Z]/.test(valor),
     /\d/.test(valor),
     /[^A-Za-z0-9]/.test(valor),
@@ -83,6 +83,6 @@ campoSenha?.addEventListener("input", () => {
     forcaSenha.textContent = "Senha média. Misture letras, números e símbolos.";
     forcaSenha.classList.add("media");
   } else {
-    forcaSenha.textContent = "Senha fraca. Use pelo menos 8 caracteres.";
+    forcaSenha.textContent = "Senha fraca. Use 10 caracteres e misture letras, número e símbolo.";
   }
 });

@@ -9,6 +9,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/fi
 import {
   addDoc,
   collection,
+  deleteField,
   deleteDoc,
   doc,
   getDoc,
@@ -17,11 +18,13 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { confirmModal } from "./confirm-modal.js";
 
 const NOMES_COLECOES = {
   jogadores: "jogadores",
+  privados: "jogadoresPrivados",
   clubes: "clubes",
   vagas: "vagas",
   denuncias: "denuncias",
@@ -67,6 +70,7 @@ const estado = {
   carregamento: 0,
   dados: {
     jogadores: [],
+    privados: [],
     clubes: [],
     vagas: [],
     denuncias: [],
@@ -469,6 +473,11 @@ function statusJogador(jogador) {
   return { texto: "Cadastrado", classe: "" };
 }
 
+function emailPrivadoJogador(jogador) {
+  const privado = estado.dados.privados.find((item) => item.id === jogador.id);
+  return texto(privado?.email || jogador.email, jogador.id);
+}
+
 function renderizarUsuarios() {
   const corpo = porId("admin-lista-usuarios");
   if (!corpo) return;
@@ -476,9 +485,10 @@ function renderizarUsuarios() {
   const filtro = porId("admin-filtro-usuarios")?.value || "todos";
 
   const filtrados = estado.dados.jogadores.filter((jogador) => {
+    const email = emailPrivadoJogador(jogador);
     const correspondeBusca = !busca || normalizar([
       jogador.nickname,
-      jogador.email,
+      email,
       jogador.eaId,
       jogador.idEA,
       jogador.clubeAtualNome,
@@ -498,9 +508,10 @@ function renderizarUsuarios() {
     ? filtrados.map((jogador) => {
         const status = statusJogador(jogador);
         const clube = jogador.clubeAtualNome || jogador.clube;
+        const email = emailPrivadoJogador(jogador);
         return `
           <tr>
-            <td><div class="admin-entidade"><strong>${escaparHtml(texto(jogador.nickname, "Jogador"))}</strong><small>${escaparHtml(texto(jogador.email, jogador.id))}</small></div></td>
+            <td><div class="admin-entidade"><strong>${escaparHtml(texto(jogador.nickname, "Jogador"))}</strong><small>${escaparHtml(email)}</small></div></td>
             <td>${escaparHtml(rotuloPosicao(jogador.posicao))}</td>
             <td>${escaparHtml(rotuloPlataforma(jogador.plataforma))}</td>
             <td>${escaparHtml(texto(clube, "Sem clube"))}</td>
@@ -708,6 +719,17 @@ function renderizarManutencao() {
   if (contagem) contagem.textContent = `${invalidos.length} registro(s)`;
   const limparTodos = porId("admin-limpar-invalidos");
   if (limparTodos) limparTodos.hidden = !estado.podeModerar || invalidos.length === 0;
+  const emailsPublicos = estado.dados.jogadores.filter((jogador) => (
+    typeof jogador.email === "string" && jogador.email.includes("@")
+  ));
+  const contagemEmails = porId("admin-contagem-emails-publicos");
+  if (contagemEmails) {
+    contagemEmails.textContent = emailsPublicos.length
+      ? `${emailsPublicos.length} e-mail(s) ainda público(s)`
+      : "Todos os e-mails estão protegidos";
+  }
+  const protegerEmails = porId("admin-proteger-emails");
+  if (protegerEmails) protegerEmails.hidden = !estado.podeModerar || emailsPublicos.length === 0;
   lista.innerHTML = invalidos.length
     ? invalidos.map((item) => {
         const problemas = [
@@ -1657,6 +1679,57 @@ async function limparRegistrosInvalidos(botao) {
   }
 }
 
+async function protegerEmailsPublicos(botao) {
+  const jogadoresComEmail = estado.dados.jogadores.filter((jogador) => (
+    typeof jogador.email === "string" && jogador.email.includes("@")
+  ));
+  if (!jogadoresComEmail.length) return toast("Todos os e-mails já estão protegidos.");
+
+  const confirmado = await confirmModal({
+    titulo: "Proteger e-mails dos usuários",
+    mensagem: `Mover ${jogadoresComEmail.length} e-mail(s) dos perfis públicos para a área privada? Foto, overall e level não serão alterados.`,
+    textoConfirmar: "Proteger e-mails",
+  });
+  if (!confirmado) return;
+
+  botao.disabled = true;
+  botao.textContent = "Protegendo...";
+  try {
+    for (let inicio = 0; inicio < jogadoresComEmail.length; inicio += 200) {
+      const lote = jogadoresComEmail.slice(inicio, inicio + 200);
+      const batch = writeBatch(db);
+      lote.forEach((jogador) => {
+        batch.set(doc(db, "jogadoresPrivados", jogador.id), {
+          email: jogador.email.trim().toLowerCase(),
+          atualizadoEm: serverTimestamp(),
+        }, { merge: true });
+        batch.update(doc(db, "jogadores", jogador.id), { email: deleteField() });
+      });
+      await batch.commit();
+    }
+
+    jogadoresComEmail.forEach((jogador) => {
+      const existente = estado.dados.privados.find((item) => item.id === jogador.id);
+      if (existente) existente.email = jogador.email.trim().toLowerCase();
+      else estado.dados.privados.push({ id: jogador.id, email: jogador.email.trim().toLowerCase() });
+      delete jogador.email;
+    });
+    renderizarTudo();
+    await registrarLog(
+      "emails_publicos_protegidos",
+      "manutencao",
+      "jogadoresPrivados",
+      `${jogadoresComEmail.length} e-mail(s) movido(s) para documentos privados`,
+    );
+    toast(`${jogadoresComEmail.length} e-mail(s) protegido(s) com sucesso.`);
+  } catch (erro) {
+    console.error("Erro ao proteger e-mails públicos:", erro);
+    botao.disabled = false;
+    botao.textContent = "Proteger e-mails agora";
+    toast("Não foi possível proteger os e-mails. Publique as novas regras e tente novamente.", "erro");
+  }
+}
+
 function configurarEventos() {
   document.querySelectorAll("[data-admin-painel]").forEach((botao) => {
     botao.addEventListener("click", () => abrirPainel(botao.dataset.adminPainel));
@@ -1673,6 +1746,7 @@ function configurarEventos() {
   porId("admin-filtro-denuncias")?.addEventListener("change", renderizarDenuncias);
   porId("admin-atualizar")?.addEventListener("click", carregarDados);
   porId("admin-limpar-invalidos")?.addEventListener("click", (evento) => limparRegistrosInvalidos(evento.currentTarget));
+  porId("admin-proteger-emails")?.addEventListener("click", (evento) => protegerEmailsPublicos(evento.currentTarget));
   porId("admin-form-torneio")?.addEventListener("submit", salvarTorneio);
   porId("admin-cancelar-edicao-torneio")?.addEventListener("click", limparFormularioTorneio);
   porId("admin-torneio-modal-fechar")?.addEventListener("click", fecharModalTorneio);

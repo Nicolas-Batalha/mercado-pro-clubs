@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   sendEmailVerification,
   sendPasswordResetEmail,
+  signOut,
   updateProfile,
 } 
                                                              from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -25,7 +26,7 @@ function mensagemErroAuth(err) {
     "auth/email-already-in-use": "Este e-mail já está cadastrado.",
     "auth/invalid-email": "Digite um e-mail válido.",
     "auth/invalid-credential": "E-mail ou senha incorretos.",
-    "auth/weak-password": "A senha precisa ter pelo menos 8 caracteres.",
+    "auth/weak-password": "A senha não atende aos requisitos de segurança.",
     "auth/popup-closed-by-user": "A janela do Google foi fechada antes de concluir.",
     "auth/popup-blocked": "O navegador bloqueou a janela do Google. Permita pop-ups e tente novamente.",
     "auth/network-request-failed": "Falha de conexão. Confira sua internet e tente novamente.",
@@ -60,6 +61,22 @@ function definirCarregando(botao, carregando, textoCarregando) {
 
 function irParaInicio() {
   window.location.href = "../index.html";
+}
+
+function senhaForte(senha) {
+  return senha.length >= 10
+    && /[a-z]/.test(senha)
+    && /[A-Z]/.test(senha)
+    && /\d/.test(senha)
+    && /[^A-Za-z0-9]/.test(senha);
+}
+
+async function salvarEmailPrivado(user) {
+  if (!user?.uid || !user?.email) return;
+  await setDoc(doc(db, "jogadoresPrivados", user.uid), {
+    email: user.email.trim().toLowerCase(),
+    atualizadoEm: serverTimestamp(),
+  }, { merge: true });
 }
 
 // ─── Utilitário: toast ────────────────────────────────────────────────────────
@@ -112,8 +129,12 @@ if (formCadastro) {
       return;
     }
 
-    if (senha.length < 8) {
-      mostrarFeedback("cadastro-feedback", "A senha precisa ter pelo menos 8 caracteres.", "erro");
+    if (!senhaForte(senha)) {
+      mostrarFeedback(
+        "cadastro-feedback",
+        "Use 10 ou mais caracteres, com letra maiúscula, minúscula, número e símbolo.",
+        "erro",
+      );
       document.getElementById("senha")?.focus();
       return;
     }
@@ -129,9 +150,9 @@ if (formCadastro) {
       try {
         await setDoc(doc(db, "jogadores", user.uid), {
           nickname: nome,
-          email: user.email,
           criadoEm: serverTimestamp(),
         }, { merge: true });
+        await salvarEmailPrivado(user);
       } catch (perfilErr) {
         console.error("Conta criada, mas o perfil inicial não pôde ser salvo:", perfilErr);
       }
@@ -142,12 +163,18 @@ if (formCadastro) {
         verificacaoEnviada = false;
         console.warn("Conta criada, mas o e-mail de verificação não pôde ser enviado:", verificacaoErr);
       }
+      try {
+        await signOut(auth);
+      } catch (logoutErr) {
+        console.warn("Não foi possível encerrar a sessão após o cadastro:", logoutErr);
+      }
       const mensagem = verificacaoEnviada
-        ? "Conta criada! Enviamos um link de verificação para o seu e-mail."
-        : "Conta criada! Você já pode completar seu perfil.";
+        ? "Conta criada! Abra o link enviado ao seu e-mail e depois faça login."
+        : "Conta criada, mas o link não foi enviado. Tente entrar novamente para reenviar.";
       mostrarFeedback("cadastro-feedback", mensagem, verificacaoEnviada ? "sucesso" : "aviso");
-      toast(`Conta criada! Bem-vindo, ${nome}.`);
-      setTimeout(irParaInicio, 2600);
+      toast(`Conta criada! Agora confirme seu e-mail, ${nome}.`);
+      formCadastro.reset();
+      definirCarregando(botao, false);
     } catch (err) {
       const mensagem = mensagemErroAuth(err);
       toast(mensagem, "erro");
@@ -170,15 +197,25 @@ if (formLogin) {
     definirCarregando(botao, true, "Entrando...");
     try {
       const { user } = await signInWithEmailAndPassword(auth, email, senha);
-      toast("Login realizado com sucesso!");
       if (!user.emailVerified) {
+        try {
+          await sendEmailVerification(user);
+        } catch (verificacaoErr) {
+          console.warn("Não foi possível reenviar a verificação:", verificacaoErr);
+        }
+        await signOut(auth);
         mostrarFeedback(
           "login-feedback",
-          "Login realizado. Verifique seu e-mail quando puder para proteger sua conta.",
+          "Confirme seu e-mail antes de entrar. Se possível, reenviamos um novo link agora.",
           "aviso",
         );
-        setTimeout(irParaInicio, 1800);
+        toast("Confirme seu e-mail para liberar a conta.", "erro");
+        definirCarregando(botao, false);
       } else {
+        await salvarEmailPrivado(user).catch((perfilErr) => {
+          console.warn("Não foi possível atualizar o e-mail privado:", perfilErr);
+        });
+        toast("Login realizado com sucesso!");
         mostrarFeedback("login-feedback", "Login realizado com sucesso!", "sucesso");
         setTimeout(irParaInicio, 800);
       }
@@ -242,11 +279,11 @@ if (btnGoogle) {
         if (!perfilSnap.exists()) {
           await setDoc(perfilRef, {
             nickname: user.displayName || "Jogador",
-            email: user.email || "",
             fotoURL: user.photoURL || "",
             criadoEm: serverTimestamp(),
           });
         }
+        await salvarEmailPrivado(user);
       } catch (perfilErr) {
         console.error("Login concluído, mas o perfil inicial não pôde ser salvo:", perfilErr);
       }
