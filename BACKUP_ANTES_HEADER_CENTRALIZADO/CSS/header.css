@@ -30,7 +30,6 @@
   height: auto;
 }
 .main-header > .logo {
-  grid-column: 1;
   justify-self: start;
 }
 .main-header > .logo a {
@@ -44,7 +43,6 @@
 }
 .menu-carrossel {
   position: relative;
-  grid-column: 2;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -79,6 +77,23 @@
   border-color: rgba(18, 224, 108, 0.35);
   transform: translateY(-1px);
 }
+.lista-links a.ativo,
+.lista-links a[aria-current="page"] {
+  background: #12e06c;
+  color: #07130b;
+  border-color: #12e06c;
+  font-weight: 800;
+  box-shadow: 0 0 18px rgba(18, 224, 108, 0.22);
+}
+.lista-links a.ativo:hover,
+.lista-links a[aria-current="page"]:hover {
+  background: #28e77b;
+  color: #07130b;
+  border-color: #28e77b;
+}
+
+
+
 .notification-icon{
   display: flex;
   align-items: center;
@@ -91,7 +106,6 @@
   transform: rotate(15deg);
 }
 .login-header {
-  grid-column: 3;
   display: flex;
   gap: 20px;
   align-items: center;
@@ -310,7 +324,3 @@
     justify-content: space-around;
     height: 150px;
    }
-
-/*============================================================
-                      media queries para o headaer 
-============================================================*/

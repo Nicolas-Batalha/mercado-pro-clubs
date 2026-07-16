@@ -50,18 +50,12 @@
 }
 
 .explorar-kicker {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 5px;
+  display: block;
+  margin-bottom: 9px;
   color: #12e06c;
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.16em;
-}
-#explorar-contagem{
-  font-size: 14px;
-  margin: 10px;
 }
 
 .explorar-hero h1 {
@@ -374,7 +368,7 @@
   min-height: 42px;
   align-items: center;
   justify-content: center;
-  margin-top: 10px  ;
+  margin-top: 10px;
   padding: 10px 12px;
   color: #07130b;
   border-radius: 9px;
@@ -632,14 +626,6 @@
   border-radius: 12px;
 }
 
-.explorar-filtros {
-  grid-template-columns: minmax(160px, 1.7fr) repeat(5, minmax(0, 1fr));
-}
-
-.explorar-campo-busca {
-  grid-column: auto;
-}
-
 .explorar-painel-topo,
 .explorar-resultados-topo {
   align-items: center;
@@ -669,10 +655,6 @@
 
 .explorar-resultados {
   padding-top: 34px;
-}
-
-.explorar-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .explorar-clube-card {
@@ -719,14 +701,6 @@
   .explorar-painel {
     padding: 20px 16px;
   }
-
-  .explorar-filtros {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .explorar-campo-busca {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (max-width: 580px) {
@@ -742,14 +716,5 @@
 
   .explorar-metricas {
     grid-template-columns: 1fr;
-  }
-
-  .explorar-filtros,
-  .explorar-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .explorar-campo-busca {
-    grid-column: auto;
   }
 }
