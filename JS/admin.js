@@ -12,6 +12,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocFromServer,
   getDocs,
   serverTimestamp,
   setDoc,
@@ -1749,7 +1750,16 @@ onAuthStateChanged(auth, async (usuario) => {
 
   mostrarCarregamentoAcesso();
   try {
-    const adminSnap = await getDoc(doc(db, "admins", usuario.uid));
+    let adminSnap;
+    try {
+      // A permissão administrativa precisa vir atualizada do Firebase.
+      // Isso evita que uma configuração antiga salva no navegador mantenha
+      // o painel em modo de leitura depois de moderarConteudo ser habilitado.
+      adminSnap = await getDocFromServer(doc(db, "admins", usuario.uid));
+    } catch (erroServidor) {
+      console.warn("Não foi possível validar o administrador direto no servidor:", erroServidor);
+      adminSnap = await getDoc(doc(db, "admins", usuario.uid));
+    }
     if (auth.currentUser?.uid !== usuario.uid) return;
 
     if (!adminSnap.exists() || adminSnap.data().ativo !== true) {
