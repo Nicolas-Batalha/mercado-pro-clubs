@@ -1,17 +1,17 @@
-.conteiner-info{
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    margin-bottom: 10px;
+.conteiner-info {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 10px;
 }
-.cadastro-form{
+.cadastro-form {
   margin-top: 10px;
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
 }
-.input-group{
+.input-group {
   background-color: var(--cor-fundo-principal);
   display: flex;
   flex-direction: column;
@@ -20,19 +20,19 @@
   align-items: center;
   width: 80%;
 }
-.input-group input{
-  width: 180px;         
-  height: 40px;         
-  padding: 10px;        
-  font-size: 16px;      
-  border-radius: 5px;   
+.input-group input {
+  width: 180px;
+  height: 40px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
 }
 .form-actions {
-    margin-top: 40px;
+  margin-top: 40px;
 }
 .btn-submit {
-    background-color: #12E06C;
-  color: #050B14;
+  background-color: #12e06c;
+  color: #050b14;
   text-decoration: none;
   font-weight: bold;
   font-size: 18px;
@@ -41,18 +41,17 @@
   transition: all 0.3s ease;
   display: inline-block;
   box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */
-
 }
 
 .btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(18, 224, 108, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(18, 224, 108, 0.4);
 }
 
 .btn-submit:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
-.contas-section{
+.contas-section {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -61,58 +60,58 @@
   margin: 10px;
 }
 .btn-social {
-    width: 100%;
-    padding: 14px;
-    border-radius: 8px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    border: none;
-    transition: transform 0.2s, opacity 0.2s;
-    box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */ 
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  font-family: "Montserrat", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: none;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
+  box-shadow: 0 0 15px rgba(18, 224, 108, 0.4); /* Brilho neon */
 }
 
 .btn-social:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
+  transform: translateY(-2px);
+  opacity: 0.9;
 }
 
 /* Cores específicas das marcas */
 .google-btn {
-    background-color: #FFFFFF;
-    color: #1f1f1f;
+  background-color: #ffffff;
+  color: #1f1f1f;
 }
-.logo_google{
+.logo_google {
   width: 20px;
   height: 20px;
 }
 
 .ea-btn {
-    background-color: #E61C24; /* Vermelho característico da EA */
-    color: #FFFFFF;
+  background-color: #e61c24; /* Vermelho característico da EA */
+  color: #ffffff;
 }
-@media screen and (min-width:1024px) {
-  .input-group{
-  background-color: var(--cor-fundo-principal);
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  gap: 10px;
-  align-items: center;
-  width: 500px;
+@media screen and (min-width: 1024px) {
+  .input-group {
+    background-color: var(--cor-fundo-principal);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+    align-items: center;
+    width: 500px;
+  }
+  .input-group input {
+    width: 300px;
+    height: 40px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+  }
 }
-  .input-group input{
-  width: 300px;         
-  height: 40px;         
-  padding: 10px;        
-  font-size: 16px;      
-  border-radius: 5px;   
-}
-}
-
-
