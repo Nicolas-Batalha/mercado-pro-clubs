@@ -1,0 +1,29 @@
+# Segredos e credenciais
+.env
+.env.*
+!.env.example
+*service-account*.json
+*-firebase-adminsdk-*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Ferramentas e dependencias locais
+.vercel/
+.firebase/
+node_modules/
+.vscode/
+.idea/
+.codex/
+.agents/
+firebase-debug.log
+*.log
+
+# Backups e arquivos locais
+BACKUP*/
+backup*/
+CAPTURA DE TELA/
+*.bak
+*.tmp
+~$*

@@ -1,0 +1,17 @@
+# O deploy deve conter apenas os arquivos publicos do site.
+CAPTURA DE TELA
+BACKUP*
+README.md
+SEGURANCA_FIREBASE.md
+FIREBASE_ADMIN_SETUP.md
+FIREBASE_SECURITY_SETUP.md
+firestore-admin.rules.example
+firebase.json
+firestore.rules
+.env*
+*service-account*.json
+*-firebase-adminsdk-*.json
+*.pem
+*.key
+*.p12
+*.pfx
