@@ -90,6 +90,71 @@ service cloud.firestore {
         );
     }
 
+    function validReviewBase(reviewId) {
+      let data = request.resource.data;
+      return verifiedAccount()
+        && reviewId == data.negociacaoTipo + '_' + data.negociacaoId + '_' + request.auth.uid
+        && data.keys().hasAll([
+          'negociacaoTipo', 'negociacaoId', 'autorUid', 'autorPapel',
+          'alvoUid', 'alvoTipo', 'alvoNome', 'nota', 'comentario', 'criadoEm'
+        ])
+        && data.keys().hasOnly([
+          'negociacaoTipo', 'negociacaoId', 'autorUid', 'autorPapel',
+          'alvoUid', 'alvoTipo', 'alvoNome', 'nota', 'comentario', 'criadoEm'
+        ])
+        && data.negociacaoTipo in ['candidatura', 'convite']
+        && data.negociacaoId is string
+        && data.negociacaoId.size() > 5
+        && data.autorUid == request.auth.uid
+        && data.autorPapel in ['jogador', 'capitao']
+        && validUid(data.alvoUid)
+        && data.alvoUid != request.auth.uid
+        && data.alvoTipo in ['jogador', 'clube']
+        && data.alvoNome is string
+        && data.alvoNome.size() > 0
+        && data.alvoNome.size() <= 100
+        && data.nota is int
+        && data.nota >= 1
+        && data.nota <= 5
+        && data.comentario is string
+        && data.comentario.size() <= 300
+        && data.criadoEm == request.time;
+    }
+
+    function validApplicationReview() {
+      let data = request.resource.data;
+      return exists(/databases/$(database)/documents/candidaturas/$(data.negociacaoId))
+        && get(/databases/$(database)/documents/candidaturas/$(data.negociacaoId)).data.status == 'aceito'
+        && (
+          (get(/databases/$(database)/documents/candidaturas/$(data.negociacaoId)).data.jogadorUid == request.auth.uid
+            && data.autorPapel == 'jogador'
+            && data.alvoUid == get(/databases/$(database)/documents/candidaturas/$(data.negociacaoId)).data.capitaoUid
+            && data.alvoTipo == 'clube')
+          ||
+          (get(/databases/$(database)/documents/candidaturas/$(data.negociacaoId)).data.capitaoUid == request.auth.uid
+            && data.autorPapel == 'capitao'
+            && data.alvoUid == get(/databases/$(database)/documents/candidaturas/$(data.negociacaoId)).data.jogadorUid
+            && data.alvoTipo == 'jogador')
+        );
+    }
+
+    function validInviteReview() {
+      let data = request.resource.data;
+      return exists(/databases/$(database)/documents/convitesClube/$(data.negociacaoId))
+        && get(/databases/$(database)/documents/convitesClube/$(data.negociacaoId)).data.status == 'aceito'
+        && (
+          (get(/databases/$(database)/documents/convitesClube/$(data.negociacaoId)).data.jogadorUid == request.auth.uid
+            && data.autorPapel == 'jogador'
+            && data.alvoUid == get(/databases/$(database)/documents/convitesClube/$(data.negociacaoId)).data.capitaoUid
+            && data.alvoTipo == 'clube')
+          ||
+          (get(/databases/$(database)/documents/convitesClube/$(data.negociacaoId)).data.capitaoUid == request.auth.uid
+            && data.autorPapel == 'capitao'
+            && data.alvoUid == get(/databases/$(database)/documents/convitesClube/$(data.negociacaoId)).data.jogadorUid
+            && data.alvoTipo == 'jogador')
+        );
+    }
+
     function chatArchiveOnlyOwnUid() {
       let before = resource.data.get('arquivadoPor', []);
       let after = request.resource.data.get('arquivadoPor', []);
@@ -325,6 +390,17 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/jogadores/$(request.resource.data.jogadorUid))
         && get(/databases/$(database)/documents/jogadores/$(request.resource.data.jogadorUid)).data.get('suspenso', false) != true;
       allow update: if inviteCanBeUpdated();
+      allow delete: if canModerate();
+    }
+
+    match /avaliacoes/{avaliacaoId} {
+      allow read: if true;
+      allow create: if validReviewBase(avaliacaoId)
+        && (
+          (request.resource.data.negociacaoTipo == 'candidatura' && validApplicationReview())
+          || (request.resource.data.negociacaoTipo == 'convite' && validInviteReview())
+        );
+      allow update: if false;
       allow delete: if canModerate();
     }
 

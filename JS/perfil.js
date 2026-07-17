@@ -477,6 +477,9 @@ function configurarLivePreview() {
 // ─── 10a. Modo visitante — vendo o perfil de outro jogador (?uid=) ────────────
 async function carregarModoVisitantePerfil(uid) {
   document.body.classList.add("perfil-visitante");
+  const reputacao = document.getElementById("perfil-reputacao");
+  if (reputacao) reputacao.dataset.reputacaoUid = uid;
+  window.mercadoReputacao?.atualizar();
   try {
     const snap = await getDoc(doc(db, "jogadores", uid));
     if (!snap.exists()) {
@@ -535,6 +538,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (perfilInicializadoUid === usuario.uid) return;
     perfilInicializadoUid = usuario.uid;
+
+    const reputacao = document.getElementById("perfil-reputacao");
+    if (reputacao) reputacao.dataset.reputacaoUid = usuario.uid;
+    window.mercadoReputacao?.atualizar();
 
     const dados = await carregarDoFirestore(usuario.uid);
     perfilEmMemoria = dados;

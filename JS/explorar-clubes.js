@@ -180,6 +180,7 @@ function cardClube(clube) {
         <div class="explorar-card-identidade">
           <h3 title="${escHtml(clube.nome)}">${escHtml(clube.nome)}</h3>
           <p>Capitão: ${escHtml(clube.capitaoNome)}</p>
+          <span data-reputacao-uid="${escHtml(clube.capitaoUid)}" data-reputacao-tipo="clube"></span>
         </div>
       </div>
       <div class="explorar-card-tags">${tags || "<span>Detalhes em atualização</span>"}</div>

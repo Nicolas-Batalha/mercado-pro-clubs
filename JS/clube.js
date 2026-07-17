@@ -816,6 +816,7 @@ function renderizarElencoPublico(elenco, capitaoUid) {
             <div class="publico-jogador-info">
               <strong>${escHtml(jogador.nickname || "Jogador")}</strong>
               <span>${escHtml(rotuloPosicaoClube(jogador.posicao))}${jogador.eaId ? ` · ${escHtml(jogador.eaId)}` : ""}</span>
+              <span data-reputacao-uid="${escHtml(jogador.uid)}" data-reputacao-tipo="jogador"></span>
             </div>
             <div class="publico-jogador-numeros">
               ${capitao ? '<span class="publico-selo-capitao">Capitão</span>' : ""}
@@ -856,6 +857,10 @@ function renderizarVagasPublicas(vagas) {
 function renderizarPerfilPublico(clube, perfilCapitao, elenco, vagas, uidClube) {
   const publico = document.getElementById("clube-publico");
   publico.hidden = false;
+
+  const reputacao = document.getElementById("publico-reputacao");
+  if (reputacao) reputacao.dataset.reputacaoUid = uidClube;
+  window.mercadoReputacao?.atualizar();
 
   const nome = textoPublico(clube.nome, "Clube");
   const escudo = imagemSegura(clube.escudoUrl, "../IMG/real madrid.svg");

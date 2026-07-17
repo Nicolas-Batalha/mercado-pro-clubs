@@ -76,6 +76,9 @@
           <button type="button" class="admin-nav-item" data-admin-painel="torneios">
             <span>♛</span> Torneios <b id="admin-nav-inscricoes" hidden>0</b>
           </button>
+          <button type="button" class="admin-nav-item" data-admin-painel="avaliacoes">
+            <span>★</span> Avaliações
+          </button>
           <button type="button" class="admin-nav-item" data-admin-painel="denuncias">
             <span>⚑</span> Denúncias <b id="admin-nav-denuncias" hidden>0</b>
           </button>
@@ -103,6 +106,7 @@
               <article class="admin-metrica"><span>Clubes</span><strong id="admin-total-clubes">—</strong><small>clubes cadastrados</small></article>
               <article class="admin-metrica"><span>Vagas</span><strong id="admin-total-vagas">—</strong><small>anúncios publicados</small></article>
               <article class="admin-metrica"><span>Torneios</span><strong id="admin-total-torneios">—</strong><small>competições cadastradas</small></article>
+              <article class="admin-metrica"><span>Avaliações</span><strong id="admin-total-avaliacoes">—</strong><small>experiências verificadas</small></article>
               <article class="admin-metrica alerta"><span>Denúncias</span><strong id="admin-total-denuncias">—</strong><small>aguardando análise</small></article>
               <article class="admin-metrica"><span>Convites</span><strong id="admin-total-convites">—</strong><small>convites pendentes</small></article>
               <article class="admin-metrica alerta"><span>Dados antigos</span><strong id="admin-total-invalidos">—</strong><small>registros que precisam de limpeza</small></article>
@@ -265,6 +269,24 @@
             <div id="admin-lista-torneios" class="admin-torneios-lista"></div>
           </section>
 
+          <section id="admin-painel-avaliacoes" class="admin-painel" aria-labelledby="admin-titulo-avaliacoes" hidden>
+            <div class="admin-secao-cabecalho">
+              <div>
+                <h2 id="admin-titulo-avaliacoes">Avaliações verificadas</h2>
+                <p>Consulte as notas públicas e remova apenas conteúdos que violem as regras da comunidade.</p>
+              </div>
+              <span id="admin-contagem-avaliacoes" class="admin-contagem"></span>
+            </div>
+            <div class="admin-toolbar">
+              <label for="admin-busca-avaliacoes" class="sr-only">Buscar avaliações</label>
+              <input type="search" id="admin-busca-avaliacoes" placeholder="Buscar por nome, comentário ou negociação">
+            </div>
+            <div class="admin-aviso admin-aviso-neutro">
+              As notas não podem ser editadas. Em caso de abuso, a moderação pode excluir a avaliação completa.
+            </div>
+            <div id="admin-lista-avaliacoes" class="admin-grid-registros"></div>
+          </section>
+
           <section id="admin-painel-denuncias" class="admin-painel" aria-labelledby="admin-titulo-denuncias" hidden>
             <div class="admin-secao-cabecalho">
               <div><h2 id="admin-titulo-denuncias">Denúncias</h2><p>Analise os conteúdos sinalizados pela comunidade.</p></div>
@@ -331,7 +353,7 @@
   </div>
 
   <script src="../JS/script.js" defer></script>
-  <script type="module" src="../JS/admin.js?v=20260716-2"></script>
+  <script type="module" src="../JS/admin.js?v=20260717-1"></script>
   <script type="module" src="../JS/header-auth.js"></script>
 </body>
 </html>

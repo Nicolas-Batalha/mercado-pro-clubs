@@ -67,6 +67,10 @@
             <span>Itens arquivados</span>
             <strong id="neg-metrica-arquivadas">0</strong>
           </article>
+          <article>
+            <span>Avaliações pendentes</span>
+            <strong id="neg-metrica-avaliacoes">0</strong>
+          </article>
         </section>
 
         <nav class="negociacoes-abas" role="tablist" aria-label="Áreas das negociações">
@@ -137,6 +141,39 @@
       </div>
     </main>
 
+    <div id="neg-avaliacao-modal" class="neg-avaliacao-overlay" hidden>
+      <section class="neg-avaliacao-modal" role="dialog" aria-modal="true" aria-labelledby="neg-avaliacao-titulo">
+        <button type="button" class="neg-avaliacao-fechar" data-avaliacao-fechar aria-label="Fechar avaliação">×</button>
+        <span class="negociacoes-kicker">AVALIAÇÃO VERIFICADA</span>
+        <h2 id="neg-avaliacao-titulo">Avaliar negociação</h2>
+        <p id="neg-avaliacao-descricao">Conte como foi sua experiência nesta negociação.</p>
+        <form id="neg-avaliacao-form">
+          <input type="hidden" id="neg-avaliacao-nota" required>
+          <fieldset class="neg-avaliacao-estrelas">
+            <legend>Sua nota</legend>
+            <div role="group" aria-label="Escolha uma nota de 1 a 5">
+              <button type="button" data-avaliacao-nota="1" aria-label="1 estrela" aria-pressed="false">★</button>
+              <button type="button" data-avaliacao-nota="2" aria-label="2 estrelas" aria-pressed="false">★</button>
+              <button type="button" data-avaliacao-nota="3" aria-label="3 estrelas" aria-pressed="false">★</button>
+              <button type="button" data-avaliacao-nota="4" aria-label="4 estrelas" aria-pressed="false">★</button>
+              <button type="button" data-avaliacao-nota="5" aria-label="5 estrelas" aria-pressed="false">★</button>
+            </div>
+          </fieldset>
+          <label class="neg-avaliacao-comentario" for="neg-avaliacao-comentario">
+            <span>Comentário público (opcional)</span>
+            <textarea id="neg-avaliacao-comentario" maxlength="300" rows="4"
+              placeholder="Ex.: comunicação clara, horários cumpridos e ambiente respeitoso."></textarea>
+            <small><span id="neg-avaliacao-contador">0</span>/300</small>
+          </label>
+          <p class="neg-avaliacao-regra">A avaliação não poderá ser alterada. Comentários ofensivos podem ser removidos pela moderação.</p>
+          <div class="neg-avaliacao-acoes">
+            <button type="button" class="negociacao-acao" data-avaliacao-fechar>Cancelar</button>
+            <button type="submit" class="negociacao-acao primaria">Enviar avaliação</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
     <footer class="main-footer">
       <div class="footer-inner">
         <div class="footer-divisor"></div>
@@ -147,6 +184,7 @@
 
     <script src="../JS/script.js" defer></script>
     <script type="module" src="../JS/negociacoes.js"></script>
+    <script type="module" src="../JS/reputacao.js"></script>
     <script type="module" src="../JS/header-auth.js"></script>
   </body>
 </html>

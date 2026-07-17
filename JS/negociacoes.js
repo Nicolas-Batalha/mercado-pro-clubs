@@ -27,8 +27,11 @@ const estado = {
   convitesEnviados: [],
   chats: [],
   arquivados: [],
+  avaliacoesEnviadas: [],
   carregamento: 0,
 };
+
+let avaliacaoAtual = null;
 
 function escHtml(valor) {
   return String(valor ?? "")
@@ -133,7 +136,91 @@ function alvoArquivo(valor) {
   };
 }
 
-function cardBase({ tipo, titulo, status, resumo, meta = [], data, acoes = [], classe = "" }) {
+function idDocumentoAvaliacao(tipo, negociacaoId) {
+  return `${tipo}_${negociacaoId}_${estado.usuario.uid}`;
+}
+
+function jaAvaliou(tipo, negociacaoId) {
+  const id = idDocumentoAvaliacao(tipo, negociacaoId);
+  return estado.avaliacoesEnviadas.some((item) => item.id === id);
+}
+
+function contextoAvaliacao(tipo, id) {
+  let item = null;
+  let autorPapel = "";
+  let alvoUid = "";
+  let alvoTipo = "";
+  let alvoNome = "";
+
+  if (tipo === "candidatura") {
+    item = encontrar(estado.candidaturasEnviadas, id);
+    if (item) {
+      autorPapel = "jogador";
+      alvoUid = item.capitaoUid;
+      alvoTipo = "clube";
+      alvoNome = item.clube || "Clube";
+    } else {
+      item = encontrar(estado.candidaturasRecebidas, id);
+      if (item) {
+        autorPapel = "capitao";
+        alvoUid = item.jogadorUid;
+        alvoTipo = "jogador";
+        alvoNome = item.jogadorNome || "Jogador";
+      }
+    }
+  }
+
+  if (tipo === "convite") {
+    item = encontrar(estado.convitesRecebidos, id);
+    if (item) {
+      autorPapel = "jogador";
+      alvoUid = item.capitaoUid;
+      alvoTipo = "clube";
+      alvoNome = item.clube || "Clube";
+    } else {
+      item = encontrar(estado.convitesEnviados, id);
+      if (item) {
+        autorPapel = "capitao";
+        alvoUid = item.jogadorUid;
+        alvoTipo = "jogador";
+        alvoNome = item.jogadorNome || "Jogador";
+      }
+    }
+  }
+
+  if (!item || statusItem(item) !== "aceito" || !uidValido(alvoUid) || alvoUid === estado.usuario.uid) {
+    return null;
+  }
+  return { tipo, id, item, autorPapel, alvoUid, alvoTipo, alvoNome };
+}
+
+function acaoAvaliacao(tipo, item) {
+  if (statusItem(item) !== "aceito") return "";
+  if (jaAvaliou(tipo, item.id)) {
+    return '<span class="negociacao-avaliada">★ Avaliação enviada</span>';
+  }
+  const contexto = contextoAvaliacao(tipo, item.id);
+  if (!contexto) return "";
+  return acaoBotao(
+    "avaliar-negociacao",
+    chaveArquivo(tipo, item.id),
+    `Avaliar ${contexto.alvoTipo === "clube" ? "clube" : "jogador"}`,
+    "avaliar",
+  );
+}
+
+function cardBase({
+  tipo,
+  titulo,
+  status,
+  resumo,
+  meta = [],
+  data,
+  acoes = [],
+  classe = "",
+  reputacaoUid = "",
+  reputacaoTipo = "jogador",
+}) {
   return `<article class="negociacao-card ${escHtml(classe)}">
     <div class="negociacao-card-topo">
       <div>
@@ -144,6 +231,7 @@ function cardBase({ tipo, titulo, status, resumo, meta = [], data, acoes = [], c
     </div>
     <p class="negociacao-resumo">${escHtml(resumo)}</p>
     ${meta.length ? `<div class="negociacao-meta">${meta.map((valor) => `<span>${escHtml(valor)}</span>`).join("")}</div>` : ""}
+    ${uidValido(reputacaoUid) ? `<div class="negociacao-reputacao" data-reputacao-uid="${escHtml(reputacaoUid)}" data-reputacao-tipo="${escHtml(reputacaoTipo)}"></div>` : ""}
     <small class="negociacao-data">Atualizado em ${escHtml(data)}</small>
     ${acoes.length ? `<div class="negociacao-acoes">${acoes.join("")}</div>` : ""}
   </article>`;
@@ -162,6 +250,8 @@ function cardCandidaturaJogador(item) {
   } else if (status === "aceito" && item.chatId) {
     acoes.push(acaoLink(`./mercado.html?chat=${encodeURIComponent(item.chatId)}`, "Abrir conversa", "primaria"));
   }
+  const avaliacao = acaoAvaliacao("candidatura", item);
+  if (avaliacao) acoes.push(avaliacao);
   if (status !== "pendente") {
     acoes.push(acaoBotao("arquivar-item", chaveArquivo("candidatura", item.id), "Arquivar", "arquivar"));
   }
@@ -179,6 +269,8 @@ function cardCandidaturaJogador(item) {
     meta: [`Posição: ${item.posicao || "—"}`, `OVR: ${item.overall || "—"}`],
     data: formatarData(item),
     acoes,
+    reputacaoUid: item.capitaoUid,
+    reputacaoTipo: "clube",
   });
 }
 
@@ -194,6 +286,8 @@ function cardConviteRecebido(item) {
   } else if (status === "aceito" && item.chatId) {
     acoes.push(acaoLink(`./mercado.html?chat=${encodeURIComponent(item.chatId)}`, "Abrir conversa", "primaria"));
   }
+  const avaliacao = acaoAvaliacao("convite", item);
+  if (avaliacao) acoes.push(avaliacao);
   if (status !== "pendente") {
     acoes.push(acaoBotao("arquivar-item", chaveArquivo("convite", item.id), "Arquivar", "arquivar"));
   }
@@ -210,6 +304,8 @@ function cardConviteRecebido(item) {
           : "O capitão cancelou este convite.",
     data: formatarData(item),
     acoes,
+    reputacaoUid: item.capitaoUid,
+    reputacaoTipo: "clube",
   });
 }
 
@@ -224,6 +320,8 @@ function cardCandidaturaCapitao(item) {
   } else if (status === "aceito" && item.chatId) {
     acoes.push(acaoLink(`./mercado.html?chat=${encodeURIComponent(item.chatId)}`, "Abrir conversa", "primaria"));
   }
+  const avaliacao = acaoAvaliacao("candidatura", item);
+  if (avaliacao) acoes.push(avaliacao);
   if (status !== "pendente") {
     acoes.push(acaoBotao("arquivar-item", chaveArquivo("candidatura", item.id), "Arquivar", "arquivar"));
   }
@@ -235,6 +333,8 @@ function cardCandidaturaCapitao(item) {
     meta: [`Posição: ${item.posicao || "—"}`, `OVR: ${item.overall || "—"}`],
     data: formatarData(item),
     acoes,
+    reputacaoUid: item.jogadorUid,
+    reputacaoTipo: "jogador",
   });
 }
 
@@ -248,6 +348,8 @@ function cardConviteEnviado(item) {
   } else if (status === "aceito" && item.chatId) {
     acoes.push(acaoLink(`./mercado.html?chat=${encodeURIComponent(item.chatId)}`, "Abrir conversa", "primaria"));
   }
+  const avaliacao = acaoAvaliacao("convite", item);
+  if (avaliacao) acoes.push(avaliacao);
   if (status !== "pendente") {
     acoes.push(acaoBotao("arquivar-item", chaveArquivo("convite", item.id), "Arquivar", "arquivar"));
   }
@@ -264,6 +366,8 @@ function cardConviteEnviado(item) {
           : "Você cancelou este convite.",
     data: formatarData(item),
     acoes,
+    reputacaoUid: item.jogadorUid,
+    reputacaoTipo: "jogador",
   });
 }
 
@@ -300,6 +404,14 @@ function cardArquivado(tipo, item, papel) {
     : tipo === "candidatura"
       ? (papel === "jogador" ? "Candidatura arquivada" : "Candidato arquivado")
       : (papel === "jogador" ? "Convite recebido arquivado" : "Convite enviado arquivado");
+  const acoes = [acaoBotao("restaurar-item", chaveArquivo(tipo, item.id), "Restaurar", "primaria")];
+  const avaliacao = !ehChat ? acaoAvaliacao(tipo, item) : "";
+  if (avaliacao) acoes.unshift(avaliacao);
+  const reputacaoUid = ehChat
+    ? ""
+    : papel === "jogador"
+      ? item.capitaoUid
+      : item.jogadorUid;
   return cardBase({
     tipo: rotulo,
     titulo,
@@ -307,7 +419,9 @@ function cardArquivado(tipo, item, papel) {
     resumo: "Este item está fora das listas principais apenas para você.",
     meta: [ehChat ? "Conversa" : tipo === "candidatura" ? "Candidatura" : "Convite"],
     data: formatarData(item),
-    acoes: [acaoBotao("restaurar-item", chaveArquivo(tipo, item.id), "Restaurar", "primaria")],
+    acoes,
+    reputacaoUid,
+    reputacaoTipo: papel === "jogador" ? "clube" : "jogador",
   });
 }
 
@@ -340,10 +454,17 @@ function renderizar() {
 
   const pendenciasJogador = jogadorItens.filter((item) => statusItem(item) === "pendente").length;
   const pendenciasCapitao = capitaoItens.filter((item) => statusItem(item) === "pendente").length;
+  const avaliacoesPendentes = [
+    ...estado.candidaturasEnviadas.map((item) => ({ tipo: "candidatura", item })),
+    ...estado.candidaturasRecebidas.map((item) => ({ tipo: "candidatura", item })),
+    ...estado.convitesRecebidos.map((item) => ({ tipo: "convite", item })),
+    ...estado.convitesEnviados.map((item) => ({ tipo: "convite", item })),
+  ].filter(({ tipo, item }) => contextoAvaliacao(tipo, item.id) && !jaAvaliou(tipo, item.id)).length;
   document.getElementById("neg-metrica-jogador").textContent = String(pendenciasJogador);
   document.getElementById("neg-metrica-capitao").textContent = String(pendenciasCapitao);
   document.getElementById("neg-metrica-conversas").textContent = String(chatsVisiveis.length);
   document.getElementById("neg-metrica-arquivadas").textContent = String(itensArquivados.length);
+  document.getElementById("neg-metrica-avaliacoes").textContent = String(avaliacoesPendentes);
   document.getElementById("neg-badge-jogador").textContent = String(jogadorItens.length);
   document.getElementById("neg-badge-capitao").textContent = String(capitaoItens.length);
   document.getElementById("neg-badge-conversas").textContent = String(chatsVisiveis.length);
@@ -405,7 +526,7 @@ async function carregarDados() {
   try {
     const uid = estado.usuario.uid;
     const [perfilSnap, clubeSnap, candidaturasEnviadas, candidaturasRecebidas,
-      convitesRecebidos, convitesEnviados, chats, arquivados] = await Promise.all([
+      convitesRecebidos, convitesEnviados, chats, arquivados, avaliacoesEnviadas] = await Promise.all([
       getDoc(doc(db, "jogadores", uid)),
       getDoc(doc(db, "clubes", uid)),
       getDocs(query(collection(db, "candidaturas"), where("jogadorUid", "==", uid))),
@@ -414,6 +535,7 @@ async function carregarDados() {
       getDocs(query(collection(db, "convitesClube"), where("capitaoUid", "==", uid))),
       getDocs(query(collection(db, "chats"), where("participantes", "array-contains", uid))),
       getDocs(query(collection(db, "negociacoesArquivadas"), where("usuarioUid", "==", uid))),
+      getDocs(query(collection(db, "avaliacoes"), where("autorUid", "==", uid))),
     ]);
     if (carregamento !== estado.carregamento || auth.currentUser?.uid !== uid) return;
     estado.perfil = perfilSnap.exists() ? perfilSnap.data() : {};
@@ -424,6 +546,7 @@ async function carregarDados() {
     estado.convitesEnviados = convitesEnviados.docs.map((item) => ({ id: item.id, ...item.data() }));
     estado.chats = chats.docs.map((item) => ({ id: item.id, ...item.data() }));
     estado.arquivados = arquivados.docs.map((item) => ({ id: item.id, ...item.data() }));
+    estado.avaliacoesEnviadas = avaliacoesEnviadas.docs.map((item) => ({ id: item.id, ...item.data() }));
     document.getElementById("negociacoes-boas-vindas").textContent =
       `Olá, ${estado.perfil.nickname || estado.usuario.displayName || "jogador"}. Acompanhe tudo que está acontecendo entre você e os clubes.`;
     renderizar();
@@ -635,6 +758,102 @@ async function restaurarItem(valor) {
   return true;
 }
 
+function selecionarNotaAvaliacao(nota) {
+  const valor = Number(nota);
+  const campo = document.getElementById("neg-avaliacao-nota");
+  if (campo) campo.value = Number.isInteger(valor) && valor >= 1 && valor <= 5 ? String(valor) : "";
+  document.querySelectorAll("[data-avaliacao-nota]").forEach((botao) => {
+    const selecionada = Number(botao.dataset.avaliacaoNota) <= valor;
+    botao.classList.toggle("selecionada", selecionada);
+    botao.setAttribute("aria-pressed", String(selecionada));
+  });
+}
+
+function fecharAvaliacao() {
+  const modal = document.getElementById("neg-avaliacao-modal");
+  if (modal) modal.hidden = true;
+  document.body.classList.remove("neg-avaliacao-aberta");
+  avaliacaoAtual = null;
+}
+
+async function abrirAvaliacao(valor) {
+  const { tipo, id } = alvoArquivo(valor);
+  if (!id || !["candidatura", "convite"].includes(tipo)) {
+    throw new Error("Não foi possível identificar esta negociação.");
+  }
+  if (jaAvaliou(tipo, id)) throw new Error("Você já avaliou esta negociação.");
+  const contexto = contextoAvaliacao(tipo, id);
+  if (!contexto) throw new Error("Somente uma negociação aceita pode ser avaliada.");
+
+  avaliacaoAtual = contexto;
+  selecionarNotaAvaliacao(0);
+  const comentario = document.getElementById("neg-avaliacao-comentario");
+  if (comentario) comentario.value = "";
+  const contador = document.getElementById("neg-avaliacao-contador");
+  if (contador) contador.textContent = "0";
+  document.getElementById("neg-avaliacao-titulo").textContent = `Avaliar ${contexto.alvoNome}`;
+  document.getElementById("neg-avaliacao-descricao").textContent =
+    `Esta avaliação ficará no perfil ${contexto.alvoTipo === "clube" ? "do clube" : "do jogador"} e será marcada como verificada.`;
+  const modal = document.getElementById("neg-avaliacao-modal");
+  modal.hidden = false;
+  document.body.classList.add("neg-avaliacao-aberta");
+  document.querySelector("[data-avaliacao-nota='5']")?.focus();
+  return false;
+}
+
+async function enviarAvaliacao(evento) {
+  evento.preventDefault();
+  if (!avaliacaoAtual) return;
+  const nota = Number(document.getElementById("neg-avaliacao-nota")?.value);
+  const comentario = String(document.getElementById("neg-avaliacao-comentario")?.value || "").trim();
+  if (!Number.isInteger(nota) || nota < 1 || nota > 5) {
+    toast("Escolha uma nota de 1 a 5 estrelas.", "erro");
+    return;
+  }
+  if (comentario.length > 300) {
+    toast("O comentário deve ter no máximo 300 caracteres.", "erro");
+    return;
+  }
+  if (!estado.usuario?.emailVerified) {
+    toast("Confirme seu e-mail antes de enviar uma avaliação.", "erro");
+    return;
+  }
+
+  const botao = evento.currentTarget.querySelector("button[type='submit']");
+  const textoOriginal = botao?.textContent || "Enviar avaliação";
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = "Enviando...";
+  }
+  const contexto = avaliacaoAtual;
+  try {
+    await setDoc(doc(db, "avaliacoes", idDocumentoAvaliacao(contexto.tipo, contexto.id)), {
+      negociacaoTipo: contexto.tipo,
+      negociacaoId: contexto.id,
+      autorUid: estado.usuario.uid,
+      autorPapel: contexto.autorPapel,
+      alvoUid: contexto.alvoUid,
+      alvoTipo: contexto.alvoTipo,
+      alvoNome: contexto.alvoNome,
+      nota,
+      comentario,
+      criadoEm: serverTimestamp(),
+    });
+    fecharAvaliacao();
+    toast("Avaliação publicada no perfil.");
+    await carregarDados();
+    await window.mercadoReputacao?.recarregar();
+  } catch (err) {
+    console.error("Erro ao enviar avaliação:", err);
+    toast(err.message || "Não foi possível enviar a avaliação.", "erro");
+  } finally {
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = textoOriginal;
+    }
+  }
+}
+
 const ACOES = {
   "cancelar-candidatura": cancelarCandidatura,
   "reenviar-candidatura": reenviarCandidatura,
@@ -645,6 +864,7 @@ const ACOES = {
   "cancelar-convite": cancelarConvite,
   "arquivar-item": arquivarItem,
   "restaurar-item": restaurarItem,
+  "avaliar-negociacao": abrirAvaliacao,
 };
 
 document.getElementById("negociacoes-app")?.addEventListener("click", async (evento) => {
@@ -682,6 +902,22 @@ document.querySelectorAll("[data-neg-tab]").forEach((botao) => {
       painel.hidden = painel.dataset.negPainel !== aba;
     });
   });
+});
+
+document.getElementById("neg-avaliacao-form")?.addEventListener("submit", enviarAvaliacao);
+document.getElementById("neg-avaliacao-modal")?.addEventListener("click", (evento) => {
+  const estrela = evento.target.closest("[data-avaliacao-nota]");
+  if (estrela) selecionarNotaAvaliacao(estrela.dataset.avaliacaoNota);
+  if (evento.target === evento.currentTarget || evento.target.closest("[data-avaliacao-fechar]")) {
+    fecharAvaliacao();
+  }
+});
+document.getElementById("neg-avaliacao-comentario")?.addEventListener("input", (evento) => {
+  const contador = document.getElementById("neg-avaliacao-contador");
+  if (contador) contador.textContent = String(evento.currentTarget.value.length);
+});
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape" && !document.getElementById("neg-avaliacao-modal")?.hidden) fecharAvaliacao();
 });
 
 onAuthStateChanged(auth, async (usuario) => {

@@ -30,6 +30,7 @@ const NOMES_COLECOES = {
   denuncias: "denuncias",
   candidaturas: "candidaturas",
   convites: "convitesClube",
+  avaliacoes: "avaliacoes",
   logs: "logsAdmin",
   torneios: "torneios",
 };
@@ -76,6 +77,7 @@ const estado = {
     denuncias: [],
     candidaturas: [],
     convites: [],
+    avaliacoes: [],
     logs: [],
     torneios: [],
   },
@@ -453,6 +455,7 @@ function renderizarMetricas() {
   preencherMetrica("admin-total-clubes", estado.dados.clubes.length);
   preencherMetrica("admin-total-vagas", estado.dados.vagas.length);
   preencherMetrica("admin-total-torneios", estado.dados.torneios.length);
+  preencherMetrica("admin-total-avaliacoes", estado.dados.avaliacoes.length);
   preencherMetrica("admin-total-denuncias", pendentes.length);
   preencherMetrica("admin-total-convites", convitesPendentes.length);
   preencherMetrica("admin-total-invalidos", invalidos.length);
@@ -752,6 +755,58 @@ function renderizarDenuncias() {
           </article>`;
       }).join("")
     : '<div class="admin-vazio">Nenhuma denúncia neste filtro.</div>';
+}
+
+function renderizarAvaliacoes() {
+  const lista = porId("admin-lista-avaliacoes");
+  if (!lista) return;
+  const busca = normalizar(porId("admin-busca-avaliacoes")?.value);
+  const filtradas = estado.dados.avaliacoes.filter((avaliacao) => {
+    const autor = obterJogador(avaliacao.autorUid);
+    return !busca || normalizar([
+      avaliacao.alvoNome,
+      avaliacao.comentario,
+      avaliacao.negociacaoTipo,
+      avaliacao.negociacaoId,
+      autor?.nickname,
+    ].filter(Boolean).join(" ")).includes(busca);
+  });
+
+  const contagem = porId("admin-contagem-avaliacoes");
+  if (contagem) contagem.textContent = `${filtradas.length} de ${estado.dados.avaliacoes.length}`;
+
+  lista.innerHTML = filtradas.length
+    ? filtradas.map((avaliacao) => {
+        const autor = obterJogador(avaliacao.autorUid);
+        const nota = Math.max(1, Math.min(5, Number(avaliacao.nota) || 1));
+        const perfilHref = avaliacao.alvoTipo === "clube"
+          ? `./clubes.html?uid=${encodeURIComponent(avaliacao.alvoUid || "")}`
+          : `./meu-perfil.html?uid=${encodeURIComponent(avaliacao.alvoUid || "")}`;
+        const tipoNegociacao = avaliacao.negociacaoTipo === "convite" ? "Convite aceito" : "Candidatura aceita";
+        return `
+          <article class="admin-registro">
+            <div class="admin-registro-topo">
+              <div>
+                <h3>${escaparHtml(texto(avaliacao.alvoNome, "Perfil avaliado"))}</h3>
+                <span class="admin-avaliacao-nota" aria-label="Nota ${nota} de 5">${"★".repeat(nota)}${"☆".repeat(5 - nota)}</span>
+              </div>
+              <span class="admin-badge verde">Avaliação verificada</span>
+            </div>
+            <div class="admin-registro-meta">
+              <span class="admin-badge">Por ${escaparHtml(texto(autor?.nickname, "usuário da comunidade"))}</span>
+              <span class="admin-badge">${escaparHtml(tipoNegociacao)}</span>
+              <span class="admin-badge">${escaparHtml(formatarData(avaliacao.criadoEm))}</span>
+            </div>
+            <p>${escaparHtml(texto(avaliacao.comentario, "Sem comentário público."))}</p>
+            <div class="admin-registro-acoes">
+              <a class="admin-btn-link" href="${perfilHref}">Ver perfil avaliado</a>
+              ${estado.podeModerar ? `<button type="button" class="admin-btn-perigo" data-admin-acao="excluir-avaliacao"
+                data-avaliacao-id="${escaparHtml(avaliacao.id)}"
+                data-nome="${escaparHtml(texto(avaliacao.alvoNome, "perfil"))}">Excluir avaliação</button>` : ""}
+            </div>
+          </article>`;
+      }).join("")
+    : '<div class="admin-vazio">Nenhuma avaliação encontrada.</div>';
 }
 
 function renderizarManutencao() {
@@ -1396,6 +1451,7 @@ function renderizarTudo() {
   renderizarClubes();
   renderizarVagas();
   renderizarTorneiosAdmin();
+  renderizarAvaliacoes();
   renderizarDenuncias();
   renderizarManutencao();
   renderizarAtividade();
@@ -1620,6 +1676,32 @@ async function excluirDenuncia(denunciaId, clube, botao) {
     console.error("Erro ao excluir denúncia:", erro);
     if (botao.isConnected) botao.disabled = false;
     toast("Não foi possível excluir a denúncia.", "erro");
+  }
+}
+
+async function excluirAvaliacao(avaliacaoId, nome, botao) {
+  if (!estado.podeModerar) {
+    toast("Sua conta possui somente acesso de leitura.", "erro");
+    return;
+  }
+  const confirmado = await confirmModal({
+    titulo: "Excluir avaliação",
+    mensagem: `Remover definitivamente a avaliação do perfil “${nome}”? A nota deixará de contar na reputação.`,
+    textoConfirmar: "Excluir avaliação",
+    destrutivo: true,
+  });
+  if (!confirmado) return;
+  botao.disabled = true;
+  try {
+    await deleteDoc(doc(db, "avaliacoes", avaliacaoId));
+    estado.dados.avaliacoes = estado.dados.avaliacoes.filter((item) => item.id !== avaliacaoId);
+    renderizarTudo();
+    await registrarLog("avaliacao_excluida", "avaliacao", avaliacaoId, `Avaliação do perfil ${nome} excluída`);
+    toast("Avaliação excluída da reputação.");
+  } catch (erro) {
+    console.error("Erro ao excluir avaliação:", erro);
+    if (botao.isConnected) botao.disabled = false;
+    toast("Não foi possível excluir a avaliação.", "erro");
   }
 }
 
@@ -1866,6 +1948,7 @@ function configurarEventos() {
   porId("admin-filtro-usuarios")?.addEventListener("change", renderizarUsuarios);
   porId("admin-busca-clubes")?.addEventListener("input", renderizarClubes);
   porId("admin-busca-vagas")?.addEventListener("input", renderizarVagas);
+  porId("admin-busca-avaliacoes")?.addEventListener("input", renderizarAvaliacoes);
   porId("admin-filtro-denuncias")?.addEventListener("change", renderizarDenuncias);
   porId("admin-atualizar")?.addEventListener("click", carregarDados);
   porId("admin-limpar-invalidos")?.addEventListener("click", (evento) => limparRegistrosInvalidos(evento.currentTarget));
@@ -1889,6 +1972,7 @@ function configurarEventos() {
     if (acao === "arquivar-denuncia") arquivarDenuncia(botao.dataset.denunciaId, botao);
     if (acao === "restaurar-denuncia") restaurarDenuncia(botao.dataset.denunciaId, botao);
     if (acao === "excluir-denuncia") excluirDenuncia(botao.dataset.denunciaId, botao.dataset.clube || "Clube", botao);
+    if (acao === "excluir-avaliacao") excluirAvaliacao(botao.dataset.avaliacaoId, botao.dataset.nome || "perfil", botao);
     if (acao === "remover-vaga") {
       removerVaga(botao.dataset.vagaId, botao.dataset.clube || "este clube", botao.dataset.denunciaId || "", botao);
     }

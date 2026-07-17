@@ -685,6 +685,14 @@
   white-space: nowrap;
 }
 
+.admin-avaliacao-nota {
+  display: inline-block;
+  margin-top: 5px;
+  color: #f7c948;
+  font-size: 1rem;
+  letter-spacing: 2px;
+}
+
 .admin-registro-meta {
   display: flex;
   flex-wrap: wrap;

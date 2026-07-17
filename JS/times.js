@@ -971,6 +971,7 @@ function cardVaga(v) {
             ${fotosExtras.map((src, i) => `<img src="${escHtml(src)}" alt="Imagem extra ${i + 2} do anúncio de ${escHtml(clube)}" />`).join("")}
           </div>` : ""}
         <p style="font-size:0.8rem;color:#888">Capitão: ${escHtml(capitaoNome)} · ${escHtml(estiloTexto)}</p>
+        ${v.capitaoUid ? `<div data-reputacao-uid="${escHtml(v.capitaoUid)}" data-reputacao-tipo="clube"></div>` : ""}
         ${ehDono ? `<p id="contador-${v.id}" style="font-size:0.8rem;color:#12E06C;font-weight:bold"></p>` : ""}
       </div>
       <div class="card-rodape">
