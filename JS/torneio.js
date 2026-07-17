@@ -20,6 +20,7 @@ const estado = {
   torneios: [],
   inscricoes: new Map(),
   partidas: new Map(),
+  enviosResultado: new Map(),
   aba: "aberto",
   busca: "",
   jogo: "",
@@ -126,6 +127,44 @@ function partidasDoTorneio(torneioId) {
   return estado.partidas.get(torneioId) || [];
 }
 
+function chavePartida(torneioId, partidaId) {
+  return `${torneioId}/${partidaId}`;
+}
+
+function enviosDaPartida(torneioId, partidaId) {
+  return estado.enviosResultado.get(chavePartida(torneioId, partidaId)) || [];
+}
+
+function usuarioParticipaDaPartida(partida) {
+  if (!estado.usuario) return false;
+  const uid = String(estado.usuario.uid);
+  return uid === String(partida.timeAId || "") || uid === String(partida.timeBId || "");
+}
+
+function meuEnvioDaPartida(torneioId, partidaId) {
+  if (!estado.usuario) return null;
+  return enviosDaPartida(torneioId, partidaId).find(
+    (envio) => String(envio.id || envio.capitaoUid) === String(estado.usuario.uid),
+  ) || null;
+}
+
+function analisarEnviosResultado(torneioId, partidaId) {
+  const unicos = new Map();
+  enviosDaPartida(torneioId, partidaId).forEach((envio) => {
+    const uid = String(envio.capitaoUid || envio.id || "");
+    if (uid) unicos.set(uid, envio);
+  });
+  const envios = [...unicos.values()];
+  const consenso = envios.length >= 2
+    && numero(envios[0].placarA, -1) === numero(envios[1].placarA, -2)
+    && numero(envios[0].placarB, -1) === numero(envios[1].placarB, -2);
+  return {
+    envios,
+    consenso,
+    divergente: envios.length >= 2 && !consenso,
+  };
+}
+
 function inscricoesAprovadas(torneioId) {
   return inscricoesDoTorneio(torneioId).filter((item) => statusInscricao(item) === "aprovada");
 }
@@ -172,8 +211,55 @@ async function carregarSubcolecao(torneioId, nome) {
   }
 }
 
+async function carregarEnviosDaPartida(torneioId, partida) {
+  if (!estado.usuario || !usuarioParticipaDaPartida(partida)) return;
+  const uid = estado.usuario.uid;
+  const chave = chavePartida(torneioId, partida.id);
+  const referenciaPropria = doc(
+    db,
+    "torneios",
+    torneioId,
+    "partidas",
+    partida.id,
+    "envios",
+    uid,
+  );
+
+  try {
+    const proprioSnapshot = await getDoc(referenciaPropria);
+    if (!proprioSnapshot.exists()) {
+      estado.enviosResultado.set(chave, []);
+      return;
+    }
+
+    const snapshot = await getDocs(
+      collection(db, "torneios", torneioId, "partidas", partida.id, "envios"),
+    );
+    estado.enviosResultado.set(
+      chave,
+      snapshot.docs.map((registro) => ({ id: registro.id, ...registro.data() })),
+    );
+  } catch (erro) {
+    console.warn(`Nao foi possivel carregar os envios da partida ${partida.id}.`, erro);
+    estado.enviosResultado.set(chave, []);
+  }
+}
+
+async function carregarEnviosPermitidos() {
+  if (!estado.usuario) return;
+  const tarefas = estado.torneios.flatMap((torneio) =>
+    partidasDoTorneio(torneio.id)
+      .filter(usuarioParticipaDaPartida)
+      .map((partida) => carregarEnviosDaPartida(torneio.id, partida)),
+  );
+  await Promise.all(tarefas);
+}
+
 async function carregarTorneios() {
   estado.carregando = true;
+  estado.inscricoes = new Map();
+  estado.partidas = new Map();
+  estado.enviosResultado = new Map();
   mostrarEstado("Buscando competições...", "Estamos organizando o calendário de torneios.", true);
 
   try {
@@ -196,6 +282,7 @@ async function carregarTorneios() {
         estado.partidas.set(torneio.id, partidas);
       }),
     );
+    await carregarEnviosPermitidos();
   } catch (erro) {
     console.error("Erro ao carregar torneios:", erro);
     estado.torneios = [];
@@ -300,12 +387,56 @@ function inscricaoItem(inscricao) {
   `;
 }
 
-function partidaItem(partida) {
+function partidaItem(torneioId, partida) {
   const placarA = partida.placarA ?? partida.golsA ?? "—";
   const placarB = partida.placarB ?? partida.golsB ?? "—";
   const vencedor = String(partida.vencedorId || "");
   const timeAId = String(partida.timeAId || partida.clubeAId || "");
   const timeBId = String(partida.timeBId || partida.clubeBId || "");
+  const finalizada = normalizar(partida.status) === "finalizado";
+  const participante = usuarioParticipaDaPartida(partida);
+  const meuEnvio = meuEnvioDaPartida(torneioId, partida.id);
+  const analise = analisarEnviosResultado(torneioId, partida.id);
+  let mensagemResultado = "Aguardando envio dos capitães";
+  let classeResultado = "aguardando";
+
+  if (finalizada) {
+    mensagemResultado = "Resultado homologado";
+    classeResultado = "homologado";
+  } else if (participante && analise.consenso) {
+    mensagemResultado = "Placares conferem — aguardando homologação";
+    classeResultado = "consenso";
+  } else if (participante && analise.divergente) {
+    mensagemResultado = "Placares divergentes — análise administrativa";
+    classeResultado = "divergente";
+  } else if (participante && meuEnvio) {
+    mensagemResultado = "Seu placar foi enviado — aguardando o adversário";
+    classeResultado = "enviado";
+  }
+
+  const formulario = participante && !finalizada ? `
+    <form class="torneio-resultado-form" data-torneio-resultado-form data-torneio-id="${escaparHtml(torneioId)}" data-partida-id="${escaparHtml(partida.id)}">
+      <strong>Enviar placar da partida</strong>
+      <div class="torneio-resultado-campos">
+        <label>
+          <span>${escaparHtml(texto(partida.timeANome, "Clube A"))}</span>
+          <input type="number" name="placarA" min="0" max="99" inputmode="numeric" required value="${meuEnvio?.placarA ?? ""}" aria-label="Gols de ${escaparHtml(texto(partida.timeANome, "Clube A"))}">
+        </label>
+        <b>×</b>
+        <label>
+          <span>${escaparHtml(texto(partida.timeBNome, "Clube B"))}</span>
+          <input type="number" name="placarB" min="0" max="99" inputmode="numeric" required value="${meuEnvio?.placarB ?? ""}" aria-label="Gols de ${escaparHtml(texto(partida.timeBNome, "Clube B"))}">
+        </label>
+      </div>
+      <label class="torneio-resultado-observacao">
+        <span>Observação opcional</span>
+        <textarea name="observacao" rows="2" maxlength="240" placeholder="Ex.: vitória nos pênaltis, W.O. ou informação para o administrador">${escaparHtml(meuEnvio?.observacao || "")}</textarea>
+      </label>
+      <p>O resultado só se torna oficial depois da homologação administrativa.</p>
+      <button type="submit" class="torneio-btn torneio-btn-primario">${meuEnvio ? "Atualizar meu placar" : "Enviar meu placar"}</button>
+    </form>
+  ` : "";
+
   return `
     <article class="torneio-partida">
       <div class="torneio-partida-time ${vencedor && vencedor === timeAId ? "vencedor" : ""}">
@@ -314,6 +445,8 @@ function partidaItem(partida) {
       <div class="torneio-partida-time ${vencedor && vencedor === timeBId ? "vencedor" : ""}">
         <span>${escaparHtml(texto(partida.timeBNome || partida.clubeBNome, "A definir"))}</span><strong>${escaparHtml(placarB)}</strong>
       </div>
+      <span class="torneio-partida-status ${classeResultado}">${escaparHtml(mensagemResultado)}</span>
+      ${formulario}
     </article>
   `;
 }
@@ -338,7 +471,7 @@ function bracketHtml(torneioId) {
 
   return `<div class="torneio-bracket">${[...rodadas.entries()].map(([rodada, jogos]) => {
     const titulo = rodada === totalRodadas ? "Final" : totalRodadas - rodada === 1 ? "Semifinal" : `Rodada ${rodada}`;
-    return `<section class="torneio-rodada"><h4>${titulo}</h4><div class="torneio-partidas">${jogos.map(partidaItem).join("")}</div></section>`;
+    return `<section class="torneio-rodada"><h4>${titulo}</h4><div class="torneio-partidas">${jogos.map((partida) => partidaItem(torneioId, partida)).join("")}</div></section>`;
   }).join("")}</div>`;
 }
 
@@ -377,6 +510,12 @@ function abrirDetalhes(torneioId) {
       </div>
     </div>
     <p class="torneio-detalhe-descricao">${escaparHtml(texto(torneio.descricao, "Competição da comunidade Mercado Pro Clubs."))}</p>
+    ${status === "finalizado" && torneio.campeaoNome ? `
+      <section class="torneio-campeao" aria-label="Clube campeão">
+        <img src="${urlImagemSegura(torneio.campeaoEscudo)}" alt="" loading="lazy">
+        <div><span>CAMPEÃO</span><strong>${escaparHtml(torneio.campeaoNome)}</strong></div>
+      </section>
+    ` : ""}
     <div class="torneio-detalhe-meta">
       <span class="torneio-chip">Jogo: ${escaparHtml(texto(torneio.jogo, "EA FC"))}</span>
       <span class="torneio-chip">Plataforma: ${escaparHtml(rotuloPlataforma(torneio.plataforma))}</span>
@@ -497,6 +636,69 @@ async function cancelarInscricao(torneioId, botao) {
   }
 }
 
+async function enviarResultado(torneioId, partidaId, formulario) {
+  if (!estado.usuario) {
+    window.location.href = "./cadastrar-se.html";
+    return;
+  }
+
+  const torneio = estado.torneios.find((item) => item.id === torneioId);
+  const partida = partidasDoTorneio(torneioId).find((item) => item.id === partidaId);
+  if (!torneio || statusTorneio(torneio) !== "andamento" || !partida) {
+    toast("Esta partida não está disponível para envio de resultado.", "erro");
+    return;
+  }
+  if (!usuarioParticipaDaPartida(partida) || normalizar(partida.status) === "finalizado") {
+    toast("Somente os capitães desta partida podem enviar o placar.", "erro");
+    return;
+  }
+
+  const placarA = numero(new FormData(formulario).get("placarA"), -1);
+  const placarB = numero(new FormData(formulario).get("placarB"), -1);
+  const observacao = String(new FormData(formulario).get("observacao") || "").trim().slice(0, 240);
+  if (!Number.isInteger(placarA) || !Number.isInteger(placarB) || placarA < 0 || placarB < 0 || placarA > 99 || placarB > 99) {
+    toast("Informe um placar válido entre 0 e 99.", "erro");
+    return;
+  }
+  if (placarA === placarB) {
+    toast("Partidas de mata-mata não podem terminar empatadas. Informe o placar após o desempate.", "erro");
+    return;
+  }
+
+  const botao = formulario.querySelector('button[type="submit"]');
+  const meuEnvio = meuEnvioDaPartida(torneioId, partidaId);
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = "Enviando...";
+  }
+
+  try {
+    await setDoc(
+      doc(db, "torneios", torneioId, "partidas", partidaId, "envios", estado.usuario.uid),
+      {
+        capitaoUid: estado.usuario.uid,
+        clubeId: estado.usuario.uid,
+        placarA,
+        placarB,
+        observacao,
+        status: "enviado",
+        criadoEm: meuEnvio?.criadoEm || serverTimestamp(),
+        atualizadoEm: serverTimestamp(),
+      },
+    );
+    await carregarEnviosDaPartida(torneioId, partida);
+    toast(meuEnvio ? "Seu placar foi atualizado." : "Placar enviado. Agora aguardamos o adversário.");
+    renderizarTudo();
+  } catch (erro) {
+    console.error("Erro ao enviar resultado:", erro);
+    toast("Não foi possível enviar o placar. Confirme sua conta e tente novamente.", "erro");
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = meuEnvio ? "Atualizar meu placar" : "Enviar meu placar";
+    }
+  }
+}
+
 function renderizarTudo() {
   atualizarMetricas();
   renderizarTorneios();
@@ -539,6 +741,17 @@ function configurarEventos() {
     if (acao === "cancelar-inscricao") cancelarInscricao(torneioId, botao);
   });
 
+  document.addEventListener("submit", (evento) => {
+    const formulario = evento.target.closest("[data-torneio-resultado-form]");
+    if (!formulario) return;
+    evento.preventDefault();
+    enviarResultado(
+      formulario.dataset.torneioId,
+      formulario.dataset.partidaId,
+      formulario,
+    );
+  });
+
   porId("torneio-modal-fechar")?.addEventListener("click", fecharDetalhes);
   porId("torneio-modal")?.addEventListener("click", (evento) => {
     if (evento.target === evento.currentTarget) fecharDetalhes();
@@ -549,8 +762,10 @@ function configurarEventos() {
 }
 
 configurarEventos();
-onAuthStateChanged(auth, (usuario) => {
+onAuthStateChanged(auth, async (usuario) => {
   estado.usuario = usuario;
+  estado.enviosResultado = new Map();
+  await carregarEnviosPermitidos();
   renderizarTudo();
 });
 carregarTorneios();

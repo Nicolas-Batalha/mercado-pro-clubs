@@ -81,6 +81,7 @@ const estado = {
   },
   inscricoesTorneio: new Map(),
   partidasTorneio: new Map(),
+  enviosResultadoTorneio: new Map(),
   torneioModalId: "",
 };
 
@@ -171,6 +172,31 @@ function inscricoesDoTorneio(torneioId) {
 
 function partidasDoTorneio(torneioId) {
   return estado.partidasTorneio.get(torneioId) || [];
+}
+
+function chavePartidaTorneio(torneioId, partidaId) {
+  return `${torneioId}/${partidaId}`;
+}
+
+function enviosDaPartidaTorneio(torneioId, partidaId) {
+  return estado.enviosResultadoTorneio.get(chavePartidaTorneio(torneioId, partidaId)) || [];
+}
+
+function analisarEnviosPartida(torneioId, partidaId) {
+  const unicos = new Map();
+  enviosDaPartidaTorneio(torneioId, partidaId).forEach((envio) => {
+    const uid = String(envio.capitaoUid || envio.id || "");
+    if (uid) unicos.set(uid, envio);
+  });
+  const envios = [...unicos.values()];
+  const consenso = envios.length >= 2
+    && numero(envios[0].placarA, -1) === numero(envios[1].placarA, -2)
+    && numero(envios[0].placarB, -1) === numero(envios[1].placarB, -2);
+  return {
+    envios,
+    consenso,
+    divergente: envios.length >= 2 && !consenso,
+  };
 }
 
 function rotuloStatusTorneio(status) {
@@ -329,9 +355,22 @@ async function carregarSubcolecaoTorneio(torneioId, nome) {
   }
 }
 
+async function carregarEnviosResultadoPartida(torneioId, partidaId) {
+  try {
+    const snap = await getDocs(
+      collection(db, "torneios", torneioId, "partidas", partidaId, "envios"),
+    );
+    return snap.docs.map((item) => ({ id: item.id, ...item.data() }));
+  } catch (erro) {
+    console.error(`Erro ao carregar envios da partida ${partidaId}:`, erro);
+    return [];
+  }
+}
+
 async function carregarDadosInternosTorneios() {
   estado.inscricoesTorneio = new Map();
   estado.partidasTorneio = new Map();
+  estado.enviosResultadoTorneio = new Map();
   await Promise.all(
     estado.dados.torneios.map(async (torneio) => {
       const [inscricoes, partidas] = await Promise.all([
@@ -340,6 +379,15 @@ async function carregarDadosInternosTorneios() {
       ]);
       estado.inscricoesTorneio.set(torneio.id, ordenarRecentes(inscricoes));
       estado.partidasTorneio.set(torneio.id, partidas);
+      await Promise.all(
+        partidas.map(async (partida) => {
+          const envios = await carregarEnviosResultadoPartida(torneio.id, partida.id);
+          estado.enviosResultadoTorneio.set(
+            chavePartidaTorneio(torneio.id, partida.id),
+            ordenarRecentes(envios),
+          );
+        }),
+      );
     }),
   );
 }
@@ -398,6 +446,12 @@ function renderizarMetricas() {
   const inscricoesPendentes = [...estado.inscricoesTorneio.values()]
     .flat()
     .filter((inscricao) => statusInscricaoTorneio(inscricao) === "pendente");
+  const resultadosPendentes = estado.dados.torneios.flatMap((torneio) =>
+    partidasDoTorneio(torneio.id).filter((partida) =>
+      normalizar(partida.status) !== "finalizado"
+      && enviosDaPartidaTorneio(torneio.id, partida.id).length > 0,
+    ),
+  );
   const invalidos = registrosInvalidos();
   const convitesPendentes = estado.dados.convites.filter(
     (convite) => normalizar(convite.status || "pendente") === "pendente",
@@ -429,8 +483,9 @@ function renderizarMetricas() {
 
   const contadorInscricoes = porId("admin-nav-inscricoes");
   if (contadorInscricoes) {
-    contadorInscricoes.textContent = String(inscricoesPendentes.length);
-    contadorInscricoes.hidden = inscricoesPendentes.length === 0;
+    const totalPendenteTorneios = inscricoesPendentes.length + resultadosPendentes.length;
+    contadorInscricoes.textContent = String(totalPendenteTorneios);
+    contadorInscricoes.hidden = totalPendenteTorneios === 0;
   }
 
   const atualizacao = porId("admin-ultima-atualizacao");
@@ -960,8 +1015,14 @@ async function excluirTorneio(torneioId, nome, botao) {
       getDocs(collection(db, "torneios", torneioId, "inscricoes")),
       getDocs(collection(db, "torneios", torneioId, "partidas")),
     ]);
+    const enviosPorPartida = await Promise.all(
+      partidas.docs.map((partida) =>
+        getDocs(collection(db, "torneios", torneioId, "partidas", partida.id, "envios")),
+      ),
+    );
     await Promise.all([
       ...inscricoes.docs.map((item) => deleteDoc(item.ref)),
+      ...enviosPorPartida.flatMap((snapshot) => snapshot.docs.map((item) => deleteDoc(item.ref))),
       ...partidas.docs.map((item) => deleteDoc(item.ref)),
     ]);
     await deleteDoc(doc(db, "torneios", torneioId));
@@ -976,19 +1037,65 @@ async function excluirTorneio(torneioId, nome, botao) {
   }
 }
 
+function partidaTemChavePosterior(torneioId, partida) {
+  const torneio = estado.dados.torneios.find((item) => item.id === torneioId);
+  const rodada = numero(partida.rodada, 1);
+  return statusTorneio(torneio) === "finalizado"
+    || partidasDoTorneio(torneioId).some((item) => numero(item.rodada, 1) > rodada);
+}
+
 function partidaAdminHtml(torneioId, partida) {
+  const analise = analisarEnviosPartida(torneioId, partida.id);
+  const sugestao = analise.consenso ? analise.envios[0] : analise.envios.length === 1 ? analise.envios[0] : null;
+  const placarA = partida.placarA ?? sugestao?.placarA ?? "";
+  const placarB = partida.placarB ?? sugestao?.placarB ?? "";
+  const finalizada = normalizar(partida.status) === "finalizado";
+  const bloqueada = finalizada && partidaTemChavePosterior(torneioId, partida);
+  const rotuloAcao = bloqueada
+    ? "Placar consolidado"
+    : finalizada
+      ? "Atualizar placar"
+      : analise.consenso
+        ? "Homologar consenso"
+        : analise.divergente
+          ? "Resolver divergência"
+          : "Salvar resultado";
+  const statusEnvios = analise.consenso
+    ? '<span class="admin-resultado-status consenso">Os capitães enviaram o mesmo placar</span>'
+    : analise.divergente
+      ? '<span class="admin-resultado-status divergente">Os placares enviados são diferentes</span>'
+      : analise.envios.length === 1
+        ? '<span class="admin-resultado-status aguardando">Um capitão enviou o placar</span>'
+        : '<span class="admin-resultado-status aguardando">Nenhum placar enviado</span>';
+  const enviosHtml = analise.envios.map((envio) => {
+    const clubeNome = String(envio.capitaoUid || envio.id) === String(partida.timeAId)
+      ? partida.timeANome
+      : partida.timeBNome;
+    return `
+      <div class="admin-resultado-envio">
+        <div><strong>${escaparHtml(texto(clubeNome, "Capitão"))}</strong><span>${numero(envio.placarA, 0)} × ${numero(envio.placarB, 0)}</span></div>
+        ${envio.observacao ? `<p>${escaparHtml(envio.observacao)}</p>` : ""}
+        <small>Enviado em ${escaparHtml(formatarData(envio.atualizadoEm || envio.criadoEm))}</small>
+      </div>`;
+  }).join("");
+
   return `
     <article class="admin-torneio-partida-admin" data-partida-id="${escaparHtml(partida.id)}">
       <div class="admin-torneio-partida-times">
         <span>${escaparHtml(texto(partida.timeANome, "A definir"))}</span>
-        <input class="admin-placar-input" data-placar="a" type="number" min="0" max="99" value="${partida.placarA ?? ""}" aria-label="Gols do primeiro clube">
+        <input class="admin-placar-input" data-placar="a" type="number" min="0" max="99" value="${placarA}" aria-label="Gols do primeiro clube" ${bloqueada ? "disabled" : ""}>
         <strong>×</strong>
-        <input class="admin-placar-input" data-placar="b" type="number" min="0" max="99" value="${partida.placarB ?? ""}" aria-label="Gols do segundo clube">
+        <input class="admin-placar-input" data-placar="b" type="number" min="0" max="99" value="${placarB}" aria-label="Gols do segundo clube" ${bloqueada ? "disabled" : ""}>
         <span>${escaparHtml(texto(partida.timeBNome, "A definir"))}</span>
+      </div>
+      <div class="admin-resultado-envios">
+        ${statusEnvios}
+        ${enviosHtml || '<p class="admin-resultado-sem-envio">Os capitães ainda não enviaram informações.</p>'}
+        ${bloqueada ? '<p class="admin-resultado-bloqueado">Resultado bloqueado porque a chave já avançou.</p>' : ""}
       </div>
       <div class="admin-torneio-partida-acoes">
         <small>Rodada ${numero(partida.rodada, 1)} • Jogo ${numero(partida.ordem, 0) + 1}</small>
-        <button type="button" class="admin-btn-primary" data-admin-acao="salvar-resultado" data-torneio-id="${escaparHtml(torneioId)}" data-partida-id="${escaparHtml(partida.id)}">${normalizar(partida.status) === "finalizado" ? "Atualizar placar" : "Salvar resultado"}</button>
+        <button type="button" class="admin-btn-primary" data-admin-acao="salvar-resultado" data-torneio-id="${escaparHtml(torneioId)}" data-partida-id="${escaparHtml(partida.id)}" ${bloqueada ? "disabled" : ""}>${rotuloAcao}</button>
       </div>
     </article>
   `;
@@ -1126,6 +1233,7 @@ async function iniciarTorneio(torneioId, botao) {
     const clubes = embaralhar(aprovadas);
     const totalRodadas = Math.log2(quantidade);
     const novasPartidas = [];
+    const lote = writeBatch(db);
     for (let indice = 0; indice < clubes.length; indice += 2) {
       const timeA = clubes[indice];
       const timeB = clubes[indice + 1];
@@ -1143,15 +1251,17 @@ async function iniciarTorneio(torneioId, botao) {
         criadoEm: serverTimestamp(),
         atualizadoEm: serverTimestamp(),
       };
-      const referencia = await addDoc(collection(db, "torneios", torneioId, "partidas"), dados);
+      const referencia = doc(collection(db, "torneios", torneioId, "partidas"));
+      lote.set(referencia, dados);
       novasPartidas.push({ id: referencia.id, ...dados, criadoEm: new Date() });
     }
-    await updateDoc(doc(db, "torneios", torneioId), {
+    lote.update(doc(db, "torneios", torneioId), {
       status: "andamento",
       iniciadoEm: serverTimestamp(),
       totalRodadas,
       atualizadoEm: serverTimestamp(),
     });
+    await lote.commit();
     estado.partidasTorneio.set(torneioId, novasPartidas);
     torneio.status = "andamento";
     torneio.totalRodadas = totalRodadas;
@@ -1187,12 +1297,14 @@ async function avancarChaveSePossivel(torneioId, rodada) {
       status: "finalizado",
       campeaoId: campeao.id,
       campeaoNome: campeao.nome,
+      campeaoEscudo: campeao.escudo,
       finalizadoEm: serverTimestamp(),
       atualizadoEm: serverTimestamp(),
     });
     torneio.status = "finalizado";
     torneio.campeaoId = campeao.id;
     torneio.campeaoNome = campeao.nome;
+    torneio.campeaoEscudo = campeao.escudo;
     await registrarLog("torneio_finalizado", "torneio", torneioId, `${campeao.nome} foi campeão de “${texto(torneio.nome)}”`);
     toast(`Torneio finalizado. Campeão: ${campeao.nome}.`);
     return;
@@ -1202,6 +1314,7 @@ async function avancarChaveSePossivel(torneioId, rodada) {
   if (partidas.some((item) => numero(item.rodada, 1) === proximaRodada)) return;
   const vencedores = rodadaAtual.map(vencedorDaPartida);
   const novasPartidas = [];
+  const lote = writeBatch(db);
   for (let indice = 0; indice < vencedores.length; indice += 2) {
     const timeA = vencedores[indice];
     const timeB = vencedores[indice + 1];
@@ -1219,9 +1332,11 @@ async function avancarChaveSePossivel(torneioId, rodada) {
       criadoEm: serverTimestamp(),
       atualizadoEm: serverTimestamp(),
     };
-    const referencia = await addDoc(collection(db, "torneios", torneioId, "partidas"), dados);
+    const referencia = doc(collection(db, "torneios", torneioId, "partidas"));
+    lote.set(referencia, dados);
     novasPartidas.push({ id: referencia.id, ...dados, criadoEm: new Date() });
   }
+  await lote.commit();
   estado.partidasTorneio.set(torneioId, [...partidas, ...novasPartidas]);
   toast(`Rodada ${proximaRodada} criada automaticamente.`);
 }
@@ -1241,6 +1356,19 @@ async function salvarResultado(torneioId, partidaId, botao) {
   }
   const partida = partidasDoTorneio(torneioId).find((item) => item.id === partidaId);
   if (!partida) return;
+  if (normalizar(partida.status) === "finalizado" && partidaTemChavePosterior(torneioId, partida)) {
+    toast("Este resultado está bloqueado porque a chave já avançou.", "erro");
+    return;
+  }
+  const analise = analisarEnviosPartida(torneioId, partidaId);
+  const consensoMantido = analise.consenso
+    && numero(analise.envios[0]?.placarA, -1) === placarA
+    && numero(analise.envios[0]?.placarB, -1) === placarB;
+  const resultadoOrigem = consensoMantido
+    ? "consenso_capitaes"
+    : analise.envios.length
+      ? "decisao_admin"
+      : "inserido_admin";
   const vencedorId = placarA > placarB ? partida.timeAId : partida.timeBId;
   const vencedorNome = placarA > placarB ? partida.timeANome : partida.timeBNome;
   botao.disabled = true;
@@ -1251,10 +1379,25 @@ async function salvarResultado(torneioId, partidaId, botao) {
       vencedorId,
       vencedorNome,
       status: "finalizado",
+      resultadoOrigem,
+      resultadoEnvios: analise.envios.length,
+      homologadoPor: estado.usuario.uid,
+      homologadoEm: serverTimestamp(),
       finalizadaEm: serverTimestamp(),
       atualizadoEm: serverTimestamp(),
     });
-    Object.assign(partida, { placarA, placarB, vencedorId, vencedorNome, status: "finalizado", finalizadaEm: new Date() });
+    Object.assign(partida, {
+      placarA,
+      placarB,
+      vencedorId,
+      vencedorNome,
+      status: "finalizado",
+      resultadoOrigem,
+      resultadoEnvios: analise.envios.length,
+      homologadoPor: estado.usuario.uid,
+      homologadoEm: new Date(),
+      finalizadaEm: new Date(),
+    });
     await registrarLog("resultado_torneio_salvo", "partidaTorneio", partidaId, `${partida.timeANome} ${placarA} × ${placarB} ${partida.timeBNome}`);
     await avancarChaveSePossivel(torneioId, numero(partida.rodada, 1));
     renderizarTudo();

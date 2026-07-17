@@ -10,6 +10,7 @@ Plataforma brasileira para jogadores e clubes de EA FC Pro Clubs encontrarem vag
 - Candidaturas, convites, negociacoes e chat
 - Diretorio publico de clubes
 - Torneios e inscricoes de clubes
+- Chaves mata-mata, envio de placares pelos capitaes, homologacao e campeao
 - Painel administrativo e moderacao
 - Layout responsivo para computador e celular
 

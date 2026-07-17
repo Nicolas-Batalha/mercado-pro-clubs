@@ -466,6 +466,82 @@ service cloud.firestore {
       match /partidas/{partidaId} {
         allow read: if true;
         allow create, update, delete: if canModerate();
+
+        match /envios/{envioId} {
+          allow get: if canModerate()
+            || (verifiedAccount()
+              && exists(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId))
+              && (
+                envioId == request.auth.uid
+                || (
+                  request.auth.uid in [
+                    get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.timeAId,
+                    get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.timeBId
+                  ]
+                  && exists(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)/envios/$(request.auth.uid))
+                )
+              ));
+          allow list: if canModerate()
+            || (verifiedAccount()
+              && exists(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId))
+              && request.auth.uid in [
+                get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.timeAId,
+                get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.timeBId
+              ]
+              && exists(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)/envios/$(request.auth.uid)));
+          allow create: if verifiedAccount()
+            && envioId == request.auth.uid
+            && request.resource.data.capitaoUid == request.auth.uid
+            && request.resource.data.clubeId == request.auth.uid
+            && request.resource.data.status == 'enviado'
+            && request.resource.data.keys().hasOnly([
+              'capitaoUid', 'clubeId', 'placarA', 'placarB', 'observacao',
+              'status', 'criadoEm', 'atualizadoEm'
+            ])
+            && request.resource.data.placarA is int
+            && request.resource.data.placarB is int
+            && request.resource.data.placarA >= 0
+            && request.resource.data.placarA <= 99
+            && request.resource.data.placarB >= 0
+            && request.resource.data.placarB <= 99
+            && request.resource.data.placarA != request.resource.data.placarB
+            && request.resource.data.observacao is string
+            && request.resource.data.observacao.size() <= 240
+            && get(/databases/$(database)/documents/torneios/$(torneioId)).data.status == 'andamento'
+            && exists(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId))
+            && get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.status == 'pendente'
+            && request.auth.uid in [
+              get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.timeAId,
+              get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.timeBId
+            ];
+          allow update: if verifiedAccount()
+            && envioId == request.auth.uid
+            && resource.data.capitaoUid == request.auth.uid
+            && request.resource.data.capitaoUid == request.auth.uid
+            && request.resource.data.clubeId == request.auth.uid
+            && request.resource.data.criadoEm == resource.data.criadoEm
+            && request.resource.data.status == 'enviado'
+            && request.resource.data.keys().hasOnly([
+              'capitaoUid', 'clubeId', 'placarA', 'placarB', 'observacao',
+              'status', 'criadoEm', 'atualizadoEm'
+            ])
+            && request.resource.data.placarA is int
+            && request.resource.data.placarB is int
+            && request.resource.data.placarA >= 0
+            && request.resource.data.placarA <= 99
+            && request.resource.data.placarB >= 0
+            && request.resource.data.placarB <= 99
+            && request.resource.data.placarA != request.resource.data.placarB
+            && request.resource.data.observacao is string
+            && request.resource.data.observacao.size() <= 240
+            && get(/databases/$(database)/documents/torneios/$(torneioId)).data.status == 'andamento'
+            && get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.status == 'pendente'
+            && request.auth.uid in [
+              get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.timeAId,
+              get(/databases/$(database)/documents/torneios/$(torneioId)/partidas/$(partidaId)).data.timeBId
+            ];
+          allow delete: if canModerate();
+        }
       }
     }
 

@@ -1115,6 +1115,83 @@ tr .admin-vazio {
   justify-content: flex-end;
 }
 
+.admin-resultado-envios {
+  display: grid;
+  gap: 7px;
+  margin: 9px 0;
+  padding: 9px;
+  border: 1px solid #29352c;
+  border-radius: 8px;
+  background: #090d0a;
+}
+
+.admin-resultado-status {
+  width: fit-content;
+  padding: 5px 8px;
+  border: 1px solid #3a473d;
+  border-radius: 999px;
+  color: #aeb8b0;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
+.admin-resultado-status.consenso {
+  border-color: rgba(24, 205, 101, 0.55);
+  color: var(--admin-verde);
+}
+
+.admin-resultado-status.divergente {
+  border-color: rgba(255, 92, 92, 0.55);
+  color: #ff8585;
+}
+
+.admin-resultado-envio {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid #2d3730;
+  border-radius: 7px;
+  background: #111612;
+}
+
+.admin-resultado-envio > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-resultado-envio strong {
+  color: #fff;
+  font-size: 0.72rem;
+}
+
+.admin-resultado-envio span {
+  color: var(--admin-verde);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.admin-resultado-envio p,
+.admin-resultado-sem-envio,
+.admin-resultado-bloqueado {
+  margin: 0;
+  color: #9aa49c;
+  font-size: 0.65rem;
+  line-height: 1.45;
+}
+
+.admin-resultado-bloqueado {
+  color: #ffce67;
+  font-weight: 800;
+}
+
+.admin-placar-input:disabled,
+.admin-torneio-partida-acoes button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .admin-torneio-vazio {
   padding: 22px;
   border: 1px dashed #3b463e;

@@ -610,6 +610,151 @@
   text-align: center;
 }
 
+.torneio-campeao {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin: 18px 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(18, 224, 108, 0.55);
+  border-radius: 11px;
+  background: linear-gradient(135deg, rgba(18, 224, 108, 0.16), rgba(18, 224, 108, 0.03));
+}
+
+.torneio-campeao img {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #242628;
+}
+
+.torneio-campeao div {
+  display: grid;
+  gap: 2px;
+}
+
+.torneio-campeao span {
+  color: #12e06c;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.torneio-campeao strong {
+  color: #fff;
+  font-size: 1rem;
+}
+
+.torneio-partida-status {
+  display: block;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #292b2e;
+  color: #9ca1a7;
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.torneio-partida-status.homologado,
+.torneio-partida-status.consenso {
+  color: #12e06c;
+}
+
+.torneio-partida-status.enviado {
+  color: #8fc1ff;
+}
+
+.torneio-partida-status.divergente {
+  color: #ff8585;
+}
+
+.torneio-resultado-form {
+  display: grid;
+  gap: 9px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #303337;
+}
+
+.torneio-resultado-form > strong {
+  color: #fff;
+  font-size: 0.72rem;
+}
+
+.torneio-resultado-campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: 7px;
+}
+
+.torneio-resultado-campos label,
+.torneio-resultado-observacao {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.torneio-resultado-campos label span,
+.torneio-resultado-observacao span {
+  overflow: hidden;
+  color: #aeb2b7;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.torneio-resultado-campos b {
+  padding-bottom: 8px;
+  color: #74797f;
+}
+
+.torneio-resultado-campos input,
+.torneio-resultado-observacao textarea {
+  width: 100%;
+  border: 1px solid #3a3d40;
+  border-radius: 7px;
+  background: #0c0d0e;
+  color: #fff;
+  font: inherit;
+}
+
+.torneio-resultado-campos input {
+  min-height: 36px;
+  padding: 7px;
+  text-align: center;
+}
+
+.torneio-resultado-observacao textarea {
+  min-height: 58px;
+  padding: 8px;
+  resize: vertical;
+}
+
+.torneio-resultado-campos input:focus,
+.torneio-resultado-observacao textarea:focus {
+  border-color: #12e06c;
+  outline: 2px solid rgba(18, 224, 108, 0.12);
+}
+
+.torneio-resultado-form > p {
+  margin: 0;
+  color: #878c92;
+  font-size: 0.6rem;
+  line-height: 1.4;
+}
+
+.torneio-resultado-form .torneio-btn {
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  font-size: 0.68rem;
+}
+
 .torneio-detalhe-acoes {
   display: flex;
   flex-wrap: wrap;
