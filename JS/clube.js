@@ -972,6 +972,15 @@ async function carregarModoVisitante(uidClube) {
 
 document.getElementById("publico-compartilhar")?.addEventListener("click", async () => {
   try {
+    if (window.mercadoCompartilhar) {
+      const nomeClube = document.getElementById("publico-nome")?.textContent?.trim() || "este clube";
+      window.mercadoCompartilhar({
+        titulo: nomeClube,
+        texto: `Conheça o ${nomeClube}, veja o elenco, as vagas e todos os detalhes no Mercado Pro Clubs.`,
+        url: location.href,
+      });
+      return;
+    }
     if (navigator.share) {
       await navigator.share({ title: document.title, text: "Confira este clube no Mercado Pro Clubs", url: location.href });
       return;

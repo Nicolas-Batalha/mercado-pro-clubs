@@ -1,0 +1,154 @@
+.acao-email-pagina {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 78% 20%, rgba(18, 224, 108, 0.13), transparent 30%),
+    linear-gradient(145deg, #09110d, #050806);
+  color: #fff;
+}
+
+.acao-email-header {
+  min-height: 110px;
+  padding: 18px clamp(20px, 5vw, 70px);
+  display: flex;
+  align-items: center;
+}
+
+.acao-email-header img {
+  width: 190px;
+  max-height: 72px;
+}
+
+.acao-email-main {
+  min-height: calc(100vh - 110px);
+  padding: 30px 20px 70px;
+  display: grid;
+  place-items: center;
+}
+
+.acao-email-card {
+  width: min(540px, 100%);
+  padding: clamp(28px, 6vw, 48px);
+  border: 1px solid rgba(18, 224, 108, 0.33);
+  border-radius: 22px;
+  background: rgba(12, 18, 14, 0.94);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+
+.acao-email-kicker {
+  color: #12e06c;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+
+.acao-email-icone {
+  width: 76px;
+  height: 76px;
+  margin: 22px auto 16px;
+  border: 1px solid #34443a;
+  border-radius: 50%;
+  background: #151d18;
+  color: #12e06c;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.acao-email-icone.sucesso { background: rgba(18, 224, 108, 0.12); }
+.acao-email-icone.erro { color: #ff796f; border-color: rgba(255, 86, 73, 0.45); }
+
+.acao-email-card h1 {
+  margin: 0 0 12px;
+  font-size: clamp(1.6rem, 5vw, 2.25rem);
+}
+
+.acao-email-card > p {
+  margin: 0;
+  color: #9eada4;
+  line-height: 1.65;
+}
+
+.acao-email-form {
+  margin-top: 26px;
+  text-align: left;
+}
+
+.acao-email-form label {
+  display: block;
+  margin: 14px 0 7px;
+  color: #dbe4de;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.acao-email-form input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #344139;
+  border-radius: 10px;
+  background: #080d0a;
+  color: #fff;
+}
+
+.acao-email-form input:focus {
+  outline: 2px solid rgba(18, 224, 108, 0.25);
+  border-color: #12e06c;
+}
+
+.acao-email-form small {
+  display: block;
+  margin-top: 7px;
+  color: #7f9086;
+  line-height: 1.5;
+}
+
+.acao-email-form button,
+.acao-email-acoes a {
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid #12e06c;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 0.76rem 'Montserrat', sans-serif;
+  text-decoration: none;
+}
+
+.acao-email-form button {
+  width: 100%;
+  margin-top: 20px;
+  background: #12e06c;
+  color: #03130a;
+  cursor: pointer;
+}
+
+.acao-email-acoes {
+  display: grid;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.acao-email-acoes a:not(.acao-email-secundario) {
+  background: #12e06c;
+  color: #03130a;
+}
+
+.acao-email-acoes .acao-email-secundario {
+  border-color: #344139;
+  color: #d4ded7;
+}
+
+.acao-email-form[hidden],
+.acao-email-acoes a[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .acao-email-header { justify-content: center; }
+  .acao-email-header img { width: 160px; }
+  .acao-email-card { padding: 28px 20px; }
+}

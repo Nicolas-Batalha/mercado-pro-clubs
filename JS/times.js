@@ -537,6 +537,54 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+function atualizarAreaPublicacao(usuario, possuiClube = false) {
+  const formulario = document.getElementById("publicar-vaga");
+  const acesso = document.getElementById("publicar-vaga-acesso");
+  const filtroNivel = document.getElementById("filtro-meu-nivel-wrap");
+  const titulo = document.getElementById("publicar-vaga-acesso-titulo");
+  const texto = document.getElementById("publicar-vaga-acesso-texto");
+  const primario = document.getElementById("publicar-vaga-acesso-primario");
+  const secundario = document.getElementById("publicar-vaga-acesso-secundario");
+
+  if (filtroNivel) filtroNivel.hidden = !usuario;
+
+  if (usuario && possuiClube) {
+    if (formulario) formulario.hidden = false;
+    if (acesso) acesso.hidden = true;
+    return;
+  }
+
+  if (formulario) formulario.hidden = true;
+  if (acesso) acesso.hidden = false;
+
+  if (usuario) {
+    if (titulo) titulo.textContent = "Primeiro, configure o seu clube";
+    if (texto) texto.textContent = "Crie o perfil do clube para publicar vagas e receber candidaturas de jogadores.";
+    if (primario) {
+      primario.textContent = "Criar meu clube";
+      primario.href = "./clubes.html";
+    }
+    if (secundario) {
+      secundario.textContent = "Explorar clubes";
+      secundario.href = "./explorar-clubes.html";
+    }
+    return;
+  }
+
+  const filtroMeuNivel = document.getElementById("filtro-meu-nivel");
+  if (filtroMeuNivel) filtroMeuNivel.checked = false;
+  if (titulo) titulo.textContent = "Seu clube está procurando jogadores?";
+  if (texto) texto.textContent = "Entre na sua conta para anunciar uma vaga e receber candidaturas de jogadores.";
+  if (primario) {
+    primario.textContent = "Entrar como capitão";
+    primario.href = "./cadastrar-se.html?continuar=%2FHTML%2Fmercado.html%23publicar-vaga#login";
+  }
+  if (secundario) {
+    secundario.textContent = "Criar conta";
+    secundario.href = "./cadastrar-se.html?continuar=%2FHTML%2Fmercado.html%23publicar-vaga#cadastro";
+  }
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
   unsubsNotificacoes.forEach((unsubscribe) => unsubscribe());
@@ -552,11 +600,20 @@ onAuthStateChanged(auth, async (user) => {
 
   usuarioAtual = user;
   perfilAtual = {};
+  let possuiClube = false;
+  const sino = document.getElementById("sino-btn");
+  const mensagens = document.getElementById("emailIcon");
+  if (sino) sino.hidden = !user;
+  if (mensagens) mensagens.hidden = !user;
   if (user) {
     try {
-      const snap = await getDoc(doc(db, "jogadores", user.uid));
+      const [snap, clubeSnap] = await Promise.all([
+        getDoc(doc(db, "jogadores", user.uid)),
+        getDoc(doc(db, "clubes", user.uid)),
+      ]);
       if (auth.currentUser?.uid !== user.uid) return;
       perfilAtual = snap.exists() ? snap.data() : {};
+      possuiClube = clubeSnap.exists() && clubeSnap.data()?.suspenso !== true;
     } catch (err) {
       console.error("Erro ao carregar perfil do usuário:", err);
     }
@@ -572,6 +629,7 @@ onAuthStateChanged(auth, async (user) => {
       window.history.replaceState({}, "", `${urlLimpa.pathname}${urlLimpa.search}${urlLimpa.hash}`);
     }
   }
+  atualizarAreaPublicacao(user, possuiClube);
   await carregarVagas();
   const abaSolicitada = new URLSearchParams(window.location.search).get("aba");
   if (abaSolicitada === "jogadores") ativarAbaMercado("jogadores", false);
@@ -927,13 +985,18 @@ function cardVaga(v) {
               🗑 Excluir
             </button>
             <span style="color:#12E06C;font-size:0.85rem;font-weight:bold">✓ Sua vaga</span>
-          ` : `
+          ` : usuarioAtual ? `
             <button type="button" class="btn-acao-card btn-denunciar-vaga" data-vaga-id="${v.id}"
               data-clube="${escHtml(clube)}" data-capitao-uid="${escHtml(v.capitaoUid || "")}">🚩 Denunciar</button>
             <button type="button" class="btn-chamar btn-candidatar"
               data-vaga-id="${v.id}" data-capitao-uid="${escHtml(v.capitaoUid || "")}" data-clube="${escHtml(clube)}">
               Me candidatar
             </button>
+          ` : `
+            <a class="btn-chamar btn-candidatar-link"
+              href="./cadastrar-se.html?continuar=${encodeURIComponent(`/HTML/mercado.html?vaga=${v.id}`)}#login">
+              Entrar para me candidatar
+            </a>
           `}
         </div>
       </div>
@@ -987,6 +1050,17 @@ async function renovarVaga(vagaId) {
 async function compartilharVaga(vagaId) {
   const link = `${location.origin}${location.pathname}?vaga=${vagaId}`;
   try {
+    const vaga = vagasFiltradasAtuais.find((item) => item.id === vagaId);
+    if (window.mercadoCompartilhar) {
+      const clube = vaga?.clube || "um clube";
+      const posicao = vaga?.posicao ? ` para ${vaga.posicao}` : "";
+      window.mercadoCompartilhar({
+        titulo: `Vaga no ${clube}`,
+        texto: `O ${clube} está procurando jogador${posicao}. Veja os detalhes no Mercado Pro Clubs.`,
+        url: link,
+      });
+      return;
+    }
     await navigator.clipboard.writeText(link);
     toast("🔗 Link copiado! Cole no grupo do seu time.");
   } catch {

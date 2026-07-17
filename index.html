@@ -105,6 +105,34 @@
         </div>
       </div>
     </section>
+    <section class="inicio-comunidade animar-scroll" aria-labelledby="inicio-comunidade-titulo">
+      <div class="inicio-comunidade-cabecalho">
+        <span>COMUNIDADE EM CAMPO</span>
+        <h2 id="inicio-comunidade-titulo">O mercado acontecendo agora</h2>
+        <p>Números reais da comunidade Mercado Pro Clubs.</p>
+      </div>
+      <div class="inicio-metricas" id="inicio-metricas" aria-live="polite" aria-busy="true">
+        <article><strong id="home-total-jogadores">—</strong><span>jogadores</span></article>
+        <article><strong id="home-total-clubes">—</strong><span>clubes</span></article>
+        <article><strong id="home-total-vagas">—</strong><span>vagas abertas</span></article>
+        <article><strong id="home-total-torneios">—</strong><span>torneios</span></article>
+      </div>
+    </section>
+
+    <section class="inicio-torneio-destaque animar-scroll" id="inicio-torneio-destaque" aria-labelledby="inicio-torneio-titulo" aria-busy="true">
+      <div class="inicio-torneio-conteudo">
+        <span class="inicio-torneio-kicker">TORNEIO EM DESTAQUE</span>
+        <h2 id="inicio-torneio-titulo">Carregando a próxima competição...</h2>
+        <p id="inicio-torneio-descricao">Veja campeonatos, inscreva seu clube e acompanhe resultados.</p>
+        <div class="inicio-torneio-meta" id="inicio-torneio-meta"></div>
+        <div class="inicio-torneio-acoes">
+          <a id="inicio-torneio-link" href="./HTML/torneio.html">VER TORNEIOS</a>
+          <button id="inicio-torneio-compartilhar" type="button" hidden>COMPARTILHAR</button>
+        </div>
+      </div>
+      <div class="inicio-torneio-trofeu" aria-hidden="true">🏆</div>
+    </section>
+
     <section class="inicio-proximo-passo" id="inicio-proximo-passo" hidden aria-live="polite">
       <div class="inicio-proximo-grid">
         <div class="inicio-proximo-conteudo">
@@ -196,6 +224,7 @@
   <script src="./JS/script.js" defer></script>
   <script type="module" src="./JS/times.js"></script>
   <script type="module" src="./JS/onboarding.js"></script>
+  <script type="module" src="./JS/home-growth.js"></script>
   <script type="module" src="./JS/header-auth.js"></script>
 </body>
 

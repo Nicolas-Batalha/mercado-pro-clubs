@@ -50,18 +50,12 @@
 }
 
 .explorar-kicker {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 5px;
+  display: block;
+  margin-bottom: 9px;
   color: #12e06c;
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.16em;
-}
-#explorar-contagem{
-  font-size: 14px;
-  margin: 10px;
 }
 
 .explorar-hero h1 {
@@ -374,7 +368,7 @@
   min-height: 42px;
   align-items: center;
   justify-content: center;
-  margin-top: 10px  ;
+  margin-top: 10px;
   padding: 10px 12px;
   color: #07130b;
   border-radius: 9px;

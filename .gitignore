@@ -27,3 +27,6 @@ CAPTURA DE TELA/
 *.bak
 *.tmp
 ~$*
+
+.vercel
+.env*

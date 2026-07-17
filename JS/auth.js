@@ -20,6 +20,10 @@ import { doc, getDoc, setDoc, serverTimestamp }
                                                              from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const googleProvider = new GoogleAuthProvider();
+const CONFIGURACAO_ACAO_EMAIL = {
+  url: "https://www.mercadoproclubs.com/HTML/cadastrar-se.html#login",
+  handleCodeInApp: false,
+};
 
 function mensagemErroAuth(err) {
   const mensagens = {
@@ -59,8 +63,22 @@ function definirCarregando(botao, carregando, textoCarregando) {
   botao.removeAttribute("aria-busy");
 }
 
+function destinoAposLogin() {
+  const destinoSolicitado = new URLSearchParams(window.location.search).get("continuar");
+  if (!destinoSolicitado) return "../index.html";
+
+  try {
+    const destino = new URL(destinoSolicitado, window.location.origin);
+    const caminhoPermitido = destino.pathname === "/" || destino.pathname.startsWith("/HTML/");
+    if (destino.origin !== window.location.origin || !caminhoPermitido) return "../index.html";
+    return `${destino.pathname}${destino.search}${destino.hash}`;
+  } catch {
+    return "../index.html";
+  }
+}
+
 function irParaInicio() {
-  window.location.href = "../index.html";
+  window.location.href = destinoAposLogin();
 }
 
 function senhaForte(senha) {
@@ -158,7 +176,7 @@ if (formCadastro) {
       }
       let verificacaoEnviada = true;
       try {
-        await sendEmailVerification(user);
+        await sendEmailVerification(user, CONFIGURACAO_ACAO_EMAIL);
       } catch (verificacaoErr) {
         verificacaoEnviada = false;
         console.warn("Conta criada, mas o e-mail de verificação não pôde ser enviado:", verificacaoErr);
@@ -199,7 +217,7 @@ if (formLogin) {
       const { user } = await signInWithEmailAndPassword(auth, email, senha);
       if (!user.emailVerified) {
         try {
-          await sendEmailVerification(user);
+          await sendEmailVerification(user, CONFIGURACAO_ACAO_EMAIL);
         } catch (verificacaoErr) {
           console.warn("Não foi possível reenviar a verificação:", verificacaoErr);
         }
@@ -244,7 +262,7 @@ btnEsqueciSenha?.addEventListener("click", async () => {
 
   definirCarregando(btnEsqueciSenha, true, "Enviando...");
   try {
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, email, CONFIGURACAO_ACAO_EMAIL);
     mostrarFeedback(
       "login-feedback",
       "Se existir uma conta com esse e-mail, você receberá o link para criar uma nova senha.",

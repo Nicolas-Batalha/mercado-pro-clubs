@@ -287,6 +287,20 @@
   font-size: 1.04rem;
 }
 
+.torneio-card-campeao {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(18, 224, 108, 0.45);
+  border-radius: 8px;
+  color: #b9c4bc;
+  background: rgba(18, 224, 108, 0.08);
+  font-size: 0.74rem;
+}
+
+.torneio-card-campeao strong {
+  color: #62ed9f;
+}
+
 .torneio-card-organizador {
   margin: 0;
   color: #90959b;
@@ -381,6 +395,14 @@
   margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid #2c2e31;
+}
+
+.torneio-card-botoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .torneio-card-data {
@@ -611,64 +633,59 @@
 }
 
 .torneio-campeao {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  margin: 18px 0;
-  padding: 14px 16px;
-  border: 1px solid rgba(18, 224, 108, 0.55);
-  border-radius: 11px;
-  background: linear-gradient(135deg, rgba(18, 224, 108, 0.16), rgba(18, 224, 108, 0.03));
-}
-
-.torneio-campeao img {
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #242628;
-}
-
-.torneio-campeao div {
   display: grid;
-  gap: 2px;
+  grid-template-columns: auto auto;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid #12e06c;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(18, 224, 108, 0.14), rgba(18, 224, 108, 0.03));
+  text-align: left;
 }
 
 .torneio-campeao span {
+  grid-column: 1 / -1;
   color: #12e06c;
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   font-weight: 900;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+
+.torneio-campeao img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
 }
 
 .torneio-campeao strong {
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
-.torneio-partida-status {
-  display: block;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #292b2e;
-  color: #9ca1a7;
-  font-size: 0.64rem;
-  font-weight: 800;
-  line-height: 1.35;
+.torneio-resultado-status {
+  margin: 9px 0 0;
+  padding: 7px 8px;
+  border: 1px solid #303337;
+  border-radius: 7px;
+  color: #b8c0ba;
+  background: #151718;
+  font-size: 0.67rem;
+  line-height: 1.45;
 }
 
-.torneio-partida-status.homologado,
-.torneio-partida-status.consenso {
-  color: #12e06c;
+.torneio-resultado-status.consenso,
+.torneio-resultado-status.homologado {
+  border-color: rgba(18, 224, 108, 0.5);
+  color: #62ed9f;
 }
 
-.torneio-partida-status.enviado {
-  color: #8fc1ff;
-}
-
-.torneio-partida-status.divergente {
-  color: #ff8585;
+.torneio-resultado-status.divergencia {
+  border-color: rgba(255, 176, 46, 0.55);
+  color: #ffc76b;
 }
 
 .torneio-resultado-form {
@@ -676,83 +693,49 @@
   gap: 9px;
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid #303337;
+  border-top: 1px solid #292b2e;
 }
 
 .torneio-resultado-form > strong {
   color: #fff;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
 }
 
-.torneio-resultado-campos {
+.torneio-resultado-placar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: end;
-  gap: 7px;
+  gap: 8px;
 }
 
-.torneio-resultado-campos label,
+.torneio-resultado-placar label,
 .torneio-resultado-observacao {
   display: grid;
-  min-width: 0;
   gap: 5px;
-}
-
-.torneio-resultado-campos label span,
-.torneio-resultado-observacao span {
-  overflow: hidden;
-  color: #aeb2b7;
-  font-size: 0.6rem;
+  min-width: 0;
+  color: #aab2ac;
+  font-size: 0.62rem;
   font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.torneio-resultado-campos b {
-  padding-bottom: 8px;
-  color: #74797f;
-}
-
-.torneio-resultado-campos input,
-.torneio-resultado-observacao textarea {
+.torneio-resultado-placar input,
+.torneio-resultado-observacao input {
   width: 100%;
-  border: 1px solid #3a3d40;
+  min-height: 37px;
+  padding: 7px 9px;
+  border: 1px solid #34383a;
   border-radius: 7px;
-  background: #0c0d0e;
   color: #fff;
+  background: #0b0c0d;
   font: inherit;
 }
 
-.torneio-resultado-campos input {
-  min-height: 36px;
-  padding: 7px;
+.torneio-resultado-placar input {
   text-align: center;
-}
-
-.torneio-resultado-observacao textarea {
-  min-height: 58px;
-  padding: 8px;
-  resize: vertical;
-}
-
-.torneio-resultado-campos input:focus,
-.torneio-resultado-observacao textarea:focus {
-  border-color: #12e06c;
-  outline: 2px solid rgba(18, 224, 108, 0.12);
-}
-
-.torneio-resultado-form > p {
-  margin: 0;
-  color: #878c92;
-  font-size: 0.6rem;
-  line-height: 1.4;
 }
 
 .torneio-resultado-form .torneio-btn {
   width: 100%;
-  min-height: 36px;
-  padding: 8px 10px;
-  font-size: 0.68rem;
 }
 
 .torneio-detalhe-acoes {
@@ -849,6 +832,11 @@
   .torneio-detalhe-topo {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .torneio-card-botoes,
+  .torneio-card-botoes .torneio-btn {
+    width: 100%;
   }
 
   .torneio-detalhe-topo {

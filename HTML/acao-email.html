@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Confirmação segura de conta do Mercado Pro Clubs.">
+  <link rel="stylesheet" href="../CSS/style.css">
+  <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml">
+  <title>Confirmar conta | Mercado Pro Clubs</title>
+</head>
+<body class="acao-email-pagina">
+  <header class="acao-email-header">
+    <a href="../index.html" aria-label="Voltar ao Mercado Pro Clubs">
+      <img src="../IMG/logo.svg" alt="Mercado Pro Clubs">
+    </a>
+  </header>
+  <main class="acao-email-main">
+    <section class="acao-email-card" aria-labelledby="acao-email-titulo">
+      <span class="acao-email-kicker">CONTA SEGURA</span>
+      <div class="acao-email-icone" id="acao-email-icone" aria-hidden="true">✉</div>
+      <h1 id="acao-email-titulo">Verificando seu link...</h1>
+      <p id="acao-email-mensagem" aria-live="polite">Aguarde alguns segundos enquanto confirmamos sua solicitação.</p>
+
+      <form id="acao-email-form-senha" class="acao-email-form" hidden>
+        <label for="acao-email-senha">Nova senha</label>
+        <input id="acao-email-senha" name="senha" type="password" minlength="10" maxlength="128" autocomplete="new-password" required
+          placeholder="Crie uma senha forte">
+        <small>Use 10 caracteres, maiúscula, minúscula, número e símbolo.</small>
+        <label for="acao-email-confirmar">Confirmar nova senha</label>
+        <input id="acao-email-confirmar" name="confirmar" type="password" minlength="10" maxlength="128" autocomplete="new-password" required
+          placeholder="Digite a senha novamente">
+        <button type="submit">SALVAR NOVA SENHA</button>
+      </form>
+
+      <div class="acao-email-acoes">
+        <a id="acao-email-continuar" href="./cadastrar-se.html#login" hidden>ENTRAR NA MINHA CONTA</a>
+        <a class="acao-email-secundario" href="../index.html">VOLTAR AO INÍCIO</a>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="../JS/acao-email.js"></script>
+</body>
+</html>

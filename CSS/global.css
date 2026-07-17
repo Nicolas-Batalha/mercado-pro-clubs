@@ -6,13 +6,14 @@
 }
 /* --- PAINEL DE CORES (VARIÁVEIS) --- */
 :root {
-  --cor-verde-neon: #12e06c;
+  --cor-verde-neon: #12E06C;
   --cor-verde-escuro: #15e450d5;
-  --cor-fundo-principal: #050b14;
-  --cor-fundo-secundario: #0f1a2c;
-  --cor-texto-claro: #ffffff;
-  --cor-texto-cinza: #a0aab5;
+  --cor-fundo-principal: #050B14;
+  --cor-fundo-secundario: #0F1A2C;
+  --cor-texto-claro: #FFFFFF;
+  --cor-texto-cinza: #A0AAB5;
   /*------ABA-DE-TORNEIO-------*/
+  
 }
 
 /* --- CONFIGURAÇÕES GERAIS --- */
@@ -20,21 +21,21 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Montserrat", sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
 body {
   /* Para colocar uma imagem de fundo depois, usaremos background-image aqui */
-  background: linear-gradient(180deg, #0f1a2c 0%, #050b14 100%);
-  background-image:
-    linear-gradient(to bottom, rgba(5, 11, 20, 0.7), rgba(5, 11, 20, 0.95)),
-    url("../IMG/fundo.png");
-  background-size: cover;
+  background: linear-gradient(180deg, #0F1A2C 0%, #050B14 100%);
+  background-image: 
+    linear-gradient(to bottom, rgba(5, 11, 20, 0.7), rgba(5, 11, 20, 0.95)), 
+    url('../IMG/fundo.png');
+     background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-attachment:fixed;
   color: var(--cor-texto-claro);
-  overflow-x: hidden;
+  overflow-x: hidden; 
 }
 /* Wrapper que o JS injeta dentro de #login-header */
 .header-usuario {
@@ -45,20 +46,20 @@ body {
   cursor: pointer;
   user-select: none;
 }
-
+ 
 /* Foto redonda */
 .hu-foto {
   width: 38px;
   height: 38px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #12e06c;
+  border: 2px solid #12E06C;
   transition: border-color 0.2s;
 }
 .header-usuario:hover .hu-foto {
   border-color: #fff;
 }
-
+ 
 /* Bolinha verde de "online" */
 .hu-avatar-wrap {
   position: relative;
@@ -71,10 +72,10 @@ body {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #12e06c;
-  border: 2px solid #0d0d0d; /* combine com a cor de fundo do header */
+  background: #12E06C;
+  border: 2px solid #0d0d0d;   /* combine com a cor de fundo do header */
 }
-
+ 
 /* Nome ao lado da foto */
 .hu-nome {
   color: #fff;
@@ -85,10 +86,10 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
+ 
 /* ── Dropdown ── */
 .hu-dropdown {
-  display: none; /* escondido por padrão */
+  display: none;          /* escondido por padrão */
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
@@ -97,62 +98,51 @@ body {
   border-radius: 10px;
   min-width: 180px;
   padding: 6px 0;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   z-index: 999;
   flex-direction: column;
 }
 .hu-dropdown.aberto {
   display: flex;
 }
-
+ 
 .hu-drop-item {
   display: block;
   padding: 10px 16px;
   color: #ddd;
   text-decoration: none;
   font-size: 0.88rem;
-  font-family: "Montserrat", sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background: transparent;
   border: none;
   width: 100%;
   text-align: left;
   cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 .hu-drop-item:hover {
   background: #252525;
-  color: #12e06c;
+  color: #12E06C;
 }
-
+ 
 .hu-drop-divider {
   height: 1px;
   background: #2a2a2a;
   margin: 4px 0;
 }
-
+ 
 .hu-sair {
   color: #e06612 !important;
 }
 .hu-sair:hover {
   color: #ff8040 !important;
 }
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-@media screen and (max-width: 425px) {
-  main {
-    margin-top: 100px;
-    min-height: 100dvh;
-  }
-}
+   .sr-only {
+     position: absolute;
+     width: 1px; height: 1px;
+     padding: 0; margin: -1px;
+     overflow: hidden;
+     clip: rect(0,0,0,0);
+     white-space: nowrap;
+     border: 0;
+   }

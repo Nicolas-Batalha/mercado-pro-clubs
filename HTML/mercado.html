@@ -115,10 +115,30 @@
               </select>
             </div>
 
-            <h2 class="titulo-time">Encontre seu clube</h2>
+            <h2 class="titulo-time">Recrute para o seu clube</h2>
+
+            <section class="mercado-acesso-card" id="publicar-vaga-acesso" aria-live="polite">
+              <div class="mercado-acesso-texto">
+                <span class="mercado-acesso-kicker">ÁREA DO CAPITÃO</span>
+                <h3 id="publicar-vaga-acesso-titulo">Seu clube está procurando jogadores?</h3>
+                <p id="publicar-vaga-acesso-texto">
+                  Entre na sua conta para anunciar uma vaga e receber candidaturas de jogadores.
+                </p>
+              </div>
+              <div class="mercado-acesso-acoes">
+                <a id="publicar-vaga-acesso-primario" class="mercado-acesso-primario"
+                  href="./cadastrar-se.html?continuar=%2FHTML%2Fmercado.html%23publicar-vaga#login">
+                  Entrar como capitão
+                </a>
+                <a id="publicar-vaga-acesso-secundario" class="mercado-acesso-secundario"
+                  href="./cadastrar-se.html?continuar=%2FHTML%2Fmercado.html%23publicar-vaga#cadastro">
+                  Criar conta
+                </a>
+              </div>
+            </section>
 
             <!-- FORMULÁRIO DE PUBLICAR VAGA -->
-            <div class="lfg-criador" id="publicar-vaga">
+            <div class="lfg-criador" id="publicar-vaga" hidden>
               <h3>Anunciar Vaga no Seu Clube</h3>
               <form id="form-lfg" class="form-lfg">
                 <div class="form-linha">
@@ -184,9 +204,9 @@
             </div>
 
             <!-- FILTRO: só vagas dentro do meu overall -->
-            <label class="lfg-checkbox-nivel">
+            <label class="lfg-checkbox-nivel" id="filtro-meu-nivel-wrap" hidden>
               <input type="checkbox" id="filtro-meu-nivel" />
-              Mostrar só vagas dentro do meu overall (precisa estar logado e ter overall no perfil)
+              Mostrar apenas vagas compatíveis com meu overall
             </label>
 
             <!-- FEED DE VAGAS -->

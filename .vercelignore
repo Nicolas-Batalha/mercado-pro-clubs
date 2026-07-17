@@ -15,3 +15,17 @@ firestore.rules
 *.key
 *.p12
 *.pfx
+
+# Arquivos locais do Codex, histórico e autenticação nunca vão ao site.
+.git
+.git/**
+.history-*.git
+.history-*.git/**
+.agents
+.agents/**
+.codex
+.codex/**
+.cleanup-tools
+.cleanup-tools/**
+gh-auth-*.tmp
+*.bak
