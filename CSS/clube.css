@@ -231,6 +231,43 @@
     display:none;
 }
 
+.clube-criacao-aviso{
+    max-width: 1400px;
+    margin: 0 auto 18px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border: 1px solid rgba(18, 224, 108, .35);
+    border-radius: 14px;
+    background: linear-gradient(105deg, rgba(18, 224, 108, .13), rgba(12, 18, 15, .96) 55%);
+}
+
+.clube-criacao-aviso[hidden]{
+    display: none;
+}
+
+.clube-criacao-aviso > span{
+    color: #12e06c;
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+    white-space: nowrap;
+}
+
+.clube-criacao-aviso h2{
+    margin: 0 0 3px;
+    color: #fff;
+    font-size: 1.15rem;
+}
+
+.clube-criacao-aviso p{
+    margin: 0;
+    color: #a8b0ab;
+    font-size: .86rem;
+    line-height: 1.5;
+}
+
 @media (max-width: 768px) {
     .menu-clubes{
         flex-wrap:wrap;
@@ -263,6 +300,15 @@
     }
     #clube-progresso-ir{
         width:100%;
+    }
+    .clube-criacao-aviso{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:8px;
+        padding:16px;
+    }
+    .clube-criacao-aviso > span{
+        white-space:normal;
     }
 }
 

@@ -77,7 +77,7 @@
           </a>
           <button type="button" id="btn-salvar-clube" class="btn-salvar-clube">
             <svg viewBox="0 0 24 24" class="salvar-icon"><path d="M5 4h11l3 3v13H5V4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 4v5h8V4M8 14h8v6H8v-6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            Salvar Alterações
+            <span id="btn-salvar-clube-texto">Salvar alterações</span>
           </button>
         </div>
         </div>
@@ -218,6 +218,13 @@
 
       <section id="painel-clube-edicao" aria-label="Painel do clube">
         <div class="tab-painel ativo" id="painel-geral" role="tabpanel" aria-labelledby="aba-geral" data-painel="geral">
+        <section id="clube-criacao-aviso" class="clube-criacao-aviso" aria-labelledby="clube-criacao-titulo" hidden>
+          <span>PRIMEIRO PASSO</span>
+          <div>
+            <h2 id="clube-criacao-titulo">Crie o seu clube</h2>
+            <p>Preencha os dados abaixo. Depois de criar, você poderá montar o elenco, publicar vagas e disputar torneios.</p>
+          </div>
+        </section>
         <div class="dashboard" id="dashboard-clube">
           <div class="escudo card">
             <div class="titulo-dashboard">

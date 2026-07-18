@@ -589,7 +589,8 @@ function atualizarProgressoClube() {
 }
 
 // ─── Liga os eventos do dashboard (upload, chips, checkboxes, preview, salvar) ─
-function ligarEventosDashboard(uid) {
+function ligarEventosDashboard(uid, { novoClube = false } = {}) {
+  let estaCriandoClube = novoClube;
   // Preview ao vivo
   ["clube","divisao","horario-treino","objetivo","jogo","plataforma","clube-lema","clube-cor-primaria","clube-cor-secundaria"].forEach(id =>
     document.getElementById(id)?.addEventListener("input", atualizarPreview)
@@ -681,6 +682,10 @@ function ligarEventosDashboard(uid) {
 
   // Salvar
   document.getElementById("btn-salvar-clube")?.addEventListener("click", async () => {
+    if (estaCriandoClube && !auth.currentUser?.emailVerified) {
+      toast("Confirme seu e-mail antes de criar o clube.", "erro");
+      return;
+    }
     const nome = document.getElementById("clube").value.trim();
     if (!nome) { toast("O nome do clube não pode ficar vazio.", "erro"); return; }
 
@@ -713,6 +718,11 @@ function ligarEventosDashboard(uid) {
     const novaImagem = document.getElementById("upload-escudo").dataset.novaImagem;
     if (novaImagem) dados.escudoUrl = novaImagem;
 
+    const botaoSalvar = document.getElementById("btn-salvar-clube");
+    const textoSalvar = document.getElementById("btn-salvar-clube-texto");
+    if (botaoSalvar) botaoSalvar.disabled = true;
+    if (textoSalvar) textoSalvar.textContent = estaCriandoClube ? "Criando..." : "Salvando...";
+
     try {
       await setDoc(doc(db, "clubes", uid), dados, { merge: true });
       await setDoc(doc(db, "jogadores", uid), {
@@ -724,8 +734,29 @@ function ligarEventosDashboard(uid) {
       clubeCarregado = { ...clubeCarregado, ...dados };
       if (novaImagem) clubeCarregado.escudoUrl = novaImagem;
       atualizarProgressoClube();
-      toast("✅ Clube atualizado!");
-    } catch (err) { toast("Erro ao salvar: " + err.message, "erro"); }
+      if (estaCriandoClube) {
+        estaCriandoClube = false;
+        configurarAbasGerenciais(true, true);
+        document.getElementById("clube-criacao-aviso")?.setAttribute("hidden", "");
+        const linkPublico = document.getElementById("btn-ver-perfil-publico");
+        if (linkPublico) {
+          linkPublico.href = `./clubes.html?uid=${encodeURIComponent(uid)}`;
+          linkPublico.hidden = false;
+        }
+        toast("✅ Clube criado com sucesso!");
+        await carregarEstatisticas(uid);
+      } else {
+        toast("✅ Clube atualizado!");
+      }
+    } catch (err) {
+      const mensagem = err?.code === "permission-denied"
+        ? "Não foi possível criar o clube. Confirme seu e-mail e tente novamente."
+        : "Erro ao salvar: " + err.message;
+      toast(mensagem, "erro");
+    } finally {
+      if (botaoSalvar) botaoSalvar.disabled = false;
+      if (textoSalvar) textoSalvar.textContent = estaCriandoClube ? "Criar meu clube" : "Salvar alterações";
+    }
   });
 }
 
@@ -935,9 +966,17 @@ function configurarAbasGerenciais(visiveis, possuiClube = true) {
   ["vagas", "estatisticas", "aparencia"].forEach((aba) => {
     const botao = document.querySelector(`[data-tab="${aba}"]`);
     if (botao) botao.hidden = !visiveis;
+    if (!visiveis) {
+      const painel = document.querySelector(`[data-painel="${aba}"]`);
+      if (painel) painel.hidden = true;
+    }
   });
   const elenco = document.querySelector('[data-tab="elenco"]');
   if (elenco) elenco.hidden = !possuiClube;
+  if (!possuiClube) {
+    const painelElenco = document.querySelector('[data-painel="elenco"]');
+    if (painelElenco) painelElenco.hidden = true;
+  }
 }
 
 async function renderPainelJogador(perfilAtual) {
@@ -975,18 +1014,26 @@ async function renderPainelJogador(perfilAtual) {
   });
 }
 
-function renderCTASemClube() {
+function prepararCriacaoClube(usuario, perfilAtual) {
   configurarAbasGerenciais(false, false);
-  document.getElementById("dashboard-clube").outerHTML = `
-    <div class="card" style="max-width:520px;margin:60px auto;text-align:center">
-      <p style="color:#fff">⚽ Você ainda não faz parte de nenhum clube.</p>
-      <p style="color:#8b8b8b;font-size:13px">Publique uma vaga como capitão ou candidate-se a um clube na área de vagas e jogadores.</p>
-      <a href="../HTML/mercado.html" class="btn-salvar-clube" style="display:inline-block;text-decoration:none;margin-top:14px">Abrir vagas e jogadores</a>
-    </div>`;
-  const btnConvidar = document.getElementById("btn-convidar-jogador");
-  if (btnConvidar) btnConvidar.hidden = true;
-  elencoAtual = [];
-  aplicarFiltrosElenco("", false);
+  clubeCarregado = {};
+  preencherFormulario({}, perfilAtual);
+
+  const escudoPadrao = "../IMG/football-club.png";
+  const escudoFormulario = document.getElementById("foto-perfil-preview");
+  const escudoPreview = document.getElementById("preview-escudo");
+  const escudoAparencia = document.getElementById("clube-aparencia-escudo");
+  if (escudoFormulario) escudoFormulario.src = escudoPadrao;
+  if (escudoPreview) escudoPreview.src = escudoPadrao;
+  if (escudoAparencia) escudoAparencia.src = escudoPadrao;
+
+  document.querySelector(".menu-acao")?.removeAttribute("hidden");
+  document.getElementById("clube-criacao-aviso")?.removeAttribute("hidden");
+  const textoSalvar = document.getElementById("btn-salvar-clube-texto");
+  if (textoSalvar) textoSalvar.textContent = "Criar meu clube";
+  const linkPublico = document.getElementById("btn-ver-perfil-publico");
+  if (linkPublico) linkPublico.hidden = true;
+  ligarEventosDashboard(usuario.uid, { novoClube: true });
 }
 
 // ─── Modo visitante: perfil público completo do clube (via ?uid=) ─────────────
@@ -1376,14 +1423,14 @@ if (uidVisitante) {
           linkPublico.hidden = false;
         }
         preencherFormulario(dadosClube, perfilAtual);
+        document.getElementById("clube-criacao-aviso")?.setAttribute("hidden", "");
         ligarEventosDashboard(usuario.uid);
         await carregarEstatisticas(usuario.uid);
       } else if (perfilAtual.clubeAtualId) {
         document.querySelector(".menu-acao")?.setAttribute("hidden", "");
         await renderPainelJogador(perfilAtual);
       } else {
-        document.querySelector(".menu-acao")?.setAttribute("hidden", "");
-        renderCTASemClube();
+        prepararCriacaoClube(usuario, perfilAtual);
       }
     } catch (err) {
       console.error("Erro ao carregar clube:", err);
