@@ -121,6 +121,7 @@
               <span class="publico-eyebrow">PERFIL PÚBLICO DO CLUBE</span>
               <h1 id="publico-nome-clube">Carregando clube...</h1>
               <p id="publico-capitao">Confira os detalhes antes de entrar para o elenco.</p>
+              <p id="publico-lema" class="publico-lema" hidden></p>
               <div id="publico-tags" class="publico-tags" aria-label="Informações rápidas do clube"></div>
             </div>
           </div>
@@ -561,13 +562,13 @@
               </div>
               <div class="stat-box">
                 <svg viewBox="0 0 24 24" class="stat-icon"><path d="M12 3l2.6 5.6 6.1.6-4.6 4.2 1.3 6-5.4-3.1-5.4 3.1 1.3-6-4.6-4.2 6.1-.6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-                <span class="stat-numero">—</span>
+                <span class="stat-numero" id="stat-reputacao">—</span>
                 <span class="stat-label">Reputação</span>
               </div>
               <div class="stat-box">
                 <svg viewBox="0 0 24 24" class="stat-icon"><rect x="3" y="8" width="18" height="9" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="12.5" r="1.3" fill="currentColor" stroke="none"/><path d="M15 11.2v2.6M13.7 12.5h2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-                <span class="stat-numero">—</span>
-                <span class="stat-label">Partidas</span>
+                <span class="stat-numero" id="stat-negociacoes">0</span>
+                <span class="stat-label">Negociações</span>
               </div>
             </div>
           </div>
@@ -631,26 +632,104 @@
         </div>
 
         <div class="tab-painel" id="painel-vagas" role="tabpanel" aria-labelledby="aba-vagas" data-painel="vagas" hidden>
-          <div class="card em-breve-card">
-            <h3 class="card-title">Vagas do Clube</h3>
-            <p class="elenco-subtitulo">(Em construção 🚧)</p>
-            <p class="elenco-subtitulo">Em breve você vai poder gerenciar as vagas publicadas direto por aqui.</p>
+          <div class="clube-area-cabecalho card">
+            <div>
+              <span class="clube-area-kicker">RECRUTAMENTO</span>
+              <h3 class="card-title">Vagas do clube</h3>
+              <p class="elenco-subtitulo">Acompanhe anúncios e candidaturas sem perder o controle do elenco.</p>
+            </div>
+            <a href="./mercado.html#publicar-vaga" class="clube-acao-principal">+ Publicar nova vaga</a>
+          </div>
+          <div class="clube-resumo-grid">
+            <article class="card clube-resumo-card"><span>Vagas ativas</span><strong id="clube-vagas-total">0</strong><small>anúncios publicados</small></article>
+            <article class="card clube-resumo-card"><span>Candidaturas</span><strong id="clube-candidaturas-total">0</strong><small>recebidas nas vagas</small></article>
+            <article class="card clube-resumo-card destaque"><span>Aguardando resposta</span><strong id="clube-candidaturas-pendentes">0</strong><small>pedidos para analisar</small></article>
+          </div>
+          <div class="card clube-gestao-card">
+            <div class="clube-gestao-toolbar">
+              <div>
+                <h3>Seus anúncios</h3>
+                <p>Edite, renove, compartilhe ou exclua uma vaga.</p>
+              </div>
+              <label class="clube-busca-vagas" for="clube-busca-vagas">
+                <span class="sr-only">Buscar vaga</span>
+                <input type="search" id="clube-busca-vagas" placeholder="Buscar por posição ou descrição">
+              </label>
+            </div>
+            <div id="clube-vagas-lista" class="clube-vagas-lista" aria-live="polite">
+              <div class="clube-estado-vazio">Carregando vagas...</div>
+            </div>
           </div>
         </div>
 
         <div class="tab-painel" id="painel-estatisticas" role="tabpanel" aria-labelledby="aba-estatisticas" data-painel="estatisticas" hidden>
-          <div class="card em-breve-card">
-            <h3 class="card-title">Estatísticas do Clube</h3>
-            <p class="elenco-subtitulo">(Em construção 🚧)</p>
-            <p class="elenco-subtitulo">Em breve: histórico de partidas, desempenho e evolução do elenco.</p>
+          <div class="clube-area-cabecalho card">
+            <div>
+              <span class="clube-area-kicker">DESEMPENHO DO CLUBE</span>
+              <h3 class="card-title">Estatísticas</h3>
+              <p class="elenco-subtitulo">Dados do elenco, recrutamento e reputação reunidos em um só lugar.</p>
+            </div>
+            <span id="clube-estatisticas-atualizadas" class="clube-atualizado">Atualizando...</span>
           </div>
+          <div class="clube-estatisticas-grid">
+            <article class="card clube-estatistica-card"><span>Jogadores</span><strong id="clube-stat-elenco">0</strong><small>no elenco atual</small></article>
+            <article class="card clube-estatistica-card"><span>Vagas</span><strong id="clube-stat-vagas">0</strong><small>anúncios ativos</small></article>
+            <article class="card clube-estatistica-card"><span>Negociações aceitas</span><strong id="clube-stat-aceitas">0</strong><small>candidaturas e convites</small></article>
+            <article class="card clube-estatistica-card"><span>Reputação</span><strong id="clube-stat-reputacao">—</strong><small id="clube-stat-avaliacoes">sem avaliações</small></article>
+          </div>
+          <div class="clube-analises-grid">
+            <article class="card clube-analise-card">
+              <div class="clube-analise-titulo"><div><span class="clube-area-kicker">ELENCO</span><h3>Posições do time</h3></div><span id="clube-posicoes-total"></span></div>
+              <div id="clube-posicoes-grafico" class="clube-barras"></div>
+            </article>
+            <article class="card clube-analise-card">
+              <div class="clube-analise-titulo"><div><span class="clube-area-kicker">RECRUTAMENTO</span><h3>Funil de candidaturas</h3></div></div>
+              <div id="clube-funil-candidaturas" class="clube-funil"></div>
+            </article>
+          </div>
+          <article class="card clube-analise-card">
+            <div class="clube-analise-titulo"><div><span class="clube-area-kicker">MOVIMENTAÇÃO RECENTE</span><h3>Últimas negociações</h3></div><a href="./negociacoes.html">Abrir negociações →</a></div>
+            <div id="clube-atividade-recente" class="clube-atividade-lista"></div>
+          </article>
         </div>
 
         <div class="tab-painel" id="painel-aparencia" role="tabpanel" aria-labelledby="aba-aparencia" data-painel="aparencia" hidden>
-          <div class="card em-breve-card">
-            <h3 class="card-title">Aparência do Clube</h3>
-            <p class="elenco-subtitulo">(Em construção 🚧)</p>
-            <p class="elenco-subtitulo">Em breve: personalize cores, banner e identidade visual do seu clube.</p>
+          <div class="clube-area-cabecalho card">
+            <div>
+              <span class="clube-area-kicker">IDENTIDADE VISUAL</span>
+              <h3 class="card-title">Aparência do clube</h3>
+              <p class="elenco-subtitulo">Escolha as cores e o lema exibidos no perfil público.</p>
+            </div>
+            <button type="button" id="btn-salvar-aparencia" class="clube-acao-principal">Salvar aparência</button>
+          </div>
+          <div class="clube-aparencia-grid">
+            <div class="card clube-aparencia-form">
+              <div class="field-box">
+                <label for="clube-lema" class="text-info">Lema do clube</label>
+                <input type="text" id="clube-lema" maxlength="120" placeholder="Ex.: Juntos até o apito final">
+                <small><span id="clube-lema-contador">0</span>/120 caracteres</small>
+              </div>
+              <div class="clube-cores-grid">
+                <label class="clube-cor-campo" for="clube-cor-primaria"><span>Cor principal</span><input type="color" id="clube-cor-primaria" value="#12e06c"></label>
+                <label class="clube-cor-campo" for="clube-cor-secundaria"><span>Cor de fundo</span><input type="color" id="clube-cor-secundaria" value="#07140d"></label>
+              </div>
+              <div class="clube-temas">
+                <span class="text-info">Combinações rápidas</span>
+                <div>
+                  <button type="button" data-clube-tema="#12e06c|#07140d"><i style="--tema-cor:#12e06c;--tema-fundo:#07140d"></i>Verde Mercado</button>
+                  <button type="button" data-clube-tema="#4da3ff|#071321"><i style="--tema-cor:#4da3ff;--tema-fundo:#071321"></i>Azul Arena</button>
+                  <button type="button" data-clube-tema="#f7c948|#171206"><i style="--tema-cor:#f7c948;--tema-fundo:#171206"></i>Ouro Campeão</button>
+                </div>
+              </div>
+              <p class="clube-aparencia-aviso">O escudo continua sendo alterado na aba Geral. As cores não modificam as fotos ou os dados dos jogadores.</p>
+            </div>
+            <aside id="clube-aparencia-preview" class="clube-aparencia-preview" style="--clube-preview-cor:#12e06c;--clube-preview-fundo:#07140d">
+              <span>PRÉVIA DO PERFIL PÚBLICO</span>
+              <img id="clube-aparencia-escudo" src="../IMG/real madrid.svg" alt="Escudo do clube">
+              <h3 id="clube-aparencia-nome">Seu Clube</h3>
+              <p id="clube-aparencia-lema">Juntos até o apito final</p>
+              <div><b id="clube-aparencia-jogo">EA FC 26</b><b id="clube-aparencia-plataforma">Plataforma</b></div>
+            </aside>
           </div>
         </div>
       </section>
@@ -658,7 +737,7 @@
     <script src="../JS/script.js" defer></script>
     <script type="module" src="../JS/times.js"></script>
     <script type="module" src="../JS/header-auth.js"></script>
-    <script type="module" src="../JS/clube.js"></script>
+    <script type="module" src="../JS/clube.js?v=20260717-2"></script>
     <script type="module" src="../JS/reputacao.js"></script>
   </body>
 </html>

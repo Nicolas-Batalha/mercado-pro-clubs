@@ -631,6 +631,12 @@ onAuthStateChanged(auth, async (user) => {
   }
   atualizarAreaPublicacao(user, possuiClube);
   await carregarVagas();
+  const editarVagaId = new URLSearchParams(window.location.search).get("editarVaga");
+  if (editarVagaId) {
+    const vaga = vagasFiltradasAtuais.find((item) => item.id === editarVagaId && item.capitaoUid === user.uid);
+    if (vaga) iniciarEdicaoVaga(vaga);
+    else toast("Não foi possível abrir esta vaga para edição.", "erro");
+  }
   const abaSolicitada = new URLSearchParams(window.location.search).get("aba");
   if (abaSolicitada === "jogadores") ativarAbaMercado("jogadores", false);
   if (!document.getElementById("painel-jogadores")?.hidden) {

@@ -249,7 +249,8 @@ service cloud.firestore {
           'nome', 'capitaoUid', 'plataforma', 'divisao', 'regiao', 'jogo',
           'estiloJogo', 'horarioTreino', 'diasTreino', 'objetivo', 'descricao',
           'discord', 'whatsapp', 'instagram', 'capitaoIdEA',
-          'capitaoMicrofone', 'necessidades', 'escudoUrl'
+          'capitaoMicrofone', 'necessidades', 'escudoUrl',
+          'lema', 'corPrimaria', 'corSecundaria'
         ])
         && request.resource.data.nome is string
         && request.resource.data.nome.size() > 0
@@ -258,6 +259,12 @@ service cloud.firestore {
         && request.resource.data.get('descricao', '').size() <= 1500
         && request.resource.data.get('escudoUrl', '') is string
         && request.resource.data.get('escudoUrl', '').size() <= 900000
+        && request.resource.data.get('lema', '') is string
+        && request.resource.data.get('lema', '').size() <= 120
+        && request.resource.data.get('corPrimaria', '#12e06c') is string
+        && request.resource.data.get('corPrimaria', '#12e06c').matches('^#[0-9A-Fa-f]{6}$')
+        && request.resource.data.get('corSecundaria', '#07140d') is string
+        && request.resource.data.get('corSecundaria', '#07140d').matches('^#[0-9A-Fa-f]{6}$')
         && !request.resource.data.keys().hasAny([
           'verificado', 'verificacaoAtualizadaPor', 'verificacaoAtualizadaEm',
           'motivoVerificacao', 'suspenso', 'suspensoPor', 'suspensoEm',
@@ -271,7 +278,8 @@ service cloud.firestore {
           'nome', 'capitaoUid', 'plataforma', 'divisao', 'regiao', 'jogo',
           'estiloJogo', 'horarioTreino', 'diasTreino', 'objetivo', 'descricao',
           'discord', 'whatsapp', 'instagram', 'capitaoIdEA',
-          'capitaoMicrofone', 'necessidades', 'escudoUrl'
+          'capitaoMicrofone', 'necessidades', 'escudoUrl',
+          'lema', 'corPrimaria', 'corSecundaria'
         ])
         && request.resource.data.nome is string
         && request.resource.data.nome.size() > 0
@@ -280,6 +288,12 @@ service cloud.firestore {
         && request.resource.data.get('descricao', '').size() <= 1500
         && request.resource.data.get('escudoUrl', '') is string
         && request.resource.data.get('escudoUrl', '').size() <= 900000
+        && request.resource.data.get('lema', '') is string
+        && request.resource.data.get('lema', '').size() <= 120
+        && request.resource.data.get('corPrimaria', '#12e06c') is string
+        && request.resource.data.get('corPrimaria', '#12e06c').matches('^#[0-9A-Fa-f]{6}$')
+        && request.resource.data.get('corSecundaria', '#07140d') is string
+        && request.resource.data.get('corSecundaria', '#07140d').matches('^#[0-9A-Fa-f]{6}$')
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
           'verificado', 'verificacaoAtualizadaPor', 'verificacaoAtualizadaEm',
           'motivoVerificacao', 'suspenso', 'suspensoPor', 'suspensoEm',

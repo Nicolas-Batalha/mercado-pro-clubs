@@ -9,7 +9,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
-  doc, getDoc, setDoc, updateDoc, addDoc, serverTimestamp,
+  doc, getDoc, setDoc, updateDoc, addDoc, deleteDoc, serverTimestamp,
   collection, query, where, getDocs, onSnapshot, limit
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { confirmModal } from "./confirm-modal.js";
@@ -71,6 +71,36 @@ async function buscarElenco(capitaoUid) {
 // =========================================================================
 let elencoAtual = [];
 let clubeCarregado = {};
+let gestaoClubeAtual = {
+  uid: "",
+  elenco: [],
+  vagas: [],
+  candidaturas: [],
+  convites: [],
+  avaliacoes: [],
+};
+
+function statusNegociacaoClube(item) {
+  const status = String(item?.status || "pendente").toLowerCase();
+  return ["pendente", "aceito", "recusado", "cancelado"].includes(status) ? status : "pendente";
+}
+
+function timestampMsClube(item) {
+  return item?.respondidoEm?.toMillis?.()
+    || item?.atualizadoEm?.toMillis?.()
+    || item?.criadoEm?.toMillis?.()
+    || 0;
+}
+
+function formatarDataClube(item) {
+  const ms = timestampMsClube(item);
+  return ms ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(ms)) : "Data não informada";
+}
+
+function corHexSegura(valor, fallback) {
+  const cor = String(valor || "").trim();
+  return /^#[0-9a-f]{6}$/i.test(cor) ? cor : fallback;
+}
 
 function linhaElenco(jogador, capitaoUid, podeEditar) {
   const ehCapitaoLinha = jogador.uid === capitaoUid;
@@ -393,6 +423,9 @@ function preencherFormulario(clube, perfilAtual) {
   set("capitao-nome", perfilAtual.nickname);
   set("capitao-idea", clube.capitaoIdEA || perfilAtual.eaId);
   set("capitao-microfone", clube.capitaoMicrofone || "sim");
+  set("clube-lema", clube.lema || "");
+  set("clube-cor-primaria", corHexSegura(clube.corPrimaria, "#12e06c"));
+  set("clube-cor-secundaria", corHexSegura(clube.corSecundaria, "#07140d"));
 
   const escudo = imagemSegura(clube.escudoUrl);
   if (escudo) {
@@ -415,6 +448,7 @@ function preencherFormulario(clube, perfilAtual) {
   });
 
   atualizarPreview();
+  atualizarPreviewAparencia();
   atualizarProgressoClube();
 }
 
@@ -430,6 +464,59 @@ function atualizarPreview() {
   document.getElementById("preview-plataforma").textContent = textoSelect("plataforma");
   document.getElementById("preview-divisao").textContent = texto("divisao");
   document.getElementById("preview-treinos").textContent = texto("horario-treino");
+  atualizarPreviewAparencia();
+}
+
+function atualizarPreviewAparencia() {
+  const preview = document.getElementById("clube-aparencia-preview");
+  if (!preview) return;
+  const primaria = corHexSegura(document.getElementById("clube-cor-primaria")?.value, "#12e06c");
+  const secundaria = corHexSegura(document.getElementById("clube-cor-secundaria")?.value, "#07140d");
+  const lema = String(document.getElementById("clube-lema")?.value || "").trim();
+  preview.style.setProperty("--clube-preview-cor", primaria);
+  preview.style.setProperty("--clube-preview-fundo", secundaria);
+  document.getElementById("clube-aparencia-nome").textContent = document.getElementById("clube")?.value.trim() || "Seu Clube";
+  document.getElementById("clube-aparencia-lema").textContent = lema || "Juntos até o apito final";
+  document.getElementById("clube-aparencia-jogo").textContent = document.getElementById("jogo")?.selectedOptions?.[0]?.text || "EA FC 26";
+  document.getElementById("clube-aparencia-plataforma").textContent = document.getElementById("plataforma")?.selectedOptions?.[0]?.text || "Plataforma";
+  const escudo = document.getElementById("foto-perfil-preview")?.src;
+  if (escudo) document.getElementById("clube-aparencia-escudo").src = escudo;
+  const contador = document.getElementById("clube-lema-contador");
+  if (contador) contador.textContent = String(lema.length);
+}
+
+async function salvarAparenciaClube(uid) {
+  const nome = document.getElementById("clube")?.value.trim();
+  if (!nome) {
+    toast("Defina o nome do clube na aba Geral antes de salvar a aparência.", "erro");
+    return;
+  }
+  const dados = {
+    nome,
+    capitaoUid: uid,
+    lema: String(document.getElementById("clube-lema")?.value || "").trim(),
+    corPrimaria: corHexSegura(document.getElementById("clube-cor-primaria")?.value, "#12e06c"),
+    corSecundaria: corHexSegura(document.getElementById("clube-cor-secundaria")?.value, "#07140d"),
+  };
+  const botao = document.getElementById("btn-salvar-aparencia");
+  const textoOriginal = botao?.textContent || "Salvar aparência";
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = "Salvando...";
+  }
+  try {
+    await setDoc(doc(db, "clubes", uid), dados, { merge: true });
+    clubeCarregado = { ...clubeCarregado, ...dados };
+    toast("Aparência do clube atualizada.");
+  } catch (erro) {
+    console.error("Erro ao salvar aparência:", erro);
+    toast("Não foi possível salvar a aparência. Publique as regras atualizadas do Firebase.", "erro");
+  } finally {
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = textoOriginal;
+    }
+  }
 }
 
 function dadosClubeDoFormulario() {
@@ -454,6 +541,9 @@ function dadosClubeDoFormulario() {
     instagram: valor("instagram"),
     capitaoIdEA: valor("capitao-idea"),
     capitaoMicrofone: valor("capitao-microfone"),
+    lema: valor("clube-lema"),
+    corPrimaria: corHexSegura(valor("clube-cor-primaria"), "#12e06c"),
+    corSecundaria: corHexSegura(valor("clube-cor-secundaria"), "#07140d"),
     diasTreino: Array.from(document.querySelectorAll(".chip.active")).map((item) => item.dataset.dia),
     necessidades,
   };
@@ -501,14 +591,15 @@ function atualizarProgressoClube() {
 // ─── Liga os eventos do dashboard (upload, chips, checkboxes, preview, salvar) ─
 function ligarEventosDashboard(uid) {
   // Preview ao vivo
-  ["clube","divisao","horario-treino","objetivo","jogo","plataforma"].forEach(id =>
+  ["clube","divisao","horario-treino","objetivo","jogo","plataforma","clube-lema","clube-cor-primaria","clube-cor-secundaria"].forEach(id =>
     document.getElementById(id)?.addEventListener("input", atualizarPreview)
   );
   document.querySelectorAll("select").forEach(sel => sel.addEventListener("change", atualizarPreview));
   [
     "clube", "plataforma", "divisao", "regiao", "jogo", "estilo-jogo",
     "horario-treino", "objetivo", "descricao", "discord", "whatsapp",
-    "instagram", "capitao-idea", "capitao-microfone",
+    "instagram", "capitao-idea", "capitao-microfone", "clube-lema",
+    "clube-cor-primaria", "clube-cor-secundaria",
   ].forEach((id) => {
     document.getElementById(id)?.addEventListener("input", atualizarProgressoClube);
     document.getElementById(id)?.addEventListener("change", atualizarProgressoClube);
@@ -545,8 +636,10 @@ function ligarEventosDashboard(uid) {
       if (comprimida.length > 850_000) throw new Error("A imagem ainda ficou muito grande.");
       document.getElementById("foto-perfil-preview").src = comprimida;
       document.getElementById("preview-escudo").src = comprimida;
+      document.getElementById("clube-aparencia-escudo").src = comprimida;
       document.getElementById("upload-escudo").dataset.novaImagem = comprimida;
       atualizarProgressoClube();
+      atualizarPreviewAparencia();
     } catch { toast("Erro ao processar imagem.", "erro"); }
     finally { e.target.value = ""; }
   });
@@ -566,6 +659,18 @@ function ligarEventosDashboard(uid) {
       atualizarProgressoClube();
     })
   );
+
+  document.querySelectorAll("[data-clube-tema]").forEach((botao) => {
+    botao.addEventListener("click", () => {
+      const [primaria, secundaria] = String(botao.dataset.clubeTema || "").split("|");
+      const campoPrimaria = document.getElementById("clube-cor-primaria");
+      const campoSecundaria = document.getElementById("clube-cor-secundaria");
+      if (campoPrimaria) campoPrimaria.value = corHexSegura(primaria, "#12e06c");
+      if (campoSecundaria) campoSecundaria.value = corHexSegura(secundaria, "#07140d");
+      atualizarPreviewAparencia();
+    });
+  });
+  document.getElementById("btn-salvar-aparencia")?.addEventListener("click", () => salvarAparenciaClube(uid));
 
   // Elenco: dados reais (sem jogador fake) + botão de convidar
   renderizarElenco(uid, true);
@@ -600,6 +705,9 @@ function ligarEventosDashboard(uid) {
       instagram:        document.getElementById("instagram").value.trim(),
       capitaoIdEA:      document.getElementById("capitao-idea").value.trim(),
       capitaoMicrofone: document.getElementById("capitao-microfone").value,
+      lema:              document.getElementById("clube-lema")?.value.trim() || "",
+      corPrimaria:       corHexSegura(document.getElementById("clube-cor-primaria")?.value, "#12e06c"),
+      corSecundaria:     corHexSegura(document.getElementById("clube-cor-secundaria")?.value, "#07140d"),
       necessidades,
     };
     const novaImagem = document.getElementById("upload-escudo").dataset.novaImagem;
@@ -621,13 +729,196 @@ function ligarEventosDashboard(uid) {
   });
 }
 
-async function carregarEstatisticas(uid) {
+function diasRestantesVaga(vaga) {
+  const criadoEm = timestampMsClube(vaga);
+  if (!criadoEm) return "prazo não informado";
+  const restantes = Math.max(0, Math.ceil((criadoEm + 30 * 24 * 60 * 60 * 1000 - Date.now()) / (24 * 60 * 60 * 1000)));
+  return restantes === 0 ? "vence hoje" : `${restantes} dia${restantes === 1 ? "" : "s"} restante${restantes === 1 ? "" : "s"}`;
+}
+
+function renderizarVagasClube() {
+  const lista = document.getElementById("clube-vagas-lista");
+  if (!lista) return;
+  const termo = String(document.getElementById("clube-busca-vagas")?.value || "").trim().toLowerCase();
+  const vagas = gestaoClubeAtual.vagas.filter((vaga) => !termo || [
+    vaga.posicao,
+    vaga.descricao,
+    vaga.jogo,
+    vaga.plataforma,
+  ].some((valor) => String(valor || "").toLowerCase().includes(termo)));
+
+  document.getElementById("clube-vagas-total").textContent = String(gestaoClubeAtual.vagas.length);
+  document.getElementById("clube-candidaturas-total").textContent = String(gestaoClubeAtual.candidaturas.length);
+  document.getElementById("clube-candidaturas-pendentes").textContent = String(
+    gestaoClubeAtual.candidaturas.filter((item) => statusNegociacaoClube(item) === "pendente").length,
+  );
+
+  lista.innerHTML = vagas.length
+    ? vagas.map((vaga) => {
+        const candidaturas = gestaoClubeAtual.candidaturas.filter((item) => item.vagaId === vaga.id);
+        const pendentes = candidaturas.filter((item) => statusNegociacaoClube(item) === "pendente").length;
+        return `<article class="clube-vaga-item">
+          <div>
+            <h4>${escHtml(rotuloPosicaoClube(vaga.posicao))} · ${escHtml(vaga.jogo || "Jogo não informado")}</h4>
+            <div class="clube-vaga-meta">
+              <span>${escHtml(vaga.plataforma || "Plataforma não informada")}</span>
+              <span>${escHtml(vaga.estilo || "Estilo não informado")}</span>
+              <span>${candidaturas.length} candidatura${candidaturas.length === 1 ? "" : "s"}</span>
+              ${pendentes ? `<span>${pendentes} aguardando resposta</span>` : ""}
+              <span>${escHtml(diasRestantesVaga(vaga))}</span>
+            </div>
+            <p>${escHtml(vaga.descricao || "Esta vaga ainda não possui descrição.")}</p>
+          </div>
+          <div class="clube-vaga-acoes">
+            <a href="./mercado.html?vaga=${encodeURIComponent(vaga.id)}">Ver anúncio</a>
+            <a href="./mercado.html?editarVaga=${encodeURIComponent(vaga.id)}#publicar-vaga">Editar</a>
+            <button type="button" data-clube-vaga-acao="renovar" data-vaga-id="${escHtml(vaga.id)}">Renovar</button>
+            <button type="button" data-clube-vaga-acao="compartilhar" data-vaga-id="${escHtml(vaga.id)}">Compartilhar</button>
+            <button type="button" class="perigo" data-clube-vaga-acao="excluir" data-vaga-id="${escHtml(vaga.id)}">Excluir</button>
+          </div>
+        </article>`;
+      }).join("")
+    : `<div class="clube-estado-vazio">${gestaoClubeAtual.vagas.length ? "Nenhuma vaga encontrada com essa busca." : "Seu clube ainda não publicou vagas."}</div>`;
+
+  lista.querySelectorAll("[data-clube-vaga-acao]").forEach((botao) => {
+    botao.addEventListener("click", () => executarAcaoVagaClube(botao.dataset.clubeVagaAcao, botao.dataset.vagaId, botao));
+  });
+}
+
+async function executarAcaoVagaClube(acao, vagaId, botao) {
+  if (!vagaId || !gestaoClubeAtual.uid) return;
+  if (acao === "compartilhar") {
+    const link = `${location.origin}${location.pathname.replace(/clubes\.html$/, "mercado.html")}?vaga=${encodeURIComponent(vagaId)}`;
+    try {
+      if (navigator.share) await navigator.share({ title: "Vaga no Mercado Pro Clubs", url: link });
+      else await navigator.clipboard.writeText(link);
+      toast("Link da vaga pronto para compartilhar.");
+    } catch (erro) {
+      if (erro?.name !== "AbortError") toast("Não foi possível compartilhar a vaga.", "erro");
+    }
+    return;
+  }
+
+  const vaga = gestaoClubeAtual.vagas.find((item) => item.id === vagaId);
+  if (!vaga) return;
+  const confirmado = await confirmModal({
+    titulo: acao === "excluir" ? "Excluir vaga" : "Renovar vaga",
+    mensagem: acao === "excluir"
+      ? `Excluir a vaga de ${rotuloPosicaoClube(vaga.posicao)}? Esta ação não pode ser desfeita.`
+      : "Renovar esta vaga por mais 30 dias?",
+    textoConfirmar: acao === "excluir" ? "Excluir" : "Renovar",
+    destrutivo: acao === "excluir",
+  });
+  if (!confirmado) return;
+  botao.disabled = true;
   try {
-    const elenco = await buscarElenco(uid);
-    const vagasSnap = await getDocs(query(collection(db, "vagas"), where("capitaoUid", "==", uid)));
-    document.getElementById("stat-jogadores").textContent = elenco.length;
-    document.getElementById("stat-vagas").textContent = vagasSnap.size;
-  } catch { /* silencioso */ }
+    if (acao === "excluir") await deleteDoc(doc(db, "vagas", vagaId));
+    if (acao === "renovar") await updateDoc(doc(db, "vagas", vagaId), { criadoEm: serverTimestamp() });
+    toast(acao === "excluir" ? "Vaga excluída." : "Vaga renovada por 30 dias.");
+    await carregarGestaoClube(gestaoClubeAtual.uid);
+  } catch (erro) {
+    console.error("Erro ao gerenciar vaga:", erro);
+    botao.disabled = false;
+    toast("Não foi possível atualizar esta vaga.", "erro");
+  }
+}
+
+function renderizarEstatisticasClube() {
+  const { elenco, vagas, candidaturas, convites, avaliacoes } = gestaoClubeAtual;
+  const aceitas = [...candidaturas, ...convites].filter((item) => statusNegociacaoClube(item) === "aceito").length;
+  const notas = avaliacoes.map((item) => Number(item.nota)).filter((nota) => Number.isInteger(nota) && nota >= 1 && nota <= 5);
+  const media = notas.length ? notas.reduce((soma, nota) => soma + nota, 0) / notas.length : 0;
+
+  const setTexto = (id, valor) => {
+    const elemento = document.getElementById(id);
+    if (elemento) elemento.textContent = String(valor);
+  };
+  setTexto("stat-jogadores", elenco.length);
+  setTexto("stat-vagas", vagas.length);
+  setTexto("stat-reputacao", notas.length ? media.toFixed(1) : "—");
+  setTexto("stat-negociacoes", candidaturas.length + convites.length);
+  setTexto("clube-stat-elenco", elenco.length);
+  setTexto("clube-stat-vagas", vagas.length);
+  setTexto("clube-stat-aceitas", aceitas);
+  setTexto("clube-stat-reputacao", notas.length ? media.toFixed(1) : "—");
+  setTexto("clube-stat-avaliacoes", notas.length ? `${notas.length} avaliação${notas.length === 1 ? "" : "ões"}` : "sem avaliações");
+  setTexto("clube-posicoes-total", `${elenco.length} jogador${elenco.length === 1 ? "" : "es"}`);
+  setTexto("clube-estatisticas-atualizadas", `Atualizado às ${new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date())}`);
+
+  const posicoes = elenco.reduce((mapa, jogador) => {
+    const posicao = rotuloPosicaoClube(jogador.posicao || "Não informada");
+    mapa.set(posicao, (mapa.get(posicao) || 0) + 1);
+    return mapa;
+  }, new Map());
+  const maior = Math.max(1, ...posicoes.values());
+  const grafico = document.getElementById("clube-posicoes-grafico");
+  if (grafico) {
+    grafico.innerHTML = posicoes.size
+      ? [...posicoes.entries()].sort((a, b) => b[1] - a[1]).map(([posicao, total]) => `
+          <div class="clube-barra-linha"><span>${escHtml(posicao)}</span><div class="clube-barra-trilha"><i style="width:${Math.round((total / maior) * 100)}%"></i></div><strong>${total}</strong></div>`).join("")
+      : '<div class="clube-estado-vazio">O elenco ainda não possui jogadores.</div>';
+  }
+
+  const funil = document.getElementById("clube-funil-candidaturas");
+  if (funil) {
+    const itens = [
+      ["Recebidas", candidaturas.length],
+      ["Pendentes", candidaturas.filter((item) => statusNegociacaoClube(item) === "pendente").length],
+      ["Aceitas", candidaturas.filter((item) => statusNegociacaoClube(item) === "aceito").length],
+      ["Recusadas", candidaturas.filter((item) => statusNegociacaoClube(item) === "recusado").length],
+    ];
+    funil.innerHTML = itens.map(([rotulo, total]) => `<article><strong>${total}</strong><span>${escHtml(rotulo)}</span></article>`).join("");
+  }
+
+  const atividade = document.getElementById("clube-atividade-recente");
+  if (atividade) {
+    const recentes = [
+      ...candidaturas.map((item) => ({ ...item, tipoAtividade: "Candidatura", nomeAtividade: item.jogadorNome || "Jogador" })),
+      ...convites.map((item) => ({ ...item, tipoAtividade: "Convite", nomeAtividade: item.jogadorNome || "Jogador" })),
+    ].sort((a, b) => timestampMsClube(b) - timestampMsClube(a)).slice(0, 6);
+    atividade.innerHTML = recentes.length
+      ? recentes.map((item) => {
+          const status = statusNegociacaoClube(item);
+          return `<div class="clube-atividade-item"><div><strong>${escHtml(item.tipoAtividade)} · ${escHtml(item.nomeAtividade)}</strong><span>${escHtml(formatarDataClube(item))}</span></div><b class="clube-status ${status}">${escHtml(status)}</b></div>`;
+        }).join("")
+      : '<div class="clube-estado-vazio">As negociações aparecerão aqui quando jogadores se candidatarem ou receberem convites.</div>';
+  }
+}
+
+async function carregarGestaoClube(uid) {
+  try {
+    const [elenco, vagasSnap, candidaturasSnap, convitesSnap, avaliacoesSnap] = await Promise.all([
+      buscarElenco(uid),
+      getDocs(query(collection(db, "vagas"), where("capitaoUid", "==", uid))),
+      getDocs(query(collection(db, "candidaturas"), where("capitaoUid", "==", uid))),
+      getDocs(query(collection(db, "convitesClube"), where("capitaoUid", "==", uid))),
+      getDocs(query(collection(db, "avaliacoes"), where("alvoUid", "==", uid))),
+    ]);
+    gestaoClubeAtual = {
+      uid,
+      elenco,
+      vagas: vagasSnap.docs.map((item) => ({ id: item.id, ...item.data() })).sort((a, b) => timestampMsClube(b) - timestampMsClube(a)),
+      candidaturas: candidaturasSnap.docs.map((item) => ({ id: item.id, ...item.data() })),
+      convites: convitesSnap.docs.map((item) => ({ id: item.id, ...item.data() })),
+      avaliacoes: avaliacoesSnap.docs.map((item) => ({ id: item.id, ...item.data() })),
+    };
+    renderizarVagasClube();
+    renderizarEstatisticasClube();
+    const busca = document.getElementById("clube-busca-vagas");
+    if (busca && !busca.dataset.listenerGestao) {
+      busca.dataset.listenerGestao = "true";
+      busca.addEventListener("input", renderizarVagasClube);
+    }
+  } catch (erro) {
+    console.error("Erro ao carregar gestão do clube:", erro);
+    const lista = document.getElementById("clube-vagas-lista");
+    if (lista) lista.innerHTML = '<div class="clube-estado-vazio">Não foi possível carregar a gestão do clube.</div>';
+    toast("Não foi possível carregar todos os dados do clube.", "erro");
+  }
+}
+
+async function carregarEstatisticas(uid) {
+  await carregarGestaoClube(uid);
 }
 
 // ─── Visão de quem não é capitão (jogador de time, ou sem clube) ───────────────
@@ -640,7 +931,17 @@ function itemElencoSimples(jogador, capitaoUid) {
     </div>`;
 }
 
+function configurarAbasGerenciais(visiveis, possuiClube = true) {
+  ["vagas", "estatisticas", "aparencia"].forEach((aba) => {
+    const botao = document.querySelector(`[data-tab="${aba}"]`);
+    if (botao) botao.hidden = !visiveis;
+  });
+  const elenco = document.querySelector('[data-tab="elenco"]');
+  if (elenco) elenco.hidden = !possuiClube;
+}
+
 async function renderPainelJogador(perfilAtual) {
+  configurarAbasGerenciais(false, true);
   const capitaoUid = perfilAtual.clubeAtualId;
   const elenco = await buscarElenco(capitaoUid);
   document.getElementById("dashboard-clube").outerHTML = `
@@ -675,6 +976,7 @@ async function renderPainelJogador(perfilAtual) {
 }
 
 function renderCTASemClube() {
+  configurarAbasGerenciais(false, false);
   document.getElementById("dashboard-clube").outerHTML = `
     <div class="card" style="max-width:520px;margin:60px auto;text-align:center">
       <p style="color:#fff">⚽ Você ainda não faz parte de nenhum clube.</p>
@@ -857,6 +1159,8 @@ function renderizarVagasPublicas(vagas) {
 function renderizarPerfilPublico(clube, perfilCapitao, elenco, vagas, uidClube) {
   const publico = document.getElementById("clube-publico");
   publico.hidden = false;
+  publico.style.setProperty("--clube-cor", corHexSegura(clube.corPrimaria, "#12e06c"));
+  publico.style.setProperty("--clube-fundo", corHexSegura(clube.corSecundaria, "#07140d"));
 
   const reputacao = document.getElementById("publico-reputacao");
   if (reputacao) reputacao.dataset.reputacaoUid = uidClube;
@@ -872,6 +1176,11 @@ function renderizarPerfilPublico(clube, perfilCapitao, elenco, vagas, uidClube) 
   document.title = `${nome} | Mercado Pro Clubs`;
   document.getElementById("publico-nome-clube").textContent = nome;
   document.getElementById("publico-capitao").textContent = `Capitão: ${textoPublico(perfilCapitao.nickname || clube.capitaoNome, "Não informado")}`;
+  const lema = document.getElementById("publico-lema");
+  if (lema) {
+    lema.textContent = String(clube.lema || "").trim();
+    lema.hidden = !lema.textContent;
+  }
   const escudoElemento = document.getElementById("publico-escudo");
   escudoElemento.src = escudo;
   escudoElemento.alt = `Escudo do ${nome}`;
@@ -1007,11 +1316,26 @@ function ligarAbas() {
     btn.addEventListener("click", () => {
       const alvo = btn.dataset.tab;
 
-      botoes.forEach(b => b.classList.toggle("ativo", b === btn));
+      botoes.forEach((b) => {
+        const ativa = b === btn;
+        b.classList.toggle("ativo", ativa);
+        b.setAttribute("aria-selected", String(ativa));
+        b.tabIndex = ativa ? 0 : -1;
+      });
 
       document.querySelectorAll(".tab-painel[data-painel]").forEach(painel => {
         painel.hidden = painel.dataset.painel !== alvo;
       });
+    });
+    btn.addEventListener("keydown", (evento) => {
+      if (!["ArrowLeft", "ArrowRight"].includes(evento.key)) return;
+      const visiveis = [...botoes].filter((botao) => !botao.hidden);
+      const atual = visiveis.indexOf(btn);
+      const direcao = evento.key === "ArrowRight" ? 1 : -1;
+      const proxima = visiveis[(atual + direcao + visiveis.length) % visiveis.length];
+      evento.preventDefault();
+      proxima?.focus();
+      proxima?.click();
     });
   });
 }
