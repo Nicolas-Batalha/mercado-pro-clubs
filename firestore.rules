@@ -314,6 +314,146 @@ service cloud.firestore {
       ) || canModerate();
     }
 
+    match /partidasClubes/{partidaId} {
+      function partidaNovaValida() {
+        let data = request.resource.data;
+        return data.keys().hasAll([
+            'clubeId', 'clubeNome', 'adversarioId', 'adversarioNome',
+            'competicao', 'tipo', 'dataPartida', 'placarClube',
+            'placarAdversario', 'estatisticas', 'camposEstatisticas',
+            'jogadores', 'provaImagem', 'observacao', 'status',
+            'criadoPor', 'criadoEm', 'atualizadoEm'
+          ])
+          && data.keys().hasOnly([
+            'clubeId', 'clubeNome', 'adversarioId', 'adversarioNome',
+            'competicao', 'tipo', 'dataPartida', 'placarClube',
+            'placarAdversario', 'estatisticas', 'camposEstatisticas',
+            'jogadores', 'provaImagem', 'observacao', 'status',
+            'criadoPor', 'criadoEm', 'atualizadoEm'
+          ])
+          && data.clubeId == request.auth.uid
+          && data.criadoPor == request.auth.uid
+          && data.clubeNome is string
+          && data.clubeNome.size() > 0
+          && data.clubeNome.size() <= 100
+          && data.adversarioId is string
+          && data.adversarioNome is string
+          && data.adversarioNome.size() >= 2
+          && data.adversarioNome.size() <= 100
+          && data.competicao is string
+          && data.competicao.size() <= 100
+          && data.tipo in ['torneio', 'liga', 'amistoso', 'treino']
+          && data.dataPartida is timestamp
+          && data.dataPartida <= request.time + duration.value(1, 'd')
+          && data.dataPartida >= request.time - duration.value(3650, 'd')
+          && data.placarClube is int
+          && data.placarClube >= 0
+          && data.placarClube <= 99
+          && data.placarAdversario is int
+          && data.placarAdversario >= 0
+          && data.placarAdversario <= 99
+          && data.estatisticas is map
+          && data.estatisticas.keys().hasOnly([
+            'posse', 'finalizacoes', 'chutesGol', 'passes', 'desarmes',
+            'defesas', 'escanteios', 'faltas', 'amarelos', 'vermelhos'
+          ])
+          && data.estatisticas.posse is int
+          && data.estatisticas.posse >= 0
+          && data.estatisticas.posse <= 100
+          && data.estatisticas.finalizacoes is int
+          && data.estatisticas.finalizacoes >= 0
+          && data.estatisticas.finalizacoes <= 999
+          && data.estatisticas.chutesGol is int
+          && data.estatisticas.chutesGol >= 0
+          && data.estatisticas.chutesGol <= 999
+          && data.estatisticas.passes is int
+          && data.estatisticas.passes >= 0
+          && data.estatisticas.passes <= 9999
+          && data.estatisticas.desarmes is int
+          && data.estatisticas.desarmes >= 0
+          && data.estatisticas.desarmes <= 999
+          && data.estatisticas.defesas is int
+          && data.estatisticas.defesas >= 0
+          && data.estatisticas.defesas <= 999
+          && data.estatisticas.escanteios is int
+          && data.estatisticas.escanteios >= 0
+          && data.estatisticas.escanteios <= 99
+          && data.estatisticas.faltas is int
+          && data.estatisticas.faltas >= 0
+          && data.estatisticas.faltas <= 99
+          && data.estatisticas.amarelos is int
+          && data.estatisticas.amarelos >= 0
+          && data.estatisticas.amarelos <= 99
+          && data.estatisticas.vermelhos is int
+          && data.estatisticas.vermelhos >= 0
+          && data.estatisticas.vermelhos <= 99
+          && data.camposEstatisticas is list
+          && data.camposEstatisticas.size() <= 10
+          && data.camposEstatisticas.toSet().hasOnly([
+            'posse', 'finalizacoes', 'chutesGol', 'passes', 'desarmes',
+            'defesas', 'escanteios', 'faltas', 'amarelos', 'vermelhos'
+          ])
+          && data.jogadores is list
+          && data.jogadores.size() <= 30
+          && data.provaImagem is string
+          && data.provaImagem.size() <= 650000
+          && data.observacao is string
+          && data.observacao.size() <= 300
+          && data.criadoEm == request.time
+          && data.atualizadoEm == request.time
+          && exists(/databases/$(database)/documents/clubes/$(request.auth.uid))
+          && data.clubeNome == get(/databases/$(database)/documents/clubes/$(request.auth.uid)).data.nome
+          && get(/databases/$(database)/documents/clubes/$(request.auth.uid)).data.get('suspenso', false) != true
+          && (
+            (data.adversarioId == '' && data.status == 'informada')
+            || (
+              validUid(data.adversarioId)
+              && data.adversarioId != request.auth.uid
+              && data.status == 'pendente'
+              && exists(/databases/$(database)/documents/clubes/$(data.adversarioId))
+              && data.adversarioNome == get(/databases/$(database)/documents/clubes/$(data.adversarioId)).data.nome
+            )
+          );
+      }
+
+      function adversarioConfirma() {
+        return verifiedAccount()
+          && resource.data.adversarioId == request.auth.uid
+          && resource.data.status == 'pendente'
+          && request.resource.data.status == 'confirmada'
+          && request.resource.data.confirmadoPor == request.auth.uid
+          && request.resource.data.confirmadoEm == request.time
+          && request.resource.data.atualizadoEm == request.time
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'confirmadoPor', 'confirmadoEm', 'atualizadoEm'
+          ]);
+      }
+
+      function adversarioContesta() {
+        return verifiedAccount()
+          && resource.data.adversarioId == request.auth.uid
+          && resource.data.status == 'pendente'
+          && request.resource.data.status == 'contestada'
+          && request.resource.data.contestadoPor == request.auth.uid
+          && request.resource.data.contestadoEm == request.time
+          && request.resource.data.atualizadoEm == request.time
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'contestadoPor', 'contestadoEm', 'atualizadoEm'
+          ]);
+      }
+
+      allow read: if signedIn()
+        && (resource.data.clubeId == request.auth.uid
+          || resource.data.adversarioId == request.auth.uid
+          || isAdmin());
+      allow create: if verifiedAccount() && partidaNovaValida();
+      allow update: if adversarioConfirma() || adversarioContesta();
+      allow delete: if canModerate()
+        || (verifiedAccount()
+          && resource.data.clubeId == request.auth.uid
+          && resource.data.status != 'confirmada');
+    }
+
     match /vagas/{vagaId} {
       allow read: if true;
       allow create: if verifiedAccount()

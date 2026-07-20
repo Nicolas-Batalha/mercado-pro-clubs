@@ -2489,6 +2489,7 @@ flex-direction: column;
 }
 .clube-resumo-card,
 .clube-estatistica-card{
+    display:block;
     position:relative;
     min-height:120px;
     overflow:hidden;
@@ -2534,6 +2535,7 @@ flex-direction: column;
     font-size:10px;
 }
 .clube-gestao-card{
+    display:block;
     padding:22px;
 }
 .clube-gestao-toolbar{
@@ -2656,6 +2658,7 @@ flex-direction: column;
     margin-bottom:16px;
 }
 .clube-analise-card{
+    display:block;
     min-width:0;
 }
 .clube-analise-titulo{
@@ -2756,6 +2759,692 @@ flex-direction: column;
 .clube-status.aceito{color:#12e06c;border-color:rgba(18,224,108,.3)}
 .clube-status.pendente{color:#f7c948;border-color:rgba(247,201,72,.3)}
 .clube-status.recusado,.clube-status.cancelado{color:#ff8d8d;border-color:rgba(255,80,80,.28)}
+
+/* =========================================================================
+   MERCADO STATS — desempenho real do clube
+========================================================================= */
+.mercado-stats-cabecalho-acoes{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:14px;
+}
+.mercado-stats-resumo{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:16px;
+}
+.mercado-stat-card{
+    display:block;
+    position:relative;
+    min-height:114px;
+    overflow:hidden;
+    background:linear-gradient(145deg,rgba(18,224,108,.055),transparent 60%),#141714;
+}
+.mercado-stat-card::after{
+    position:absolute;
+    right:-30px;
+    bottom:-46px;
+    width:105px;
+    height:105px;
+    border-radius:50%;
+    background:rgba(18,224,108,.075);
+    content:"";
+}
+.mercado-stat-card.vitoria::after{background:rgba(18,224,108,.12)}
+.mercado-stat-card.empate::after{background:rgba(247,201,72,.1)}
+.mercado-stat-card.derrota::after{background:rgba(255,92,92,.09)}
+.mercado-stat-card > span,
+.mercado-stat-card > strong,
+.mercado-stat-card > small{
+    position:relative;
+    z-index:1;
+    display:block;
+}
+.mercado-stat-card > span{
+    color:#8d9991;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+}
+.mercado-stat-card > strong{
+    margin:10px 0 5px;
+    color:#fff;
+    font-size:30px;
+    line-height:1;
+}
+.mercado-stat-card.vitoria > strong{color:#12e06c}
+.mercado-stat-card.empate > strong{color:#f7c948}
+.mercado-stat-card.derrota > strong{color:#ff8484}
+.mercado-stat-card > small{
+    color:#718078;
+    font-size:9px;
+}
+.mercado-stats-confirmacoes{
+    display:block;
+    margin-bottom:16px;
+    border-color:rgba(247,201,72,.28);
+    background:linear-gradient(110deg,rgba(247,201,72,.07),transparent 45%),#141714;
+}
+.mercado-stats-confirmacoes[hidden],
+.mercado-stats-modal[hidden]{display:none!important}
+.mercado-stats-confirmacoes-lista{
+    display:grid;
+    gap:9px;
+}
+.mercado-stats-confirmacao-item{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:18px;
+    padding:14px 15px;
+    border:1px solid #303630;
+    border-radius:11px;
+    background:#0e120f;
+}
+.mercado-stats-confirmacao-item span,
+.mercado-stats-confirmacao-item strong,
+.mercado-stats-confirmacao-item small{display:block}
+.mercado-stats-confirmacao-item span{
+    color:#87928a;
+    font-size:9px;
+}
+.mercado-stats-confirmacao-item strong{
+    margin:3px 0;
+    color:#fff;
+    font-size:13px;
+}
+.mercado-stats-confirmacao-item small{
+    color:#b7c2ba;
+    font-size:10px;
+}
+.mercado-stats-confirmacao-item > div:last-child{
+    display:flex;
+    gap:8px;
+}
+.mercado-stats-confirmacao-item button,
+.mercado-stats-partida-acoes button{
+    min-height:34px;
+    padding:7px 12px;
+    color:#06140b;
+    border:1px solid #12e06c;
+    border-radius:8px;
+    background:#12e06c;
+    font:inherit;
+    font-size:9px;
+    font-weight:850;
+    cursor:pointer;
+}
+.mercado-stats-confirmacao-item button.perigo,
+.mercado-stats-partida-acoes button.perigo{
+    color:#ff9a9a;
+    border-color:rgba(255,90,90,.35);
+    background:rgba(255,90,90,.06);
+}
+.mercado-stats-confirmacao-item button:disabled,
+.mercado-stats-partida-acoes button:disabled{opacity:.5;cursor:wait}
+.mercado-stats-paineis{
+    display:grid;
+    grid-template-columns:minmax(0,1.65fr) minmax(270px,.7fr);
+    align-items:start;
+    gap:16px;
+    margin-bottom:16px;
+}
+.mercado-stats-historico-card{display:block;min-width:0}
+.mercado-stats-historico-card select{
+    min-height:36px;
+    padding:8px 32px 8px 11px;
+    color:#dce6df;
+    border:1px solid #303832;
+    border-radius:8px;
+    outline:none;
+    background:#0d110e;
+    font:inherit;
+    font-size:9px;
+}
+.mercado-stats-lateral{
+    display:grid;
+    gap:16px;
+}
+.mercado-stats-forma-card,
+.mercado-stats-medias-card,
+.mercado-stats-jogadores-card{display:block}
+.mercado-stats-forma{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    min-height:38px;
+}
+.mercado-stats-forma span,
+.mercado-stats-placar span{
+    display:inline-grid;
+    width:34px;
+    height:34px;
+    place-items:center;
+    border:1px solid #39413b;
+    border-radius:50%;
+    color:#d8e1db;
+    background:#202521;
+    font-size:10px;
+    font-weight:900;
+}
+.mercado-stats-forma span.vitoria,
+.mercado-stats-placar span.vitoria{color:#07140b;border-color:#12e06c;background:#12e06c}
+.mercado-stats-forma span.empate,
+.mercado-stats-placar span.empate{color:#1b1603;border-color:#f7c948;background:#f7c948}
+.mercado-stats-forma span.derrota,
+.mercado-stats-placar span.derrota{color:#fff;border-color:#dd5555;background:#bd3d3d}
+.mercado-stats-forma-card > p{
+    margin:12px 0 0;
+    color:#7e8b82;
+    font-size:10px;
+    line-height:1.5;
+}
+.mercado-stats-medias{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+.mercado-stats-medias > div{
+    padding:11px;
+    border:1px solid #2c332e;
+    border-radius:9px;
+    background:#101311;
+}
+.mercado-stats-medias span,
+.mercado-stats-medias strong{display:block}
+.mercado-stats-medias span{
+    color:#78857d;
+    font-size:8px;
+}
+.mercado-stats-medias strong{
+    margin-top:5px;
+    color:#12e06c;
+    font-size:17px;
+}
+.mercado-stats-historico{
+    display:grid;
+    gap:11px;
+}
+.mercado-stats-partida{
+    padding:15px;
+    border:1px solid #2b332d;
+    border-radius:12px;
+    background:linear-gradient(110deg,rgba(18,224,108,.035),transparent 45%),#101311;
+}
+.mercado-stats-partida.contestada{
+    border-color:rgba(255,85,85,.25);
+    background:linear-gradient(110deg,rgba(255,85,85,.045),transparent 45%),#101311;
+}
+.mercado-stats-partida-topo{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+}
+.mercado-stats-partida-topo div span,
+.mercado-stats-partida-topo div b{display:block}
+.mercado-stats-partida-topo div span{
+    color:#78847c;
+    font-size:8px;
+}
+.mercado-stats-partida-topo div b{
+    margin-top:3px;
+    color:#dfe8e2;
+    font-size:10px;
+}
+.mercado-stats-status{
+    padding:5px 8px;
+    border:1px solid #3a423c;
+    border-radius:999px;
+    color:#adb8b1;
+    font-size:8px;
+    font-weight:800;
+    white-space:nowrap;
+}
+.mercado-stats-status.confirmada{color:#12e06c;border-color:rgba(18,224,108,.35);background:rgba(18,224,108,.06)}
+.mercado-stats-status.pendente{color:#f7c948;border-color:rgba(247,201,72,.35);background:rgba(247,201,72,.05)}
+.mercado-stats-status.contestada{color:#ff8585;border-color:rgba(255,85,85,.35);background:rgba(255,85,85,.05)}
+.mercado-stats-placar{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    align-items:center;
+    gap:12px;
+    margin:15px 0;
+}
+.mercado-stats-placar > strong{
+    color:#fff;
+    font-size:12px;
+}
+.mercado-stats-placar > strong:last-child{text-align:right}
+.mercado-stats-placar > div{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+.mercado-stats-placar > div b{
+    color:#fff;
+    font-size:20px;
+    white-space:nowrap;
+}
+.mercado-stats-placar > div i{
+    color:#637068;
+    font-style:normal;
+    font-weight:500;
+}
+.mercado-stats-partida-numeros{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:7px;
+    padding-top:12px;
+    border-top:1px solid #272e29;
+}
+.mercado-stats-partida-numeros span{
+    color:#78857d;
+    font-size:8px;
+    text-align:center;
+}
+.mercado-stats-partida-numeros b{
+    display:block;
+    margin-bottom:3px;
+    color:#dce7e0;
+    font-size:12px;
+}
+.mercado-stats-partida-observacao{
+    margin:11px 0 0;
+    color:#89968d;
+    font-size:9px;
+    line-height:1.5;
+}
+.mercado-stats-partida-acoes{
+    display:flex;
+    align-items:flex-start;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:11px;
+}
+.mercado-stats-partida-acoes details{
+    margin-right:auto;
+}
+.mercado-stats-partida-acoes summary{
+    padding:8px 10px;
+    color:#b7c3bb;
+    border:1px solid #313a33;
+    border-radius:8px;
+    background:#171b18;
+    font-size:9px;
+    font-weight:800;
+    cursor:pointer;
+    list-style:none;
+}
+.mercado-stats-partida-acoes details[open]{width:100%;order:2}
+.mercado-stats-partida-acoes details[open] summary{width:max-content;margin-bottom:9px}
+.mercado-stats-partida-acoes details img{
+    display:block;
+    width:100%;
+    max-height:430px;
+    object-fit:contain;
+    border:1px solid #303832;
+    border-radius:10px;
+    background:#090c0a;
+}
+.mercado-stats-jogadores-card{margin-bottom:20px}
+.mercado-stats-tabela-wrap{
+    width:100%;
+    overflow-x:auto;
+}
+.mercado-stats-tabela{
+    width:100%;
+    min-width:650px;
+    border-collapse:collapse;
+}
+.mercado-stats-tabela th,
+.mercado-stats-tabela td{
+    padding:11px 10px;
+    color:#cad5ce;
+    border-bottom:1px solid #29302b;
+    font-size:10px;
+    text-align:center;
+}
+.mercado-stats-tabela th{
+    color:#7e8a82;
+    font-size:8px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+.mercado-stats-tabela th:first-child,
+.mercado-stats-tabela td:first-child{text-align:left}
+.mercado-stats-tabela tbody tr:last-child td{border-bottom:0}
+.mercado-stats-jogador{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    color:inherit;
+    text-decoration:none;
+}
+.mercado-stats-jogador img{
+    width:34px;
+    height:34px;
+    flex:0 0 auto;
+    object-fit:cover;
+    border:1px solid rgba(18,224,108,.35);
+    border-radius:50%;
+    background:#0b0f0c;
+}
+.mercado-stats-jogador strong,
+.mercado-stats-jogador small{display:block}
+.mercado-stats-jogador strong{color:#fff;font-size:10px}
+.mercado-stats-jogador small{margin-top:2px;color:#77837b;font-size:8px}
+.mercado-stats-gestao{
+    padding-top:4px;
+}
+.mercado-stats-secao-titulo{
+    margin:5px 0 13px;
+}
+.mercado-stats-secao-titulo h3{
+    margin:4px 0 0;
+    color:#fff;
+    font-size:17px;
+}
+.mercado-stats-modal{
+    position:fixed;
+    z-index:10020;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:22px;
+    background:rgba(0,0,0,.78);
+    backdrop-filter:blur(6px);
+}
+.mercado-stats-modal-conteudo{
+    width:min(1080px,100%);
+    max-height:calc(100vh - 44px);
+    overflow-y:auto;
+    border:1px solid #303a33;
+    border-radius:17px;
+    background:#0d100e;
+    box-shadow:0 24px 80px rgba(0,0,0,.65);
+}
+.mercado-stats-modal-topo{
+    position:sticky;
+    z-index:4;
+    top:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    padding:19px 22px;
+    border-bottom:1px solid #29312b;
+    background:rgba(13,16,14,.96);
+    backdrop-filter:blur(10px);
+}
+.mercado-stats-modal-topo h2{
+    margin:4px 0 0;
+    color:#fff;
+    font-size:22px;
+}
+.mercado-stats-modal-topo > button{
+    display:grid;
+    width:38px;
+    height:38px;
+    place-items:center;
+    color:#c8d2cb;
+    border:1px solid #343d36;
+    border-radius:10px;
+    background:#171b18;
+    font-size:24px;
+    cursor:pointer;
+}
+.mercado-stats-form-secao{
+    margin:18px 22px 0;
+    padding:18px;
+    border:1px solid #29322b;
+    border-radius:13px;
+    background:#121512;
+}
+.mercado-stats-form-secao h3{
+    margin:0 0 14px;
+    color:#fff;
+    font-size:15px;
+}
+.mercado-stats-form-secao-titulo p{
+    margin:-8px 0 14px;
+    color:#78857c;
+    font-size:9px;
+}
+.mercado-stats-form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+}
+.mercado-stats-campo-largo{grid-column:1/-1}
+.mercado-stats-form-grid label,
+.mercado-stats-numeros-grid label,
+.mercado-stats-observacao,
+.mercado-stats-jogador-form > label:not(.mercado-stats-participou):not(.mercado-stats-mvp){
+    display:grid;
+    gap:6px;
+    color:#aab6ae;
+    font-size:9px;
+    font-weight:750;
+}
+.mercado-stats-form-grid input,
+.mercado-stats-form-grid select,
+.mercado-stats-numeros-grid input,
+.mercado-stats-observacao textarea,
+.mercado-stats-jogador-form input[type="number"]{
+    width:100%;
+    min-height:40px;
+    padding:9px 11px;
+    color:#fff;
+    border:1px solid #303a33;
+    border-radius:8px;
+    outline:none;
+    background:#0a0d0b;
+    font:inherit;
+    font-size:10px;
+}
+.mercado-stats-form-grid input:focus,
+.mercado-stats-form-grid select:focus,
+.mercado-stats-numeros-grid input:focus,
+.mercado-stats-observacao textarea:focus,
+.mercado-stats-jogador-form input:focus{border-color:#12e06c;box-shadow:0 0 0 3px rgba(18,224,108,.08)}
+.mercado-stats-form-grid input[readonly]{color:#99a69d;background:#151916}
+.mercado-stats-placar-form{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:17px;
+    margin-top:18px;
+}
+.mercado-stats-placar-form label{
+    display:grid;
+    gap:7px;
+    color:#dfe8e2;
+    font-size:10px;
+    font-weight:850;
+    text-align:center;
+}
+.mercado-stats-placar-form input{
+    width:92px;
+    height:66px;
+    color:#fff;
+    border:1px solid #364039;
+    border-radius:11px;
+    outline:none;
+    background:#080b09;
+    font:inherit;
+    font-size:28px;
+    font-weight:900;
+    text-align:center;
+}
+.mercado-stats-placar-form input:focus{border-color:#12e06c}
+.mercado-stats-placar-form > b{
+    margin-bottom:18px;
+    color:#667168;
+    font-size:22px;
+}
+.mercado-stats-numeros-grid{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:10px;
+}
+.mercado-stats-jogadores-form{
+    display:grid;
+    gap:8px;
+}
+.mercado-stats-jogador-form{
+    display:grid;
+    grid-template-columns:minmax(220px,1.5fr) repeat(4,minmax(66px,.45fr)) 54px;
+    align-items:end;
+    gap:9px;
+    padding:11px;
+    border:1px solid #29312b;
+    border-radius:10px;
+    opacity:.66;
+    background:#0d100e;
+    transition:.2s;
+}
+.mercado-stats-jogador-form.ativo{
+    border-color:rgba(18,224,108,.34);
+    opacity:1;
+    background:rgba(18,224,108,.035);
+}
+.mercado-stats-participou{
+    display:flex;
+    min-width:0;
+    align-items:center;
+    gap:9px;
+    cursor:pointer;
+}
+.mercado-stats-participou > input{
+    width:16px;
+    height:16px;
+    accent-color:#12e06c;
+}
+.mercado-stats-participou img{
+    width:35px;
+    height:35px;
+    flex:0 0 auto;
+    object-fit:cover;
+    border-radius:50%;
+    background:#070a08;
+}
+.mercado-stats-participou strong,
+.mercado-stats-participou small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mercado-stats-participou strong{color:#fff;font-size:10px}
+.mercado-stats-participou small{margin-top:2px;color:#77847b;font-size:8px}
+.mercado-stats-mvp{
+    display:grid;
+    min-height:40px;
+    place-items:center;
+    color:#9da9a1;
+    border:1px solid #303832;
+    border-radius:8px;
+    font-size:8px;
+    font-weight:900;
+    cursor:pointer;
+}
+.mercado-stats-mvp input{accent-color:#f7c948}
+.mercado-stats-prova-upload{
+    display:flex;
+    min-height:62px;
+    align-items:center;
+    justify-content:center;
+    padding:13px;
+    color:#aeb9b1;
+    border:1px dashed rgba(18,224,108,.5);
+    border-radius:10px;
+    background:rgba(18,224,108,.035);
+    font-size:10px;
+    text-align:center;
+    cursor:pointer;
+}
+.mercado-stats-prova-upload input{display:none}
+.mercado-stats-prova-preview{
+    display:grid;
+    justify-items:center;
+    gap:9px;
+    margin-top:12px;
+}
+.mercado-stats-prova-preview[hidden]{display:none}
+.mercado-stats-prova-preview img{
+    width:min(500px,100%);
+    max-height:320px;
+    object-fit:contain;
+    border:1px solid #303a33;
+    border-radius:10px;
+    background:#080b09;
+}
+.mercado-stats-prova-preview button{
+    padding:7px 10px;
+    color:#ff9999;
+    border:1px solid rgba(255,90,90,.3);
+    border-radius:7px;
+    background:rgba(255,90,90,.05);
+    font:inherit;
+    font-size:9px;
+    cursor:pointer;
+}
+.mercado-stats-observacao{margin-top:13px}
+.mercado-stats-observacao textarea{min-height:82px;resize:vertical;line-height:1.5}
+.mercado-stats-form-feedback{
+    min-height:17px;
+    margin:12px 22px 0;
+    color:#ff9b9b;
+    font-size:10px;
+    text-align:right;
+}
+.mercado-stats-form-acoes{
+    position:sticky;
+    bottom:0;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:6px;
+    padding:15px 22px 19px;
+    border-top:1px solid #263029;
+    background:rgba(13,16,14,.96);
+    backdrop-filter:blur(10px);
+}
+.mercado-stats-form-acoes > button:first-child{
+    min-height:42px;
+    padding:9px 16px;
+    color:#bec9c1;
+    border:1px solid #354038;
+    border-radius:9px;
+    background:#171b18;
+    font:inherit;
+    font-size:10px;
+    font-weight:800;
+    cursor:pointer;
+}
+.mercado-stats-form-acoes button:disabled{opacity:.55;cursor:wait}
+.mercado-stats-modal-aberto{overflow:hidden}
+.mercado-stats-toast{
+    position:fixed;
+    z-index:10050;
+    right:22px;
+    bottom:22px;
+    max-width:min(410px,calc(100vw - 32px));
+    padding:13px 17px;
+    color:#04130a;
+    border:1px solid #12e06c;
+    border-radius:10px;
+    opacity:0;
+    background:#12e06c;
+    box-shadow:0 12px 35px rgba(0,0,0,.5);
+    font-size:11px;
+    font-weight:850;
+    transform:translateY(8px);
+    transition:.22s;
+}
+.mercado-stats-toast.erro{color:#fff;border-color:#d95353;background:#b83737}
+.mercado-stats-toast.visivel{opacity:1;transform:translateY(0)}
 .clube-aparencia-grid{
     display:grid;
     grid-template-columns:minmax(0,1fr) minmax(320px,.8fr);
@@ -2925,6 +3614,12 @@ flex-direction: column;
 @media (max-width:900px){
     .clube-estatisticas-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     .clube-analises-grid,.clube-aparencia-grid{grid-template-columns:1fr}
+    .mercado-stats-resumo{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .mercado-stats-paineis{grid-template-columns:1fr}
+    .mercado-stats-lateral{grid-template-columns:1fr 1fr}
+    .mercado-stats-numeros-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .mercado-stats-jogador-form{grid-template-columns:minmax(190px,1.3fr) repeat(3,minmax(62px,.45fr));align-items:end}
+    .mercado-stats-jogador-form > label:nth-of-type(5),.mercado-stats-jogador-form > label:nth-of-type(6){grid-column:auto}
 }
 @media (max-width:680px){
     .clube-area-cabecalho,.clube-gestao-toolbar{align-items:stretch;flex-direction:column}
@@ -2934,4 +3629,38 @@ flex-direction: column;
     .clube-vaga-acoes{justify-content:flex-start;max-width:none}
     .clube-cores-grid,.clube-temas > div{grid-template-columns:1fr}
     .clube-aparencia-preview{min-height:360px}
+    .mercado-stats-cabecalho-acoes{align-items:stretch;flex-direction:column}
+    .mercado-stats-resumo{grid-template-columns:1fr 1fr;gap:9px}
+    .mercado-stat-card{min-height:104px;padding:14px}
+    .mercado-stats-lateral{grid-template-columns:1fr}
+    .mercado-stats-confirmacao-item{grid-template-columns:1fr}
+    .mercado-stats-confirmacao-item > div:last-child{display:grid;grid-template-columns:1fr 1fr}
+    .mercado-stats-confirmacao-item button{width:100%}
+    .mercado-stats-historico-card .clube-analise-titulo{align-items:stretch;flex-direction:column}
+    .mercado-stats-historico-card select{width:100%}
+    .mercado-stats-placar{grid-template-columns:1fr;justify-items:center;text-align:center}
+    .mercado-stats-placar > strong:last-child{text-align:center}
+    .mercado-stats-placar > div{grid-row:2}
+    .mercado-stats-partida-numeros{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .mercado-stats-modal{align-items:flex-end;padding:0}
+    .mercado-stats-modal-conteudo{max-height:94vh;border-right:0;border-bottom:0;border-left:0;border-radius:18px 18px 0 0}
+    .mercado-stats-modal-topo{padding:16px}
+    .mercado-stats-form-secao{margin:13px 13px 0;padding:14px}
+    .mercado-stats-form-grid{grid-template-columns:1fr}
+    .mercado-stats-campo-largo{grid-column:auto}
+    .mercado-stats-numeros-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .mercado-stats-jogador-form{grid-template-columns:repeat(2,minmax(0,1fr));align-items:end}
+    .mercado-stats-participou{grid-column:1/-1;padding-bottom:5px}
+    .mercado-stats-mvp{min-height:40px}
+    .mercado-stats-form-feedback{margin-right:13px;margin-left:13px;text-align:left}
+    .mercado-stats-form-acoes{padding:13px}
+    .mercado-stats-form-acoes > button{flex:1}
+    .mercado-stats-toast{right:16px;bottom:16px}
+}
+@media (max-width:420px){
+    .mercado-stats-resumo{grid-template-columns:1fr}
+    .mercado-stats-medias{grid-template-columns:1fr}
+    .mercado-stats-numeros-grid{grid-template-columns:1fr 1fr}
+    .mercado-stats-placar-form{gap:10px}
+    .mercado-stats-placar-form input{width:78px;height:60px}
 }

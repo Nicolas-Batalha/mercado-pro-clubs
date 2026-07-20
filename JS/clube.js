@@ -13,6 +13,7 @@ import {
   collection, query, where, getDocs, onSnapshot, limit
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { confirmModal } from "./confirm-modal.js";
+import { carregarMercadoStats, inicializarMercadoStats } from "./mercado-stats.js?v=20260720-1";
 
 function toast(msg, tipo = "sucesso") {
   document.getElementById("toast-clube")?.remove();
@@ -591,6 +592,11 @@ function atualizarProgressoClube() {
 // ─── Liga os eventos do dashboard (upload, chips, checkboxes, preview, salvar) ─
 function ligarEventosDashboard(uid, { novoClube = false } = {}) {
   let estaCriandoClube = novoClube;
+  inicializarMercadoStats({
+    uid,
+    getClube: () => clubeCarregado,
+    getElenco: () => gestaoClubeAtual.elenco,
+  });
   // Preview ao vivo
   ["clube","divisao","horario-treino","objetivo","jogo","plataforma","clube-lema","clube-cor-primaria","clube-cor-secundaria"].forEach(id =>
     document.getElementById(id)?.addEventListener("input", atualizarPreview)
@@ -935,6 +941,7 @@ async function carregarGestaoClube(uid) {
     };
     renderizarVagasClube();
     renderizarEstatisticasClube();
+    await carregarMercadoStats({ uid, clube: clubeCarregado, elenco });
     const busca = document.getElementById("clube-busca-vagas");
     if (busca && !busca.dataset.listenerGestao) {
       busca.dataset.listenerGestao = "true";

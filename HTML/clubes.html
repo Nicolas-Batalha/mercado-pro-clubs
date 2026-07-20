@@ -7,7 +7,7 @@
       name="description"
       content="Gerencie as informações, o elenco, as vagas e os contatos do seu clube de Pro Clubs."
     />
-    <link rel="stylesheet" href="../CSS/style.css" />
+    <link rel="stylesheet" href="../CSS/style.css?v=20260720-1" />
     <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml" />
     <title>Meu Clube | Mercado Pro Clubs</title>
   </head>
@@ -672,32 +672,171 @@
         <div class="tab-painel" id="painel-estatisticas" role="tabpanel" aria-labelledby="aba-estatisticas" data-painel="estatisticas" hidden>
           <div class="clube-area-cabecalho card">
             <div>
-              <span class="clube-area-kicker">DESEMPENHO DO CLUBE</span>
-              <h3 class="card-title">Estatísticas</h3>
-              <p class="elenco-subtitulo">Dados do elenco, recrutamento e reputação reunidos em um só lugar.</p>
+              <span class="clube-area-kicker">MERCADO STATS</span>
+              <h3 class="card-title">Central de desempenho</h3>
+              <p class="elenco-subtitulo">Registre partidas, confirme resultados e acompanhe a evolução do clube e dos jogadores.</p>
             </div>
-            <span id="clube-estatisticas-atualizadas" class="clube-atualizado">Atualizando...</span>
+            <div class="mercado-stats-cabecalho-acoes">
+              <span id="clube-estatisticas-atualizadas" class="clube-atualizado">Atualizando...</span>
+              <button type="button" id="btn-registrar-partida" class="clube-acao-principal">+ Registrar partida</button>
+            </div>
           </div>
-          <div class="clube-estatisticas-grid">
-            <article class="card clube-estatistica-card"><span>Jogadores</span><strong id="clube-stat-elenco">0</strong><small>no elenco atual</small></article>
-            <article class="card clube-estatistica-card"><span>Vagas</span><strong id="clube-stat-vagas">0</strong><small>anúncios ativos</small></article>
-            <article class="card clube-estatistica-card"><span>Negociações aceitas</span><strong id="clube-stat-aceitas">0</strong><small>candidaturas e convites</small></article>
-            <article class="card clube-estatistica-card"><span>Reputação</span><strong id="clube-stat-reputacao">—</strong><small id="clube-stat-avaliacoes">sem avaliações</small></article>
+
+          <div class="mercado-stats-resumo">
+            <article class="card mercado-stat-card"><span>Jogos</span><strong id="mercado-stat-jogos">0</strong><small id="mercado-stat-verificados">nenhum verificado</small></article>
+            <article class="card mercado-stat-card vitoria"><span>Vitórias</span><strong id="mercado-stat-vitorias">0</strong><small>campanha registrada</small></article>
+            <article class="card mercado-stat-card empate"><span>Empates</span><strong id="mercado-stat-empates">0</strong><small>campanha registrada</small></article>
+            <article class="card mercado-stat-card derrota"><span>Derrotas</span><strong id="mercado-stat-derrotas">0</strong><small>campanha registrada</small></article>
+            <article class="card mercado-stat-card"><span>Aproveitamento</span><strong id="mercado-stat-aproveitamento">0%</strong><small>pontos conquistados</small></article>
+            <article class="card mercado-stat-card"><span>Gols marcados</span><strong id="mercado-stat-gols-pro">0</strong><small id="mercado-stat-media-gols">média 0,0</small></article>
+            <article class="card mercado-stat-card"><span>Gols sofridos</span><strong id="mercado-stat-gols-contra">0</strong><small>defesa do clube</small></article>
+            <article class="card mercado-stat-card"><span>Saldo</span><strong id="mercado-stat-saldo">0</strong><small>diferença de gols</small></article>
           </div>
-          <div class="clube-analises-grid">
-            <article class="card clube-analise-card">
-              <div class="clube-analise-titulo"><div><span class="clube-area-kicker">ELENCO</span><h3>Posições do time</h3></div><span id="clube-posicoes-total"></span></div>
-              <div id="clube-posicoes-grafico" class="clube-barras"></div>
-            </article>
-            <article class="card clube-analise-card">
-              <div class="clube-analise-titulo"><div><span class="clube-area-kicker">RECRUTAMENTO</span><h3>Funil de candidaturas</h3></div></div>
-              <div id="clube-funil-candidaturas" class="clube-funil"></div>
-            </article>
-          </div>
-          <article class="card clube-analise-card">
-            <div class="clube-analise-titulo"><div><span class="clube-area-kicker">MOVIMENTAÇÃO RECENTE</span><h3>Últimas negociações</h3></div><a href="./negociacoes.html">Abrir negociações →</a></div>
-            <div id="clube-atividade-recente" class="clube-atividade-lista"></div>
+
+          <article id="mercado-stats-confirmacoes-card" class="card mercado-stats-confirmacoes" hidden>
+            <div class="clube-analise-titulo">
+              <div><span class="clube-area-kicker">PRECISA DE VOCÊ</span><h3>Resultados aguardando confirmação</h3></div>
+              <span id="mercado-stats-confirmacoes-total">0 pendentes</span>
+            </div>
+            <div id="mercado-stats-confirmacoes" class="mercado-stats-confirmacoes-lista"></div>
           </article>
+
+          <div class="mercado-stats-paineis">
+            <article class="card mercado-stats-historico-card">
+              <div class="clube-analise-titulo">
+                <div><span class="clube-area-kicker">PARTIDAS</span><h3>Histórico recente</h3></div>
+                <select id="mercado-stats-filtro-status" aria-label="Filtrar histórico por situação">
+                  <option value="todos">Todos</option>
+                  <option value="confirmada">Verificados</option>
+                  <option value="pendente">Aguardando confirmação</option>
+                  <option value="informada">Informados pelo clube</option>
+                  <option value="contestada">Contestados</option>
+                </select>
+              </div>
+              <div id="mercado-stats-historico" class="mercado-stats-historico" aria-live="polite">
+                <div class="clube-estado-vazio">Carregando partidas...</div>
+              </div>
+            </article>
+
+            <aside class="mercado-stats-lateral">
+              <article class="card mercado-stats-forma-card">
+                <div class="clube-analise-titulo"><div><span class="clube-area-kicker">MOMENTO</span><h3>Forma recente</h3></div></div>
+                <div id="mercado-stats-forma" class="mercado-stats-forma"></div>
+                <p id="mercado-stats-forma-texto">Registre partidas para acompanhar a sequência.</p>
+              </article>
+              <article class="card mercado-stats-medias-card">
+                <div class="clube-analise-titulo"><div><span class="clube-area-kicker">MÉDIAS</span><h3>Números por jogo</h3></div></div>
+                <div class="mercado-stats-medias">
+                  <div><span>Posse</span><strong id="mercado-media-posse">—</strong></div>
+                  <div><span>Finalizações</span><strong id="mercado-media-finalizacoes">—</strong></div>
+                  <div><span>Chutes no gol</span><strong id="mercado-media-chutes-gol">—</strong></div>
+                  <div><span>Passes certos</span><strong id="mercado-media-passes">—</strong></div>
+                  <div><span>Desarmes</span><strong id="mercado-media-desarmes">—</strong></div>
+                  <div><span>Defesas</span><strong id="mercado-media-defesas">—</strong></div>
+                </div>
+              </article>
+            </aside>
+          </div>
+
+          <article class="card mercado-stats-jogadores-card">
+            <div class="clube-analise-titulo">
+              <div><span class="clube-area-kicker">DESTAQUES DO ELENCO</span><h3>Ranking dos jogadores</h3></div>
+              <span id="mercado-stats-jogadores-total">0 jogadores com dados</span>
+            </div>
+            <div class="mercado-stats-tabela-wrap">
+              <table class="mercado-stats-tabela">
+                <thead><tr><th>Jogador</th><th>J</th><th>G</th><th>A</th><th>Def</th><th>Nota</th><th>MVP</th></tr></thead>
+                <tbody id="mercado-stats-jogadores"><tr><td colspan="7">Nenhuma estatística registrada.</td></tr></tbody>
+              </table>
+            </div>
+          </article>
+
+          <section class="mercado-stats-gestao">
+            <div class="mercado-stats-secao-titulo">
+              <span class="clube-area-kicker">GESTÃO DO CLUBE</span>
+              <h3>Elenco, recrutamento e reputação</h3>
+            </div>
+            <div class="clube-estatisticas-grid">
+              <article class="card clube-estatistica-card"><span>Jogadores</span><strong id="clube-stat-elenco">0</strong><small>no elenco atual</small></article>
+              <article class="card clube-estatistica-card"><span>Vagas</span><strong id="clube-stat-vagas">0</strong><small>anúncios ativos</small></article>
+              <article class="card clube-estatistica-card"><span>Negociações aceitas</span><strong id="clube-stat-aceitas">0</strong><small>candidaturas e convites</small></article>
+              <article class="card clube-estatistica-card"><span>Reputação</span><strong id="clube-stat-reputacao">—</strong><small id="clube-stat-avaliacoes">sem avaliações</small></article>
+            </div>
+            <div class="clube-analises-grid">
+              <article class="card clube-analise-card">
+                <div class="clube-analise-titulo"><div><span class="clube-area-kicker">ELENCO</span><h3>Posições do time</h3></div><span id="clube-posicoes-total"></span></div>
+                <div id="clube-posicoes-grafico" class="clube-barras"></div>
+              </article>
+              <article class="card clube-analise-card">
+                <div class="clube-analise-titulo"><div><span class="clube-area-kicker">RECRUTAMENTO</span><h3>Funil de candidaturas</h3></div></div>
+                <div id="clube-funil-candidaturas" class="clube-funil"></div>
+              </article>
+            </div>
+            <article class="card clube-analise-card">
+              <div class="clube-analise-titulo"><div><span class="clube-area-kicker">MOVIMENTAÇÃO RECENTE</span><h3>Últimas negociações</h3></div><a href="./negociacoes.html">Abrir negociações →</a></div>
+              <div id="clube-atividade-recente" class="clube-atividade-lista"></div>
+            </article>
+          </section>
+        </div>
+
+        <div id="mercado-stats-modal" class="mercado-stats-modal" role="dialog" aria-modal="true" aria-labelledby="mercado-stats-modal-titulo" hidden>
+          <div class="mercado-stats-modal-conteudo">
+            <div class="mercado-stats-modal-topo">
+              <div><span class="clube-area-kicker">MERCADO STATS</span><h2 id="mercado-stats-modal-titulo">Registrar partida</h2></div>
+              <button type="button" id="mercado-stats-fechar" aria-label="Fechar">&times;</button>
+            </div>
+            <form id="mercado-stats-form">
+              <section class="mercado-stats-form-secao">
+                <h3>Informações da partida</h3>
+                <div class="mercado-stats-form-grid">
+                  <label><span>Data e horário *</span><input type="datetime-local" id="stats-data" required></label>
+                  <label><span>Competição</span><input type="text" id="stats-competicao" maxlength="100" placeholder="Ex.: Copa Mercado Pro Clubs"></label>
+                  <label><span>Tipo de partida</span><select id="stats-tipo"><option value="torneio">Torneio</option><option value="liga">Liga</option><option value="amistoso">Amistoso</option><option value="treino">Treino</option></select></label>
+                  <label><span>Clube adversário cadastrado</span><select id="stats-adversario-id"><option value="">Não está cadastrado</option></select></label>
+                  <label class="mercado-stats-campo-largo"><span>Nome do adversário *</span><input type="text" id="stats-adversario-nome" maxlength="100" required placeholder="Nome do clube adversário"></label>
+                </div>
+                <div class="mercado-stats-placar-form">
+                  <label><span id="stats-placar-clube-nome">Seu clube</span><input type="number" id="stats-placar-clube" min="0" max="99" required inputmode="numeric"></label>
+                  <b>&times;</b>
+                  <label><span id="stats-placar-adversario-nome">Adversário</span><input type="number" id="stats-placar-adversario" min="0" max="99" required inputmode="numeric"></label>
+                </div>
+              </section>
+
+              <section class="mercado-stats-form-secao">
+                <div class="mercado-stats-form-secao-titulo"><div><h3>Estatísticas do clube</h3><p>Campos opcionais. Preencha somente os dados que aparecem no resumo da partida.</p></div></div>
+                <div class="mercado-stats-numeros-grid">
+                  <label><span>Posse (%)</span><input type="number" id="stats-posse" min="0" max="100" inputmode="numeric"></label>
+                  <label><span>Finalizações</span><input type="number" id="stats-finalizacoes" min="0" max="999" inputmode="numeric"></label>
+                  <label><span>Chutes no gol</span><input type="number" id="stats-chutes-gol" min="0" max="999" inputmode="numeric"></label>
+                  <label><span>Passes certos</span><input type="number" id="stats-passes" min="0" max="9999" inputmode="numeric"></label>
+                  <label><span>Desarmes</span><input type="number" id="stats-desarmes" min="0" max="999" inputmode="numeric"></label>
+                  <label><span>Defesas</span><input type="number" id="stats-defesas" min="0" max="999" inputmode="numeric"></label>
+                  <label><span>Escanteios</span><input type="number" id="stats-escanteios" min="0" max="99" inputmode="numeric"></label>
+                  <label><span>Faltas</span><input type="number" id="stats-faltas" min="0" max="99" inputmode="numeric"></label>
+                  <label><span>Cartões amarelos</span><input type="number" id="stats-amarelos" min="0" max="99" inputmode="numeric"></label>
+                  <label><span>Cartões vermelhos</span><input type="number" id="stats-vermelhos" min="0" max="99" inputmode="numeric"></label>
+                </div>
+              </section>
+
+              <section class="mercado-stats-form-secao">
+                <div class="mercado-stats-form-secao-titulo"><div><h3>Desempenho dos jogadores</h3><p>Marque quem participou e informe os números da partida.</p></div></div>
+                <div id="mercado-stats-jogadores-form" class="mercado-stats-jogadores-form"></div>
+              </section>
+
+              <section class="mercado-stats-form-secao">
+                <h3>Comprovação</h3>
+                <label class="mercado-stats-prova-upload" for="stats-prova">
+                  <span>Adicionar imagem das estatísticas (opcional, até 2MB)</span>
+                  <input type="file" id="stats-prova" accept="image/png,image/jpeg,image/webp">
+                </label>
+                <div id="mercado-stats-prova-preview" class="mercado-stats-prova-preview" hidden><img alt="Prévia da comprovação"><button type="button" id="stats-remover-prova">Remover imagem</button></div>
+                <label class="mercado-stats-observacao"><span>Observação</span><textarea id="stats-observacao" maxlength="300" rows="3" placeholder="Ex.: partida decidida nos pênaltis"></textarea></label>
+              </section>
+
+              <p id="mercado-stats-form-feedback" class="mercado-stats-form-feedback" aria-live="polite"></p>
+              <div class="mercado-stats-form-acoes"><button type="button" id="mercado-stats-cancelar">Cancelar</button><button type="submit" id="mercado-stats-salvar" class="clube-acao-principal">Salvar partida</button></div>
+            </form>
+          </div>
         </div>
 
         <div class="tab-painel" id="painel-aparencia" role="tabpanel" aria-labelledby="aba-aparencia" data-painel="aparencia" hidden>
@@ -744,7 +883,7 @@
     <script src="../JS/script.js" defer></script>
     <script type="module" src="../JS/times.js"></script>
     <script type="module" src="../JS/header-auth.js"></script>
-    <script type="module" src="../JS/clube.js?v=20260717-2"></script>
+    <script type="module" src="../JS/clube.js?v=20260720-1"></script>
     <script type="module" src="../JS/reputacao.js"></script>
   </body>
 </html>
