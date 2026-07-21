@@ -7,7 +7,7 @@
       name="description"
       content="Gerencie as informações, o elenco, as vagas e os contatos do seu clube de Pro Clubs."
     />
-    <link rel="stylesheet" href="../CSS/style.css?v=20260720-1" />
+    <link rel="stylesheet" href="../CSS/style.css?v=20260720-3" />
     <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml" />
     <title>Meu Clube | Mercado Pro Clubs</title>
   </head>
@@ -670,6 +670,57 @@
         </div>
 
         <div class="tab-painel" id="painel-estatisticas" role="tabpanel" aria-labelledby="aba-estatisticas" data-painel="estatisticas" hidden>
+          <article id="ea-clube-stats" class="card ea-clube-stats">
+            <div class="ea-clube-stats-topo">
+              <div>
+                <span class="clube-area-kicker">EA SPORTS FC 26</span>
+                <h3>Encontrar meu clube no jogo</h3>
+                <p>Busque pelo nome e conecte as estatísticas públicas do seu clube.</p>
+              </div>
+              <span id="ea-clube-status" class="ea-clube-status">Não conectado</span>
+            </div>
+
+            <form id="ea-clube-form" class="ea-clube-form">
+              <label>
+                <span>Nome do clube</span>
+                <input id="ea-clube-nome" name="nome" type="search" minlength="2" maxlength="32" autocomplete="off" placeholder="Ex.: Manos OFC" required>
+              </label>
+              <label>
+                <span>Plataforma</span>
+                <select id="ea-clube-plataforma" name="plataforma" required>
+                  <option value="common-gen5">PS5, Xbox Series e PC</option>
+                  <option value="common-gen4">PS4 e Xbox One</option>
+                  <option value="nx">Nintendo Switch</option>
+                </select>
+              </label>
+              <button id="ea-clube-buscar" type="submit" class="clube-acao-principal">Buscar na EA</button>
+            </form>
+            <p id="ea-clube-feedback" class="ea-clube-feedback" aria-live="polite"></p>
+            <div id="ea-clube-resultados" class="ea-clube-resultados" aria-live="polite"></div>
+
+            <section id="ea-clube-conectado" class="ea-clube-conectado" hidden>
+              <div class="ea-clube-identidade">
+                <div>
+                  <span>CLUBE CONECTADO</span>
+                  <h4 id="ea-clube-conectado-nome">—</h4>
+                  <p id="ea-clube-conectado-plataforma">—</p>
+                </div>
+                <button id="ea-clube-atualizar" type="button" class="ea-clube-atualizar">Atualizar da EA</button>
+              </div>
+              <div class="ea-clube-numeros">
+                <article><span>Jogos</span><strong id="ea-stat-jogos">0</strong></article>
+                <article class="positivo"><span>Vitórias</span><strong id="ea-stat-vitorias">0</strong></article>
+                <article><span>Empates</span><strong id="ea-stat-empates">0</strong></article>
+                <article class="negativo"><span>Derrotas</span><strong id="ea-stat-derrotas">0</strong></article>
+                <article><span>Gols marcados</span><strong id="ea-stat-gols">0</strong></article>
+                <article><span>Gols sofridos</span><strong id="ea-stat-gols-contra">0</strong></article>
+                <article><span>Aproveitamento</span><strong id="ea-stat-aproveitamento">0%</strong></article>
+                <article><span>Divisão</span><strong id="ea-stat-divisao">—</strong></article>
+              </div>
+              <p class="ea-clube-fonte">Dados públicos consultados no EA SPORTS FC Clubs. A disponibilidade depende do serviço da EA.</p>
+            </section>
+          </article>
+
           <div class="clube-area-cabecalho card">
             <div>
               <span class="clube-area-kicker">MERCADO STATS</span>
@@ -678,6 +729,7 @@
             </div>
             <div class="mercado-stats-cabecalho-acoes">
               <span id="clube-estatisticas-atualizadas" class="clube-atualizado">Atualizando...</span>
+              <span id="mercado-stats-acesso-leitura" class="mercado-stats-acesso-leitura" hidden>Visualização do integrante</span>
               <button type="button" id="btn-registrar-partida" class="clube-acao-principal">+ Registrar partida</button>
             </div>
           </div>
@@ -751,7 +803,7 @@
             </div>
           </article>
 
-          <section class="mercado-stats-gestao">
+          <section id="mercado-stats-gestao" class="mercado-stats-gestao">
             <div class="mercado-stats-secao-titulo">
               <span class="clube-area-kicker">GESTÃO DO CLUBE</span>
               <h3>Elenco, recrutamento e reputação</h3>
@@ -883,7 +935,7 @@
     <script src="../JS/script.js" defer></script>
     <script type="module" src="../JS/times.js"></script>
     <script type="module" src="../JS/header-auth.js"></script>
-    <script type="module" src="../JS/clube.js?v=20260720-1"></script>
+    <script type="module" src="../JS/clube.js?v=20260720-3"></script>
     <script type="module" src="../JS/reputacao.js"></script>
   </body>
 </html>

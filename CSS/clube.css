@@ -2769,6 +2769,19 @@ flex-direction: column;
     justify-content:flex-end;
     gap:14px;
 }
+.mercado-stats-acesso-leitura{
+    display:inline-flex;
+    align-items:center;
+    min-height:34px;
+    padding:7px 12px;
+    border:1px solid rgba(34,197,94,.38);
+    border-radius:999px;
+    color:#86efac;
+    background:rgba(34,197,94,.1);
+    font-size:12px;
+    font-weight:800;
+    white-space:nowrap;
+}
 .mercado-stats-resumo{
     display:grid;
     grid-template-columns:repeat(4,minmax(0,1fr));
@@ -3445,6 +3458,210 @@ flex-direction: column;
 }
 .mercado-stats-toast.erro{color:#fff;border-color:#d95353;background:#b83737}
 .mercado-stats-toast.visivel{opacity:1;transform:translateY(0)}
+.ea-clube-stats{
+    display:grid;
+    gap:18px;
+    margin-bottom:16px;
+    padding:22px;
+    border-color:rgba(18,224,108,.22);
+    background:
+        radial-gradient(circle at 92% 0,rgba(18,224,108,.09),transparent 34%),
+        #121713;
+}
+.ea-clube-stats-topo,
+.ea-clube-identidade{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:18px;
+}
+.ea-clube-stats-topo h3,
+.ea-clube-identidade h4{
+    margin:4px 0 5px;
+    color:#f4f7f5;
+    font-size:22px;
+}
+.ea-clube-stats-topo p,
+.ea-clube-identidade p{
+    margin:0;
+    color:#89958d;
+    font-size:11px;
+    line-height:1.55;
+}
+.ea-clube-status{
+    flex:0 0 auto;
+    padding:7px 11px;
+    color:#9aa59e;
+    border:1px solid #303832;
+    border-radius:999px;
+    background:#0c100d;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+}
+.ea-clube-status.conectado{
+    color:#12e06c;
+    border-color:rgba(18,224,108,.42);
+    background:rgba(18,224,108,.08);
+}
+.ea-clube-form{
+    display:grid;
+    grid-template-columns:minmax(220px,1fr) minmax(210px,.7fr) auto;
+    gap:11px;
+    align-items:end;
+    padding:16px;
+    border:1px solid #2b332e;
+    border-radius:12px;
+    background:rgba(7,10,8,.68);
+}
+.ea-clube-form label{
+    display:grid;
+    gap:7px;
+    color:#cbd4ce;
+    font-size:9px;
+    font-weight:800;
+}
+.ea-clube-form input,
+.ea-clube-form select{
+    width:100%;
+    min-height:42px;
+    padding:0 12px;
+    color:#f4f7f5;
+    border:1px solid #303832;
+    border-radius:8px;
+    outline:none;
+    background:#0c100d;
+    font:inherit;
+    font-size:11px;
+}
+.ea-clube-form input:focus,
+.ea-clube-form select:focus{
+    border-color:#12e06c;
+    box-shadow:0 0 0 3px rgba(18,224,108,.08);
+}
+.ea-clube-form button{
+    min-height:42px;
+    white-space:nowrap;
+}
+.ea-clube-feedback{
+    min-height:16px;
+    margin:0;
+    color:#89958d;
+    font-size:10px;
+}
+.ea-clube-feedback.sucesso{color:#42ea87}
+.ea-clube-feedback.aviso{color:#e3bd52}
+.ea-clube-feedback.erro{color:#ff7676}
+.ea-clube-resultados{
+    display:grid;
+    gap:9px;
+}
+.ea-clube-resultado{
+    display:grid;
+    grid-template-columns:minmax(180px,1fr) auto auto;
+    align-items:center;
+    gap:18px;
+    padding:14px;
+    border:1px solid #303832;
+    border-radius:11px;
+    background:#171c18;
+}
+.ea-clube-resultado-principal > span,
+.ea-clube-identidade > div > span{
+    color:#12e06c;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.11em;
+}
+.ea-clube-resultado h4{
+    margin:4px 0;
+    color:#fff;
+    font-size:14px;
+}
+.ea-clube-resultado p{
+    margin:0;
+    color:#849087;
+    font-size:9px;
+}
+.ea-clube-resultado-campanha{
+    display:grid;
+    grid-template-columns:auto auto auto auto auto auto;
+    align-items:baseline;
+    gap:4px;
+    color:#859087;
+    font-size:8px;
+}
+.ea-clube-resultado-campanha strong{
+    margin-left:7px;
+    color:#f5f7f6;
+    font-size:13px;
+}
+.ea-clube-resultado button,
+.ea-clube-atualizar{
+    padding:10px 13px;
+    color:#06140c;
+    border:1px solid #12e06c;
+    border-radius:8px;
+    background:#12e06c;
+    font:inherit;
+    font-size:9px;
+    font-weight:900;
+    cursor:pointer;
+}
+.ea-clube-resultado button:disabled,
+.ea-clube-atualizar:disabled,
+.ea-clube-form button:disabled{
+    cursor:wait;
+    opacity:.62;
+}
+.ea-clube-conectado{
+    display:grid;
+    gap:14px;
+    padding-top:17px;
+    border-top:1px solid #2b332e;
+}
+.ea-clube-identidade h4{font-size:18px}
+.ea-clube-atualizar{
+    color:#12e06c;
+    background:rgba(18,224,108,.07);
+}
+.ea-clube-numeros{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:9px;
+}
+.ea-clube-numeros article{
+    display:grid;
+    gap:5px;
+    min-height:82px;
+    align-content:center;
+    padding:13px;
+    border:1px solid #2c342f;
+    border-radius:10px;
+    background:#181d19;
+}
+.ea-clube-numeros span{
+    color:#89958d;
+    font-size:8px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+.ea-clube-numeros strong{
+    color:#f5f7f6;
+    font-size:22px;
+}
+.ea-clube-numeros .positivo strong{color:#12e06c}
+.ea-clube-numeros .negativo strong{color:#ff7373}
+.ea-clube-fonte{
+    margin:0;
+    color:#6f7c73;
+    font-size:8px;
+    line-height:1.5;
+}
+.ea-clube-form[hidden],
+.ea-clube-conectado[hidden]{display:none!important}
+
 .clube-aparencia-grid{
     display:grid;
     grid-template-columns:minmax(0,1fr) minmax(320px,.8fr);
@@ -3612,6 +3829,11 @@ flex-direction: column;
 }
 
 @media (max-width:900px){
+    .ea-clube-form{grid-template-columns:1fr 1fr}
+    .ea-clube-form button{grid-column:1/-1}
+    .ea-clube-resultado{grid-template-columns:1fr auto}
+    .ea-clube-resultado-campanha{grid-row:2;grid-column:1/-1;justify-content:start}
+    .ea-clube-numeros{grid-template-columns:repeat(2,minmax(0,1fr))}
     .clube-estatisticas-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     .clube-analises-grid,.clube-aparencia-grid{grid-template-columns:1fr}
     .mercado-stats-resumo{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -3622,6 +3844,14 @@ flex-direction: column;
     .mercado-stats-jogador-form > label:nth-of-type(5),.mercado-stats-jogador-form > label:nth-of-type(6){grid-column:auto}
 }
 @media (max-width:680px){
+    .ea-clube-stats{padding:16px}
+    .ea-clube-stats-topo,.ea-clube-identidade{align-items:stretch;flex-direction:column}
+    .ea-clube-status{align-self:flex-start}
+    .ea-clube-form{grid-template-columns:1fr}
+    .ea-clube-form button{grid-column:auto}
+    .ea-clube-resultado{grid-template-columns:1fr;gap:12px}
+    .ea-clube-resultado-campanha{grid-row:auto;grid-column:auto;grid-template-columns:auto auto auto auto auto auto}
+    .ea-clube-resultado button,.ea-clube-atualizar{width:100%}
     .clube-area-cabecalho,.clube-gestao-toolbar{align-items:stretch;flex-direction:column}
     .clube-acao-principal,.clube-busca-vagas input{width:100%}
     .clube-resumo-grid,.clube-estatisticas-grid{grid-template-columns:1fr}

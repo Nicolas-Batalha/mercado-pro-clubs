@@ -35,6 +35,7 @@ const estado = {
   confirmacoes: [],
   clubes: [],
   provaImagem: "",
+  somenteLeitura: false,
   eventosLigados: false,
   getClube: () => ({}),
   getElenco: () => [],
@@ -124,10 +125,11 @@ function ordenarPartidas(partidas) {
   return [...partidas].sort((a, b) => dataPartidaMs(b) - dataPartidaMs(a));
 }
 
-function atualizarContexto({ uid, clube, elenco } = {}) {
+function atualizarContexto({ uid, clube, elenco, somenteLeitura } = {}) {
   if (uid) estado.uid = uid;
   if (clube) estado.clube = clube;
   if (Array.isArray(elenco)) estado.elenco = elenco;
+  if (typeof somenteLeitura === "boolean") estado.somenteLeitura = somenteLeitura;
   const clubeAtual = estado.getClube?.();
   const elencoAtual = estado.getElenco?.();
   if (clubeAtual && typeof clubeAtual === "object") estado.clube = clubeAtual;
@@ -285,7 +287,7 @@ function renderizarHistorico() {
           ${partida.observacao ? `<p class="mercado-stats-partida-observacao">${escHtml(partida.observacao)}</p>` : ""}
           <div class="mercado-stats-partida-acoes">
             ${prova ? `<details><summary>Ver comprovante</summary><img src="${escHtml(prova)}" alt="Comprovante da partida"></details>` : ""}
-            ${status !== "confirmada" ? `<button type="button" class="perigo" data-stats-excluir="${escHtml(partida.id)}">Excluir registro</button>` : ""}
+            ${!estado.somenteLeitura && status !== "confirmada" ? `<button type="button" class="perigo" data-stats-excluir="${escHtml(partida.id)}">Excluir registro</button>` : ""}
           </div>
         </article>`;
       }).join("")
@@ -296,6 +298,11 @@ function renderizarConfirmacoes() {
   const card = document.getElementById("mercado-stats-confirmacoes-card");
   const lista = document.getElementById("mercado-stats-confirmacoes");
   if (!card || !lista) return;
+  if (estado.somenteLeitura) {
+    card.hidden = true;
+    lista.innerHTML = "";
+    return;
+  }
   const pendentes = ordenarPartidas(estado.confirmacoes.filter((partida) => statusPartida(partida) === "pendente"));
   card.hidden = pendentes.length === 0;
   setTexto("mercado-stats-confirmacoes-total", `${pendentes.length} pendente${pendentes.length === 1 ? "" : "s"}`);
@@ -306,6 +313,12 @@ function renderizarConfirmacoes() {
 }
 
 function renderizarTudo() {
+  const botaoRegistrar = document.getElementById("btn-registrar-partida");
+  const avisoLeitura = document.getElementById("mercado-stats-acesso-leitura");
+  const gestao = document.getElementById("mercado-stats-gestao");
+  if (botaoRegistrar) botaoRegistrar.hidden = estado.somenteLeitura;
+  if (avisoLeitura) avisoLeitura.hidden = !estado.somenteLeitura;
+  if (gestao) gestao.hidden = estado.somenteLeitura;
   renderizarResumo();
   renderizarMedias();
   renderizarRankingJogadores();
@@ -470,6 +483,7 @@ function coletarJogadores() {
 
 async function salvarPartida(evento) {
   evento.preventDefault();
+  if (estado.somenteLeitura) return;
   atualizarContexto();
   const usuario = auth.currentUser;
   const feedback = document.getElementById("mercado-stats-form-feedback");
@@ -536,6 +550,7 @@ async function salvarPartida(evento) {
 }
 
 async function responderConfirmacao(partidaId, acao, botao) {
+  if (estado.somenteLeitura) return;
   const partida = estado.confirmacoes.find((item) => item.id === partidaId);
   if (!partida || !estado.uid) return;
   const confirmar = acao === "confirmar";
@@ -564,6 +579,7 @@ async function responderConfirmacao(partidaId, acao, botao) {
 }
 
 async function excluirPartida(partidaId, botao) {
+  if (estado.somenteLeitura) return;
   const partida = estado.partidas.find((item) => item.id === partidaId);
   if (!partida || statusPartida(partida) === "confirmada") return;
   const aceitou = await confirmModal({
@@ -585,8 +601,9 @@ async function excluirPartida(partidaId, botao) {
   }
 }
 
-export function inicializarMercadoStats({ uid, getClube, getElenco } = {}) {
+export function inicializarMercadoStats({ uid, getClube, getElenco, somenteLeitura = false } = {}) {
   if (uid) estado.uid = uid;
+  estado.somenteLeitura = somenteLeitura === true;
   if (typeof getClube === "function") estado.getClube = getClube;
   if (typeof getElenco === "function") estado.getElenco = getElenco;
   if (estado.eventosLigados) return;
@@ -641,15 +658,17 @@ export function inicializarMercadoStats({ uid, getClube, getElenco } = {}) {
   });
 }
 
-export async function carregarMercadoStats({ uid, clube, elenco } = {}) {
-  atualizarContexto({ uid, clube, elenco });
+export async function carregarMercadoStats({ uid, clube, elenco, somenteLeitura } = {}) {
+  atualizarContexto({ uid, clube, elenco, somenteLeitura });
   const lista = document.getElementById("mercado-stats-historico");
   if (!estado.uid || !lista) return;
   lista.innerHTML = '<div class="clube-estado-vazio">Carregando partidas...</div>';
   try {
     const [propriasResultado, confirmacoesResultado, clubesResultado] = await Promise.allSettled([
       getDocs(query(collection(db, "partidasClubes"), where("clubeId", "==", estado.uid))),
-      getDocs(query(collection(db, "partidasClubes"), where("adversarioId", "==", estado.uid))),
+      estado.somenteLeitura
+        ? Promise.resolve({ docs: [] })
+        : getDocs(query(collection(db, "partidasClubes"), where("adversarioId", "==", estado.uid))),
       getDocs(collection(db, "clubes")),
     ]);
     if (propriasResultado.status === "rejected") throw propriasResultado.reason;

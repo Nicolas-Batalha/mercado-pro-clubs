@@ -30,6 +30,12 @@ service cloud.firestore {
         && value != 'null';
     }
 
+    function memberOfClub(clubeId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/jogadores/$(request.auth.uid))
+        && get(/databases/$(database)/documents/jogadores/$(request.auth.uid)).data.get('clubeAtualId', '') == clubeId;
+    }
+
     function candidaturaParticipant(data) {
       return signedIn()
         && (data.jogadorUid == request.auth.uid || data.capitaoUid == request.auth.uid);
@@ -250,7 +256,8 @@ service cloud.firestore {
           'estiloJogo', 'horarioTreino', 'diasTreino', 'objetivo', 'descricao',
           'discord', 'whatsapp', 'instagram', 'capitaoIdEA',
           'capitaoMicrofone', 'necessidades', 'escudoUrl',
-          'lema', 'corPrimaria', 'corSecundaria'
+          'lema', 'corPrimaria', 'corSecundaria',
+          'eaClubId', 'eaClubName', 'eaPlatform', 'eaSincronizadoEm'
         ])
         && request.resource.data.nome is string
         && request.resource.data.nome.size() > 0
@@ -265,6 +272,12 @@ service cloud.firestore {
         && request.resource.data.get('corPrimaria', '#12e06c').matches('^#[0-9A-Fa-f]{6}$')
         && request.resource.data.get('corSecundaria', '#07140d') is string
         && request.resource.data.get('corSecundaria', '#07140d').matches('^#[0-9A-Fa-f]{6}$')
+        && request.resource.data.get('eaClubId', '') is string
+        && request.resource.data.get('eaClubId', '').matches('^$|^[0-9]{1,20}$')
+        && request.resource.data.get('eaClubName', '') is string
+        && request.resource.data.get('eaClubName', '').size() <= 64
+        && request.resource.data.get('eaPlatform', '') in ['', 'common-gen5', 'common-gen4', 'nx']
+        && request.resource.data.get('eaSincronizadoEm', request.time) is timestamp
         && !request.resource.data.keys().hasAny([
           'verificado', 'verificacaoAtualizadaPor', 'verificacaoAtualizadaEm',
           'motivoVerificacao', 'suspenso', 'suspensoPor', 'suspensoEm',
@@ -279,7 +292,8 @@ service cloud.firestore {
           'estiloJogo', 'horarioTreino', 'diasTreino', 'objetivo', 'descricao',
           'discord', 'whatsapp', 'instagram', 'capitaoIdEA',
           'capitaoMicrofone', 'necessidades', 'escudoUrl',
-          'lema', 'corPrimaria', 'corSecundaria'
+          'lema', 'corPrimaria', 'corSecundaria',
+          'eaClubId', 'eaClubName', 'eaPlatform', 'eaSincronizadoEm'
         ])
         && request.resource.data.nome is string
         && request.resource.data.nome.size() > 0
@@ -294,6 +308,12 @@ service cloud.firestore {
         && request.resource.data.get('corPrimaria', '#12e06c').matches('^#[0-9A-Fa-f]{6}$')
         && request.resource.data.get('corSecundaria', '#07140d') is string
         && request.resource.data.get('corSecundaria', '#07140d').matches('^#[0-9A-Fa-f]{6}$')
+        && request.resource.data.get('eaClubId', '') is string
+        && request.resource.data.get('eaClubId', '').matches('^$|^[0-9]{1,20}$')
+        && request.resource.data.get('eaClubName', '') is string
+        && request.resource.data.get('eaClubName', '').size() <= 64
+        && request.resource.data.get('eaPlatform', '') in ['', 'common-gen5', 'common-gen4', 'nx']
+        && request.resource.data.get('eaSincronizadoEm', request.time) is timestamp
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
           'verificado', 'verificacaoAtualizadaPor', 'verificacaoAtualizadaEm',
           'motivoVerificacao', 'suspenso', 'suspensoPor', 'suspensoEm',
@@ -445,6 +465,7 @@ service cloud.firestore {
       allow read: if signedIn()
         && (resource.data.clubeId == request.auth.uid
           || resource.data.adversarioId == request.auth.uid
+          || memberOfClub(resource.data.clubeId)
           || isAdmin());
       allow create: if verifiedAccount() && partidaNovaValida();
       allow update: if adversarioConfirma() || adversarioContesta();

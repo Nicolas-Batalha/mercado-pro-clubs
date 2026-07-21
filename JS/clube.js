@@ -13,7 +13,8 @@ import {
   collection, query, where, getDocs, onSnapshot, limit
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { confirmModal } from "./confirm-modal.js";
-import { carregarMercadoStats, inicializarMercadoStats } from "./mercado-stats.js?v=20260720-1";
+import { carregarMercadoStats, inicializarMercadoStats } from "./mercado-stats.js?v=20260720-3";
+import { inicializarEAClubStats } from "./ea-club-stats.js?v=20260720-3";
 
 function toast(msg, tipo = "sucesso") {
   document.getElementById("toast-clube")?.remove();
@@ -597,6 +598,15 @@ function ligarEventosDashboard(uid, { novoClube = false } = {}) {
     getClube: () => clubeCarregado,
     getElenco: () => gestaoClubeAtual.elenco,
   });
+  if (!novoClube) {
+    inicializarEAClubStats({
+      uid,
+      getClube: () => clubeCarregado,
+      onVinculado: (vinculacao) => {
+        clubeCarregado = { ...clubeCarregado, ...vinculacao };
+      },
+    });
+  }
   // Preview ao vivo
   ["clube","divisao","horario-treino","objetivo","jogo","plataforma","clube-lema","clube-cor-primaria","clube-cor-secundaria"].forEach(id =>
     document.getElementById(id)?.addEventListener("input", atualizarPreview)
@@ -750,6 +760,13 @@ function ligarEventosDashboard(uid, { novoClube = false } = {}) {
           linkPublico.hidden = false;
         }
         toast("✅ Clube criado com sucesso!");
+        inicializarEAClubStats({
+          uid,
+          getClube: () => clubeCarregado,
+          onVinculado: (vinculacao) => {
+            clubeCarregado = { ...clubeCarregado, ...vinculacao };
+          },
+        });
         await carregarEstatisticas(uid);
       } else {
         toast("✅ Clube atualizado!");
@@ -989,7 +1006,24 @@ function configurarAbasGerenciais(visiveis, possuiClube = true) {
 async function renderPainelJogador(perfilAtual) {
   configurarAbasGerenciais(false, true);
   const capitaoUid = perfilAtual.clubeAtualId;
-  const elenco = await buscarElenco(capitaoUid);
+  const abaEstatisticas = document.querySelector('[data-tab="estatisticas"]');
+  if (abaEstatisticas) abaEstatisticas.hidden = false;
+
+  const [elenco, clubeSnap] = await Promise.all([
+    buscarElenco(capitaoUid),
+    getDoc(doc(db, "clubes", capitaoUid)),
+  ]);
+  clubeCarregado = clubeSnap.exists()
+    ? clubeSnap.data()
+    : { nome: perfilAtual.clubeAtualNome || "Seu clube" };
+  gestaoClubeAtual = {
+    uid: capitaoUid,
+    elenco,
+    vagas: [],
+    candidaturas: [],
+    convites: [],
+    avaliacoes: [],
+  };
   document.getElementById("dashboard-clube").outerHTML = `
     <div class="card" style="max-width:640px;margin:0 auto 16px">
       <h3 style="color:#22C55E">Você joga no ${escHtml(perfilAtual.clubeAtualNome || "seu clube")}</h3>
@@ -1003,6 +1037,23 @@ async function renderPainelJogador(perfilAtual) {
   const btnConvidar = document.getElementById("btn-convidar-jogador");
   if (btnConvidar) btnConvidar.hidden = true;
   await renderizarElenco(capitaoUid, false);
+  inicializarMercadoStats({
+    uid: capitaoUid,
+    somenteLeitura: true,
+    getClube: () => clubeCarregado,
+    getElenco: () => elenco,
+  });
+  inicializarEAClubStats({
+    uid: capitaoUid,
+    somenteLeitura: true,
+    getClube: () => clubeCarregado,
+  });
+  await carregarMercadoStats({
+    uid: capitaoUid,
+    clube: clubeCarregado,
+    elenco,
+    somenteLeitura: true,
+  });
   document.getElementById("btn-sair-clube").addEventListener("click", async () => {
     const ok = await confirmModal({
       titulo: "Sair do clube",
