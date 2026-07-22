@@ -129,6 +129,7 @@
     border-color:#22C55E;
     color:#22C55E;
 }
+.abas-clube[hidden]{display:none!important}
 
 /* --- Progresso do perfil do clube --- */
 .clube-progresso{
@@ -3640,6 +3641,44 @@ body.clube-onboarding .menu-clubes{
     color:#89958d;
     font-size:10px;
 }
+.ea-clube-continuar-manual{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:14px 16px;
+    border:1px solid rgba(240,201,101,.32);
+    border-radius:11px;
+    background:rgba(240,201,101,.06);
+}
+.ea-clube-continuar-manual[hidden]{display:none!important}
+.ea-clube-continuar-manual > div{
+    display:grid;
+    gap:4px;
+}
+.ea-clube-continuar-manual strong{
+    color:#f4f7f5;
+    font-size:11px;
+}
+.ea-clube-continuar-manual span{
+    color:#a5afa8;
+    font-size:9px;
+    line-height:1.5;
+}
+.ea-clube-continuar-manual button{
+    min-height:40px;
+    flex:0 0 auto;
+    padding:0 16px;
+    color:#08150d;
+    border:0;
+    border-radius:8px;
+    background:#f0c965;
+    font:inherit;
+    font-size:10px;
+    font-weight:900;
+    cursor:pointer;
+}
+.ea-clube-continuar-manual button:disabled{cursor:wait;opacity:.65}
 .ea-clube-feedback.sucesso{color:#42ea87}
 .ea-clube-feedback.aviso{color:#e3bd52}
 .ea-clube-feedback.erro{color:#ff7676}
@@ -4068,6 +4107,8 @@ body.clube-onboarding .menu-clubes{
     .ea-clube-primeiro-acesso{padding:18px}
     .ea-clube-primeiro-acesso h2{font-size:23px}
     .ea-clube-primeiro-acesso ol{grid-template-columns:1fr}
+    .ea-clube-continuar-manual{align-items:stretch;flex-direction:column}
+    .ea-clube-continuar-manual button{width:100%}
     .ea-clube-stats-topo,.ea-clube-identidade{align-items:stretch;flex-direction:column}
     .ea-clube-status{align-self:flex-start}
     .ea-clube-form{grid-template-columns:1fr}

@@ -7,7 +7,7 @@
       name="description"
       content="Gerencie as informações, o elenco, as vagas e os contatos do seu clube de Pro Clubs."
     />
-    <link rel="stylesheet" href="../CSS/style.css?v=20260722-2" />
+    <link rel="stylesheet" href="../CSS/style.css?v=20260722-3" />
     <link rel="icon" href="../IMG/favicon.svg" type="image/svg+xml" />
     <title>Meu Clube | Mercado Pro Clubs</title>
   </head>
@@ -702,6 +702,13 @@
               <button id="ea-clube-buscar" type="submit" class="clube-acao-principal">Buscar na EA</button>
             </form>
             <p id="ea-clube-feedback" class="ea-clube-feedback" aria-live="polite"></p>
+            <div id="ea-clube-continuar-manual" class="ea-clube-continuar-manual" hidden>
+              <div>
+                <strong>A busca automática está indisponível?</strong>
+                <span>Você pode criar o clube agora e conectar as estatísticas da EA depois.</span>
+              </div>
+              <button id="ea-clube-criar-manual" type="button">Continuar com este nome</button>
+            </div>
             <div id="ea-clube-resultados" class="ea-clube-resultados" aria-live="polite"></div>
 
             <section id="ea-clube-conectado" class="ea-clube-conectado" hidden>
@@ -968,7 +975,7 @@
     <script src="../JS/script.js" defer></script>
     <script type="module" src="../JS/times.js"></script>
     <script type="module" src="../JS/header-auth.js"></script>
-    <script type="module" src="../JS/clube.js?v=20260722-2"></script>
+    <script type="module" src="../JS/clube.js?v=20260722-3"></script>
     <script type="module" src="../JS/reputacao.js"></script>
   </body>
 </html>

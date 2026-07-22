@@ -13,8 +13,8 @@ import {
   collection, query, where, getDocs, onSnapshot, limit
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { confirmModal } from "./confirm-modal.js";
-import { carregarMercadoStats, inicializarMercadoStats } from "./mercado-stats.js?v=20260722-2";
-import { inicializarEAClubStats } from "./ea-club-stats.js?v=20260722-2";
+import { carregarMercadoStats, inicializarMercadoStats } from "./mercado-stats.js?v=20260722-3";
+import { inicializarEAClubStats } from "./ea-club-stats.js?v=20260722-3";
 
 function toast(msg, tipo = "sucesso") {
   document.getElementById("toast-clube")?.remove();

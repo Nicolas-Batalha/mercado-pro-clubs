@@ -139,7 +139,11 @@ async function consultarApi(parametros) {
   } catch {
     dados = null;
   }
-  if (!resposta.ok) throw new Error(mensagemErroLocal(resposta, dados));
+  if (!resposta.ok) {
+    const erro = new Error(mensagemErroLocal(resposta, dados));
+    erro.status = resposta.status;
+    throw erro;
+  }
   if (numeroRequisicao !== estado.requisicaoAtual) return null;
   return dados;
 }
@@ -334,6 +338,8 @@ async function carregarDetalhes(clubeVinculado, fallback = null) {
 async function executarBusca(nome, plataforma, { conectarExato = false } = {}) {
   definirCarregando(true);
   definirFeedback("Procurando o clube nos dados públicos da EA...");
+  const continuarManual = elemento("ea-clube-continuar-manual");
+  if (continuarManual) continuarManual.hidden = true;
   renderizarResultados([]);
   try {
     const resultados = await consultarClubes(nome, plataforma);
@@ -352,9 +358,65 @@ async function executarBusca(nome, plataforma, { conectarExato = false } = {}) {
     );
   } catch (erro) {
     renderizarResultados([]);
-    definirFeedback(erro?.message || "A busca está indisponível no momento.", "erro");
+    const permiteContinuar = estado.modoCriacao && [502, 503, 504].includes(erro?.status);
+    if (continuarManual) continuarManual.hidden = !permiteContinuar;
+    definirFeedback(
+      permiteContinuar
+        ? "A EA bloqueou a consulta automática agora. Você pode continuar e conectar as estatísticas depois."
+        : (erro?.message || "A busca está indisponível no momento."),
+      permiteContinuar ? "aviso" : "erro",
+    );
   } finally {
     definirCarregando(false);
+  }
+}
+
+async function criarClubeManual() {
+  if (!estado.modoCriacao || !estado.uid) return;
+  const nome = String(elemento("ea-clube-nome")?.value || "").trim().replace(/\s+/g, " ").slice(0, 64);
+  const plataformaEA = plataformaValida(elemento("ea-clube-plataforma")?.value);
+  if (nome.length < 2) {
+    definirFeedback("Digite pelo menos 2 caracteres do nome do clube.", "erro");
+    return;
+  }
+  const botao = elemento("ea-clube-criar-manual");
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = "Criando clube...";
+  }
+  try {
+    const vinculacao = {
+      nome,
+      plataforma: PERFIL_DA_PLATAFORMA[plataformaEA],
+    };
+    const lote = writeBatch(db);
+    lote.set(doc(db, "clubes", estado.uid), {
+      ...vinculacao,
+      capitaoUid: estado.uid,
+    });
+    lote.set(doc(db, "jogadores", estado.uid), {
+      ehCapitao: true,
+      clube: nome,
+      clubeAtualId: estado.uid,
+      clubeAtualNome: nome,
+    }, { merge: true });
+    await lote.commit();
+    estado.onVinculado?.(vinculacao);
+    estado.modoCriacao = false;
+    definirFeedback("Clube criado. Você poderá conectar os dados da EA no painel.", "sucesso");
+    estado.onCriado?.(vinculacao);
+  } catch (erro) {
+    definirFeedback(
+      erro?.code === "permission-denied"
+        ? "Não foi possível criar o clube. Confirme seu e-mail e publique as regras atualizadas do Firestore."
+        : "Não foi possível criar o clube agora.",
+      "erro",
+    );
+  } finally {
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = "Continuar com este nome";
+    }
   }
 }
 
@@ -463,6 +525,7 @@ function ligarEventos() {
   });
   elemento("ea-clube-atualizar")?.addEventListener("click", atualizarClubeConectado);
   elemento("ea-clube-trocar")?.addEventListener("click", mostrarTrocaDeClube);
+  elemento("ea-clube-criar-manual")?.addEventListener("click", criarClubeManual);
 }
 
 export function inicializarEAClubStats({

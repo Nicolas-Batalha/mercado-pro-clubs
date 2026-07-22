@@ -273,6 +273,7 @@ module.exports = async function handler(req, res) {
   } catch (erro) {
     console.error("Falha na consulta pública de clubes da EA:", erro?.message || erro);
     const indisponivel = erro?.name === "AbortError" || [403, 429, 500, 502, 503, 504].includes(erro?.statusEA);
+    res.setHeader("Cache-Control", "no-store");
     enviar(res, indisponivel ? 503 : 502, {
       erro: indisponivel
         ? "Os dados da EA estão temporariamente indisponíveis. Tente novamente em alguns minutos."
