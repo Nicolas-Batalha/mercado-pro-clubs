@@ -2,7 +2,7 @@ import { db } from "./firebase-config.js";
 import {
   doc,
   serverTimestamp,
-  updateDoc,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const ROTULOS_PLATAFORMA = {
@@ -28,14 +28,29 @@ const PLATAFORMA_DO_PERFIL = {
   nx: "nx",
 };
 
+const PERFIL_DA_PLATAFORMA = {
+  "common-gen5": "new-gen",
+  "common-gen4": "ven-gen",
+  nx: "switch",
+};
+
+const ROTULOS_POSICAO = {
+  goalkeeper: "Goleiro",
+  defender: "Defensor",
+  midfielder: "Meio-campista",
+  forward: "Atacante",
+};
+
 const estado = {
   uid: "",
   somenteLeitura: false,
+  modoCriacao: false,
   getClube: () => ({}),
   onVinculado: null,
+  onCriado: null,
   resultados: [],
   eventosLigados: false,
-  buscaAtual: 0,
+  requisicaoAtual: 0,
 };
 
 function elemento(id) {
@@ -56,6 +71,20 @@ function inteiro(valor) {
   return Number.isFinite(numero) && numero >= 0 ? numero : 0;
 }
 
+function decimal(valor) {
+  const numero = Number.parseFloat(String(valor ?? "0").replace(",", "."));
+  return Number.isFinite(numero) && numero >= 0 ? numero : 0;
+}
+
+function normalizarNome(valor) {
+  return String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
 function plataformaValida(valor) {
   return Object.hasOwn(ROTULOS_PLATAFORMA, valor) ? valor : "common-gen5";
 }
@@ -73,12 +102,12 @@ function definirFeedback(mensagem = "", tipo = "") {
   feedback.className = `ea-clube-feedback${tipo ? ` ${tipo}` : ""}`;
 }
 
-function definirCarregando(carregando) {
+function definirCarregando(carregando, texto = "Buscando...") {
   const buscar = elemento("ea-clube-buscar");
   const atualizar = elemento("ea-clube-atualizar");
   if (buscar) {
     buscar.disabled = carregando;
-    buscar.textContent = carregando ? "Buscando..." : "Buscar na EA";
+    buscar.textContent = carregando ? texto : "Buscar na EA";
   }
   if (atualizar) {
     atualizar.disabled = carregando;
@@ -91,37 +120,141 @@ function preencherNumero(id, valor, sufixo = "") {
   if (campo) campo.textContent = `${inteiro(valor)}${sufixo}`;
 }
 
-function exibirEstatisticas(clube) {
-  if (!clube) return;
+function mensagemErroLocal(resposta, dados) {
+  if (resposta.status === 404 && ["127.0.0.1", "localhost"].includes(location.hostname)) {
+    return "A busca automática funciona no site publicado. O Live Server não executa a rota /api.";
+  }
+  return dados?.erro || "Não foi possível consultar a EA agora.";
+}
+
+async function consultarApi(parametros) {
+  const numeroRequisicao = ++estado.requisicaoAtual;
+  const resposta = await fetch(`/api/ea-clubs?${new URLSearchParams(parametros).toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
+  let dados = null;
+  try {
+    dados = await resposta.json();
+  } catch {
+    dados = null;
+  }
+  if (!resposta.ok) throw new Error(mensagemErroLocal(resposta, dados));
+  if (numeroRequisicao !== estado.requisicaoAtual) return null;
+  return dados;
+}
+
+function exibirIdentidade(clube) {
+  elemento("painel-estatisticas")?.classList.add("ea-clube-automatico");
   const conectado = elemento("ea-clube-conectado");
   if (conectado) conectado.hidden = false;
   const status = elemento("ea-clube-status");
   if (status) {
-    status.textContent = "Conectado";
+    status.textContent = "Dados automáticos";
     status.classList.add("conectado");
   }
   const nome = elemento("ea-clube-conectado-nome");
   if (nome) nome.textContent = clube.clubName || "Clube conectado";
   const plataforma = elemento("ea-clube-conectado-plataforma");
-  if (plataforma) plataforma.textContent = ROTULOS_PLATAFORMA[clube.platform] || "Plataforma não informada";
+  if (plataforma) {
+    const partes = [ROTULOS_PLATAFORMA[clube.platform] || "Plataforma não informada"];
+    if (clube.stadiumName) partes.push(clube.stadiumName);
+    plataforma.textContent = partes.join(" · ");
+  }
+}
 
-  preencherNumero("ea-stat-jogos", clube.gamesPlayed);
-  preencherNumero("ea-stat-vitorias", clube.wins);
-  preencherNumero("ea-stat-empates", clube.ties);
-  preencherNumero("ea-stat-derrotas", clube.losses);
-  preencherNumero("ea-stat-gols", clube.goals);
-  preencherNumero("ea-stat-gols-contra", clube.goalsAgainst);
-  preencherNumero("ea-stat-aproveitamento", clube.aproveitamento, "%");
-  const divisao = elemento("ea-stat-divisao");
-  if (divisao) divisao.textContent = inteiro(clube.currentDivision) > 0 ? String(inteiro(clube.currentDivision)) : "—";
+function aplicarIdentidadeAutomatica(clube) {
+  const campoNome = elemento("clube");
+  if (campoNome) {
+    if (clube.eaClubName || clube.clubName) campoNome.value = clube.eaClubName || clube.clubName;
+    campoNome.readOnly = true;
+    campoNome.title = "Nome sincronizado com o clube selecionado na EA";
+  }
+  const campoPlataforma = elemento("plataforma");
+  if (campoPlataforma) {
+    const plataformaEA = plataformaValida(clube.eaPlatform || clube.platform);
+    campoPlataforma.value = PERFIL_DA_PLATAFORMA[plataformaEA];
+    campoPlataforma.disabled = true;
+    campoPlataforma.title = "Plataforma sincronizada com a EA";
+  }
+  const campoDivisao = elemento("divisao");
+  if (campoDivisao) {
+    if (inteiro(clube.currentDivision) > 0) campoDivisao.value = String(inteiro(clube.currentDivision));
+    campoDivisao.readOnly = true;
+    campoDivisao.title = "A divisão é informada pelos dados do jogo";
+  }
+}
+
+function renderizarForma(resultados) {
+  const forma = elemento("ea-clube-forma");
+  if (!forma) return;
+  forma.innerHTML = Array.isArray(resultados) && resultados.length
+    ? resultados.map((resultado) => {
+        const valor = ["V", "E", "D"].includes(resultado) ? resultado : "—";
+        const classe = valor === "V" ? "vitoria" : valor === "D" ? "derrota" : "empate";
+        return `<b class="${classe}" title="${valor === "V" ? "Vitória" : valor === "D" ? "Derrota" : "Empate"}">${valor}</b>`;
+      }).join("")
+    : "<small>Sem partidas recentes</small>";
+}
+
+function jogadorHtml(jogador) {
+  const posicao = ROTULOS_POSICAO[jogador.favoritePosition]
+    || (jogador.proPos ? `Posição ${jogador.proPos}` : "Não informada");
+  const nota = decimal(jogador.ratingAverage);
+  return `<tr>
+    <td data-label="Jogador"><strong>${escHtml(jogador.name || "Jogador")}</strong></td>
+    <td data-label="Posição"><span>${escHtml(posicao)}</span></td>
+    <td data-label="Jogos">${inteiro(jogador.gamesPlayed)}</td>
+    <td data-label="Gols">${inteiro(jogador.goals)}</td>
+    <td data-label="Assistências">${inteiro(jogador.assists)}</td>
+    <td data-label="Nota"><b class="ea-nota-jogador">${nota ? nota.toFixed(1).replace(".", ",") : "—"}</b></td>
+    <td data-label="MVP">${inteiro(jogador.manOfTheMatch)}</td>
+  </tr>`;
+}
+
+function renderizarElenco(jogadores) {
+  const lista = elemento("ea-clube-elenco");
+  const total = elemento("ea-clube-elenco-total");
+  const elenco = Array.isArray(jogadores) ? jogadores : [];
+  if (total) total.textContent = `${elenco.length} jogador${elenco.length === 1 ? "" : "es"}`;
+  if (!lista) return;
+  lista.innerHTML = elenco.length
+    ? elenco.map(jogadorHtml).join("")
+    : '<tr><td colspan="7">A EA não retornou jogadores para este clube.</td></tr>';
+}
+
+function exibirEstatisticas({ club = {}, stats = {}, players = [], updatedAt = "", partial = false } = {}) {
+  exibirIdentidade(club);
+  aplicarIdentidadeAutomatica({ ...club, currentDivision: stats.currentDivision });
+  preencherNumero("ea-stat-jogos", stats.gamesPlayed);
+  preencherNumero("ea-stat-vitorias", stats.wins);
+  preencherNumero("ea-stat-empates", stats.ties);
+  preencherNumero("ea-stat-derrotas", stats.losses);
+  preencherNumero("ea-stat-gols", stats.goals);
+  preencherNumero("ea-stat-gols-contra", stats.goalsAgainst);
+  preencherNumero("ea-stat-aproveitamento", stats.aproveitamento, "%");
+  preencherNumero("ea-stat-skill", stats.skillRating);
+  preencherNumero("ea-stat-promocoes", stats.promotions);
+  preencherNumero("ea-stat-elenco", players.length);
+  renderizarForma(stats.recentForm);
+  renderizarElenco(players);
+
+  const horario = updatedAt
+    ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(updatedAt))
+    : "agora";
+  definirFeedback(
+    partial
+      ? `Dados atualizados parcialmente em ${horario}. Uma parte do serviço da EA não respondeu.`
+      : `Campanha e elenco atualizados automaticamente em ${horario}.`,
+    partial ? "aviso" : "sucesso",
+  );
 }
 
 function resultadoHtml(clube, indice) {
-  const jogos = inteiro(clube.gamesPlayed);
   const plataforma = ROTULOS_PLATAFORMA[clube.platform] || "Plataforma não informada";
   const botao = estado.somenteLeitura
     ? ""
-    : `<button type="button" data-ea-conectar="${indice}">Conectar este clube</button>`;
+    : `<button type="button" data-ea-conectar="${indice}">Usar este clube</button>`;
   return `<article class="ea-clube-resultado">
     <div class="ea-clube-resultado-principal">
       <span>CLUBE ENCONTRADO</span>
@@ -129,7 +262,7 @@ function resultadoHtml(clube, indice) {
       <p>${escHtml(plataforma)} · ID ${escHtml(clube.clubId)}</p>
     </div>
     <div class="ea-clube-resultado-campanha" aria-label="Resumo da campanha">
-      <strong>${jogos}</strong><span>jogos</span>
+      <strong>${inteiro(clube.gamesPlayed)}</strong><span>jogos</span>
       <strong>${inteiro(clube.wins)}V</strong><span>${inteiro(clube.ties)}E · ${inteiro(clube.losses)}D</span>
       <strong>${inteiro(clube.goals)}:${inteiro(clube.goalsAgainst)}</strong><span>gols</span>
     </div>
@@ -151,57 +284,83 @@ function renderizarResultados(resultados) {
   });
 }
 
-async function consultarClubes(nome, plataforma, { silencioso = false } = {}) {
-  const numeroBusca = ++estado.buscaAtual;
-  definirCarregando(true);
-  if (!silencioso) {
-    definirFeedback("Procurando o clube nos dados públicos da EA...");
-    renderizarResultados([]);
-  }
+async function consultarClubes(nome, plataforma) {
+  const dados = await consultarApi({ name: nome.trim(), platform: plataformaValida(plataforma) });
+  return Array.isArray(dados?.resultados) ? dados.resultados : [];
+}
+
+async function carregarDetalhes(clubeVinculado, fallback = null) {
+  const clubId = String(clubeVinculado?.eaClubId || clubeVinculado?.clubId || "");
+  const plataforma = plataformaValida(clubeVinculado?.eaPlatform || clubeVinculado?.platform);
+  if (!clubId) return;
+  definirCarregando(true, "Atualizando...");
+  definirFeedback("Carregando campanha e jogadores diretamente da EA...");
   try {
-    const parametros = new URLSearchParams({ name: nome.trim(), platform: plataformaValida(plataforma) });
-    const resposta = await fetch(`/api/ea-clubs?${parametros.toString()}`, {
-      method: "GET",
-      headers: { Accept: "application/json" },
+    const nome = String(clubeVinculado?.eaClubName || clubeVinculado?.clubName || "").trim();
+    const parametros = { clubId, platform: plataforma };
+    if (nome.length >= 2) parametros.name = nome;
+    const dados = await consultarApi(parametros);
+    if (!dados) return;
+    exibirEstatisticas({
+      club: {
+        ...dados.club,
+        clubName: dados.club?.clubName || clubeVinculado?.eaClubName || clubeVinculado?.clubName,
+        platform: plataforma,
+      },
+      stats: dados.stats || fallback || {},
+      players: dados.players || [],
+      updatedAt: dados.updatedAt,
+      partial: Boolean(dados.partial),
     });
-    let dados = null;
-    try {
-      dados = await resposta.json();
-    } catch {
-      dados = null;
+  } catch (erro) {
+    if (fallback) {
+      exibirEstatisticas({
+        club: {
+          clubId,
+          clubName: clubeVinculado?.eaClubName || clubeVinculado?.clubName,
+          platform: plataforma,
+        },
+        stats: fallback,
+        players: [],
+        partial: true,
+      });
     }
-    if (!resposta.ok) {
-      if (resposta.status === 404 && location.hostname === "127.0.0.1") {
-        throw new Error("A busca automática funciona no site publicado. No Live Server, a rota /api não é executada.");
-      }
-      throw new Error(dados?.erro || "Não foi possível consultar a EA agora.");
-    }
-    if (numeroBusca !== estado.buscaAtual) return [];
-    return Array.isArray(dados?.resultados) ? dados.resultados : [];
+    definirFeedback(erro?.message || "A EA está temporariamente indisponível.", "erro");
   } finally {
-    if (numeroBusca === estado.buscaAtual) definirCarregando(false);
+    definirCarregando(false);
   }
 }
 
-async function executarBusca(nome, plataforma) {
+async function executarBusca(nome, plataforma, { conectarExato = false } = {}) {
+  definirCarregando(true);
+  definirFeedback("Procurando o clube nos dados públicos da EA...");
+  renderizarResultados([]);
   try {
     const resultados = await consultarClubes(nome, plataforma);
+    const exatos = resultados.filter((clube) => normalizarNome(clube.clubName) === normalizarNome(nome));
+    if (conectarExato && exatos.length === 1 && !estado.somenteLeitura) {
+      definirFeedback(`Clube ${exatos[0].clubName} encontrado. Conectando campanha e elenco...`, "sucesso");
+      await conectarClube(exatos[0]);
+      return;
+    }
     renderizarResultados(resultados);
     definirFeedback(
       resultados.length
-        ? `${resultados.length} clube${resultados.length === 1 ? " encontrado" : "s encontrados"}. Confira o nome e a campanha antes de conectar.`
+        ? `${resultados.length} clube${resultados.length === 1 ? " encontrado" : "s encontrados"}. Escolha o clube correto.`
         : "Nenhum clube foi encontrado. Confira a grafia e a plataforma.",
       resultados.length ? "sucesso" : "aviso",
     );
   } catch (erro) {
     renderizarResultados([]);
     definirFeedback(erro?.message || "A busca está indisponível no momento.", "erro");
+  } finally {
+    definirCarregando(false);
   }
 }
 
 async function conectarClube(clube, botao) {
   if (estado.somenteLeitura || !estado.uid || !clube?.clubId) return;
-  const textoOriginal = botao?.textContent || "Conectar este clube";
+  const textoOriginal = botao?.textContent || "Usar este clube";
   if (botao) {
     botao.disabled = true;
     botao.textContent = "Conectando...";
@@ -212,15 +371,47 @@ async function conectarClube(clube, botao) {
       eaClubName: String(clube.clubName || "").slice(0, 64),
       eaPlatform: plataformaValida(clube.platform),
       eaSincronizadoEm: serverTimestamp(),
+      nome: String(clube.clubName || "").slice(0, 64),
+      plataforma: PERFIL_DA_PLATAFORMA[plataformaValida(clube.platform)],
     };
-    await updateDoc(doc(db, "clubes", estado.uid), vinculacao);
+    if (inteiro(clube.currentDivision) > 0) vinculacao.divisao = String(inteiro(clube.currentDivision));
+    const lote = writeBatch(db);
+    const clubeRef = doc(db, "clubes", estado.uid);
+    if (estado.modoCriacao) {
+      lote.set(clubeRef, {
+        ...vinculacao,
+        capitaoUid: estado.uid,
+      });
+      lote.set(doc(db, "jogadores", estado.uid), {
+        ehCapitao: true,
+        clube: vinculacao.nome,
+        clubeAtualId: estado.uid,
+        clubeAtualNome: vinculacao.nome,
+      }, { merge: true });
+    } else {
+      lote.update(clubeRef, vinculacao);
+    }
+    await lote.commit();
     estado.onVinculado?.(vinculacao);
+    aplicarIdentidadeAutomatica({ ...clube, ...vinculacao });
     renderizarResultados([]);
-    exibirEstatisticas({ ...clube, platform: vinculacao.eaPlatform });
-    definirFeedback("Clube conectado. As estatísticas agora aparecem para todo o elenco.", "sucesso");
+    const formulario = elemento("ea-clube-form");
+    if (formulario) formulario.hidden = true;
+    exibirIdentidade({
+      clubId: vinculacao.eaClubId,
+      clubName: vinculacao.eaClubName,
+      platform: vinculacao.eaPlatform,
+    });
+    await carregarDetalhes(vinculacao, clube);
+    if (estado.modoCriacao) {
+      estado.modoCriacao = false;
+      estado.onCriado?.(vinculacao);
+    }
   } catch (erro) {
-    const mensagem = erro?.code === "permission-denied"
-      ? "Somente o capitão pode conectar o clube à EA. Publique também as regras atualizadas do Firestore."
+    const mensagem = erro?.code === "permission-denied" && estado.modoCriacao
+      ? "Não foi possível criar o clube. Confirme seu e-mail e publique as regras atualizadas do Firestore."
+      : erro?.code === "permission-denied"
+        ? "Somente o capitão pode conectar o clube à EA. Publique também as regras atualizadas do Firestore."
       : "Não foi possível salvar a conexão com este clube.";
     definirFeedback(mensagem, "erro");
   } finally {
@@ -234,41 +425,27 @@ async function conectarClube(clube, botao) {
 async function atualizarClubeConectado() {
   const clubeSalvo = estado.getClube?.() || {};
   const id = String(clubeSalvo.eaClubId || "");
-  const nome = String(clubeSalvo.eaClubName || clubeSalvo.nome || "").trim();
-  const plataforma = plataformaDoClube(clubeSalvo);
-  if (!id || nome.length < 2) {
-    if (estado.somenteLeitura) {
-      definirFeedback("O capitão ainda não conectou este clube aos dados da EA.", "aviso");
-    }
+  if (!id) {
+    definirFeedback("Conecte o clube primeiro para carregar os dados automáticos.", "aviso");
     return;
   }
+  await carregarDetalhes(clubeSalvo);
+}
 
-  const nomeConectado = elemento("ea-clube-conectado-nome");
-  if (nomeConectado) nomeConectado.textContent = nome;
-  const plataformaConectada = elemento("ea-clube-conectado-plataforma");
-  if (plataformaConectada) plataformaConectada.textContent = ROTULOS_PLATAFORMA[plataforma];
-  const conectado = elemento("ea-clube-conectado");
-  if (conectado) conectado.hidden = false;
-  const status = elemento("ea-clube-status");
-  if (status) {
-    status.textContent = "Conectado";
-    status.classList.add("conectado");
+function mostrarTrocaDeClube() {
+  if (estado.somenteLeitura) return;
+  const clube = estado.getClube?.() || {};
+  const formulario = elemento("ea-clube-form");
+  if (formulario) formulario.hidden = false;
+  const nome = elemento("ea-clube-nome");
+  if (nome) {
+    nome.value = clube.eaClubName || clube.nome || "";
+    nome.focus();
   }
-
-  definirFeedback("Atualizando as estatísticas do clube...");
-  try {
-    const resultados = await consultarClubes(nome, plataforma, { silencioso: true });
-    const encontrado = resultados.find((item) => String(item.clubId) === id)
-      || resultados.find((item) => String(item.clubName || "").localeCompare(nome, "pt-BR", { sensitivity: "base" }) === 0);
-    if (!encontrado) {
-      definirFeedback("O clube está conectado, mas a EA não devolveu as estatísticas agora. Tente atualizar mais tarde.", "aviso");
-      return;
-    }
-    exibirEstatisticas({ ...encontrado, platform: plataforma });
-    definirFeedback("Estatísticas atualizadas com os dados públicos da EA.", "sucesso");
-  } catch (erro) {
-    definirFeedback(erro?.message || "A EA está temporariamente indisponível.", "erro");
-  }
+  const plataforma = elemento("ea-clube-plataforma");
+  if (plataforma) plataforma.value = plataformaDoClube(clube);
+  renderizarResultados([]);
+  definirFeedback("Busque e selecione outro clube. A conexão atual só será trocada depois da confirmação.", "aviso");
 }
 
 function ligarEventos() {
@@ -285,25 +462,52 @@ function ligarEventos() {
     executarBusca(nome, plataforma);
   });
   elemento("ea-clube-atualizar")?.addEventListener("click", atualizarClubeConectado);
+  elemento("ea-clube-trocar")?.addEventListener("click", mostrarTrocaDeClube);
 }
 
-export function inicializarEAClubStats({ uid, somenteLeitura = false, getClube, onVinculado } = {}) {
+export function inicializarEAClubStats({
+  uid,
+  somenteLeitura = false,
+  modoCriacao = false,
+  getClube,
+  onVinculado,
+  onCriado,
+} = {}) {
   if (!elemento("ea-clube-stats") || !uid) return;
   estado.uid = uid;
   estado.somenteLeitura = Boolean(somenteLeitura);
+  estado.modoCriacao = Boolean(modoCriacao);
   estado.getClube = typeof getClube === "function" ? getClube : () => ({});
   estado.onVinculado = typeof onVinculado === "function" ? onVinculado : null;
+  estado.onCriado = typeof onCriado === "function" ? onCriado : null;
 
   const clube = estado.getClube() || {};
+  const conectado = Boolean(clube.eaClubId);
+  const primeiroAcesso = elemento("ea-clube-primeiro-acesso");
+  if (primeiroAcesso) primeiroAcesso.hidden = !estado.modoCriacao;
   const formulario = elemento("ea-clube-form");
-  if (formulario) formulario.hidden = estado.somenteLeitura;
+  if (formulario) formulario.hidden = estado.somenteLeitura || conectado;
   const atualizar = elemento("ea-clube-atualizar");
   if (atualizar) atualizar.hidden = estado.somenteLeitura;
+  const trocar = elemento("ea-clube-trocar");
+  if (trocar) trocar.hidden = estado.somenteLeitura;
   const inputNome = elemento("ea-clube-nome");
-  if (inputNome && !inputNome.value) inputNome.value = clube.eaClubName || clube.nome || "";
+  if (inputNome) inputNome.value = clube.eaClubName || clube.nome || "";
   const inputPlataforma = elemento("ea-clube-plataforma");
   if (inputPlataforma) inputPlataforma.value = plataformaDoClube(clube);
 
   ligarEventos();
-  atualizarClubeConectado();
+  if (conectado) {
+    aplicarIdentidadeAutomatica(clube);
+    exibirIdentidade({
+      clubId: clube.eaClubId,
+      clubName: clube.eaClubName || clube.nome,
+      platform: plataformaDoClube(clube),
+    });
+    carregarDetalhes(clube);
+  } else if (estado.somenteLeitura) {
+    definirFeedback("O capitão ainda não conectou este clube aos dados da EA.", "aviso");
+  } else if (String(clube.nome || "").trim().length >= 2) {
+    executarBusca(String(clube.nome).trim(), plataformaDoClube(clube), { conectarExato: true });
+  }
 }

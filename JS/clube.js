@@ -13,8 +13,8 @@ import {
   collection, query, where, getDocs, onSnapshot, limit
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { confirmModal } from "./confirm-modal.js";
-import { carregarMercadoStats, inicializarMercadoStats } from "./mercado-stats.js?v=20260720-3";
-import { inicializarEAClubStats } from "./ea-club-stats.js?v=20260720-3";
+import { carregarMercadoStats, inicializarMercadoStats } from "./mercado-stats.js?v=20260722-2";
+import { inicializarEAClubStats } from "./ea-club-stats.js?v=20260722-2";
 
 function toast(msg, tipo = "sucesso") {
   document.getElementById("toast-clube")?.remove();
@@ -767,6 +767,7 @@ function ligarEventosDashboard(uid, { novoClube = false } = {}) {
             clubeCarregado = { ...clubeCarregado, ...vinculacao };
           },
         });
+        document.getElementById("aba-estatisticas")?.click();
         await carregarEstatisticas(uid);
       } else {
         toast("✅ Clube atualizado!");
@@ -1073,25 +1074,37 @@ async function renderPainelJogador(perfilAtual) {
 }
 
 function prepararCriacaoClube(usuario, perfilAtual) {
-  configurarAbasGerenciais(false, false);
   clubeCarregado = {};
-  preencherFormulario({}, perfilAtual);
+  document.body.classList.add("clube-onboarding");
+  document.querySelector(".menu-acao")?.setAttribute("hidden", "");
+  document.querySelector(".abas-clube")?.setAttribute("hidden", "");
+  document.getElementById("clube-progresso")?.setAttribute("hidden", "");
+  document.getElementById("clube-criacao-aviso")?.setAttribute("hidden", "");
+  document.querySelectorAll(".tab-painel[data-painel]").forEach((painel) => {
+    painel.hidden = painel.id !== "painel-estatisticas";
+  });
+  const painelEstatisticas = document.getElementById("painel-estatisticas");
+  if (painelEstatisticas) {
+    painelEstatisticas.hidden = false;
+    painelEstatisticas.classList.add("ea-onboarding");
+  }
+  const titulo = document.querySelector(".text-menu h1");
+  if (titulo) titulo.textContent = "Encontre seu clube";
+  const descricao = document.querySelector(".text-menu p");
+  if (descricao) descricao.textContent = "Conecte o clube do jogo antes de completar seu perfil no Mercado Pro Clubs.";
 
-  const escudoPadrao = "../IMG/football-club.png";
-  const escudoFormulario = document.getElementById("foto-perfil-preview");
-  const escudoPreview = document.getElementById("preview-escudo");
-  const escudoAparencia = document.getElementById("clube-aparencia-escudo");
-  if (escudoFormulario) escudoFormulario.src = escudoPadrao;
-  if (escudoPreview) escudoPreview.src = escudoPadrao;
-  if (escudoAparencia) escudoAparencia.src = escudoPadrao;
-
-  document.querySelector(".menu-acao")?.removeAttribute("hidden");
-  document.getElementById("clube-criacao-aviso")?.removeAttribute("hidden");
-  const textoSalvar = document.getElementById("btn-salvar-clube-texto");
-  if (textoSalvar) textoSalvar.textContent = "Criar meu clube";
-  const linkPublico = document.getElementById("btn-ver-perfil-publico");
-  if (linkPublico) linkPublico.hidden = true;
-  ligarEventosDashboard(usuario.uid, { novoClube: true });
+  inicializarEAClubStats({
+    uid: usuario.uid,
+    modoCriacao: true,
+    getClube: () => clubeCarregado,
+    onVinculado: (vinculacao) => {
+      clubeCarregado = { ...clubeCarregado, ...vinculacao };
+    },
+    onCriado: () => {
+      toast("✅ Clube encontrado! Agora complete o perfil.");
+      window.setTimeout(() => window.location.reload(), 900);
+    },
+  });
 }
 
 // ─── Modo visitante: perfil público completo do clube (via ?uid=) ─────────────
@@ -1471,7 +1484,7 @@ if (uidVisitante) {
       const perfilAtual = perfilSnap.exists() ? perfilSnap.data() : {};
 
       const clubeSnap = await getDoc(doc(db, "clubes", usuario.uid));
-      const ehCapitao = clubeSnap.exists() || perfilAtual.ehCapitao;
+      const ehCapitao = clubeSnap.exists();
 
       if (ehCapitao) {
         const dadosClube = clubeSnap.exists() ? clubeSnap.data() : { nome: perfilAtual.clube || "" };
@@ -1484,7 +1497,7 @@ if (uidVisitante) {
         document.getElementById("clube-criacao-aviso")?.setAttribute("hidden", "");
         ligarEventosDashboard(usuario.uid);
         await carregarEstatisticas(usuario.uid);
-      } else if (perfilAtual.clubeAtualId) {
+      } else if (perfilAtual.clubeAtualId && perfilAtual.clubeAtualId !== usuario.uid) {
         document.querySelector(".menu-acao")?.setAttribute("hidden", "");
         await renderPainelJogador(perfilAtual);
       } else {

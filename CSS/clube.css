@@ -3468,6 +3468,96 @@ flex-direction: column;
         radial-gradient(circle at 92% 0,rgba(18,224,108,.09),transparent 34%),
         #121713;
 }
+.ea-clube-primeiro-acesso{
+    display:grid;
+    gap:11px;
+    padding:24px;
+    border:1px solid rgba(18,224,108,.28);
+    border-radius:14px;
+    background:
+        radial-gradient(circle at 92% 8%,rgba(18,224,108,.14),transparent 38%),
+        rgba(8,13,10,.88);
+}
+.ea-clube-primeiro-acesso[hidden]{display:none!important}
+.ea-clube-primeiro-acesso > span{
+    color:#12e06c;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.14em;
+}
+.ea-clube-primeiro-acesso h2{
+    max-width:680px;
+    margin:0;
+    color:#f5f8f6;
+    font-size:28px;
+    line-height:1.14;
+}
+.ea-clube-primeiro-acesso p{
+    max-width:720px;
+    margin:0;
+    color:#9ba79f;
+    font-size:12px;
+    line-height:1.65;
+}
+.ea-clube-primeiro-acesso ol{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:9px;
+    margin:8px 0 0;
+    padding:0;
+    list-style:none;
+    counter-reset:ea-onboarding;
+}
+.ea-clube-primeiro-acesso li{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    min-height:44px;
+    padding:10px 12px;
+    color:#dce5df;
+    border:1px solid #2b342e;
+    border-radius:9px;
+    background:rgba(18,23,19,.78);
+    font-size:10px;
+    font-weight:800;
+    counter-increment:ea-onboarding;
+}
+.ea-clube-primeiro-acesso li::before{
+    display:grid;
+    width:24px;
+    height:24px;
+    flex:0 0 auto;
+    place-items:center;
+    color:#06150c;
+    border-radius:50%;
+    background:#12e06c;
+    content:counter(ea-onboarding);
+    font-size:10px;
+    font-weight:900;
+}
+body.clube-onboarding .menu{
+    max-width:900px;
+    margin-bottom:0;
+    padding-top:24px;
+}
+body.clube-onboarding .menu-clubes{
+    justify-content:center;
+    text-align:center;
+}
+#painel-estatisticas.ea-onboarding{
+    max-width:900px;
+    margin:0 auto;
+}
+#painel-estatisticas.ea-onboarding > :not(.ea-clube-stats){display:none!important}
+#painel-estatisticas.ea-onboarding .ea-clube-stats{
+    margin:8px 0 32px;
+    padding:28px;
+    box-shadow:0 24px 70px rgba(0,0,0,.28);
+}
+#painel-estatisticas.ea-onboarding .ea-clube-stats-topo{display:none}
+#painel-estatisticas.ea-onboarding .ea-clube-form{
+    grid-template-columns:minmax(240px,1fr) minmax(220px,.72fr) auto;
+}
 .ea-clube-stats-topo,
 .ea-clube-identidade{
     display:flex;
@@ -3598,7 +3688,8 @@ flex-direction: column;
     font-size:13px;
 }
 .ea-clube-resultado button,
-.ea-clube-atualizar{
+.ea-clube-atualizar,
+.ea-clube-trocar{
     padding:10px 13px;
     color:#06140c;
     border:1px solid #12e06c;
@@ -3611,6 +3702,7 @@ flex-direction: column;
 }
 .ea-clube-resultado button:disabled,
 .ea-clube-atualizar:disabled,
+.ea-clube-trocar:disabled,
 .ea-clube-form button:disabled{
     cursor:wait;
     opacity:.62;
@@ -3622,9 +3714,19 @@ flex-direction: column;
     border-top:1px solid #2b332e;
 }
 .ea-clube-identidade h4{font-size:18px}
+.ea-clube-identidade-acoes{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
 .ea-clube-atualizar{
     color:#12e06c;
     background:rgba(18,224,108,.07);
+}
+.ea-clube-trocar{
+    color:#aab5ad;
+    border-color:#38423b;
+    background:#171c18;
 }
 .ea-clube-numeros{
     display:grid;
@@ -3653,6 +3755,110 @@ flex-direction: column;
 }
 .ea-clube-numeros .positivo strong{color:#12e06c}
 .ea-clube-numeros .negativo strong{color:#ff7373}
+.ea-clube-forma-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    padding:12px 14px;
+    border:1px solid #2c342f;
+    border-radius:10px;
+    background:#111512;
+}
+.ea-clube-forma-wrap > span,
+.ea-clube-elenco-topo span{
+    color:#7f8d83;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.11em;
+}
+.ea-clube-forma{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.ea-clube-forma b{
+    display:grid;
+    width:28px;
+    height:28px;
+    place-items:center;
+    color:#c8d2cb;
+    border:1px solid #3b443e;
+    border-radius:7px;
+    background:#202521;
+    font-size:10px;
+}
+.ea-clube-forma b.vitoria{color:#12e06c;border-color:rgba(18,224,108,.4);background:rgba(18,224,108,.08)}
+.ea-clube-forma b.derrota{color:#ff7676;border-color:rgba(255,118,118,.35);background:rgba(255,118,118,.07)}
+.ea-clube-forma b.empate{color:#f0c965;border-color:rgba(240,201,101,.35);background:rgba(240,201,101,.07)}
+.ea-clube-forma small{color:#78847c;font-size:9px}
+.ea-clube-elenco-oficial{
+    overflow:hidden;
+    border:1px solid #2c342f;
+    border-radius:12px;
+    background:#111512;
+}
+.ea-clube-elenco-topo{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    padding:15px;
+    border-bottom:1px solid #2c342f;
+}
+.ea-clube-elenco-topo h4{
+    margin:4px 0 0;
+    color:#f4f7f5;
+    font-size:14px;
+}
+.ea-clube-elenco-topo > strong{
+    color:#12e06c;
+    font-size:10px;
+}
+.ea-clube-elenco-tabela-wrap{overflow-x:auto}
+.ea-clube-elenco-tabela{
+    width:100%;
+    border-collapse:collapse;
+    color:#cbd4ce;
+    font-size:10px;
+}
+.ea-clube-elenco-tabela th,
+.ea-clube-elenco-tabela td{
+    padding:12px 14px;
+    border-bottom:1px solid #252c27;
+    text-align:center;
+    white-space:nowrap;
+}
+.ea-clube-elenco-tabela th{
+    color:#7f8d83;
+    background:#0c100d;
+    font-size:8px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+}
+.ea-clube-elenco-tabela th:first-child,
+.ea-clube-elenco-tabela td:first-child{text-align:left}
+.ea-clube-elenco-tabela tbody tr:last-child td{border-bottom:0}
+.ea-clube-elenco-tabela tbody tr:hover{background:rgba(18,224,108,.025)}
+.ea-clube-elenco-tabela td > strong{color:#f4f7f5;font-size:10px}
+.ea-clube-elenco-tabela td > span{
+    padding:5px 7px;
+    color:#aeb9b1;
+    border:1px solid #333d36;
+    border-radius:999px;
+    background:#181d19;
+    font-size:8px;
+}
+.ea-nota-jogador{
+    display:inline-grid;
+    min-width:34px;
+    min-height:25px;
+    place-items:center;
+    color:#07140d;
+    border-radius:6px;
+    background:#12e06c;
+    font-size:9px;
+}
 .ea-clube-fonte{
     margin:0;
     color:#6f7c73;
@@ -3661,6 +3867,16 @@ flex-direction: column;
 }
 .ea-clube-form[hidden],
 .ea-clube-conectado[hidden]{display:none!important}
+#painel-estatisticas.ea-clube-automatico > :not(.ea-clube-stats){display:none!important}
+#clube[readonly],
+#divisao[readonly],
+#plataforma:disabled{
+    color:#9ca8a0;
+    border-color:rgba(18,224,108,.22);
+    background:rgba(18,224,108,.045);
+    cursor:not-allowed;
+    opacity:1;
+}
 
 .clube-aparencia-grid{
     display:grid;
@@ -3845,13 +4061,31 @@ flex-direction: column;
 }
 @media (max-width:680px){
     .ea-clube-stats{padding:16px}
+    body.clube-onboarding .menu{padding-top:14px}
+    body.clube-onboarding .menu-clubes{align-items:flex-start;text-align:left}
+    #painel-estatisticas.ea-onboarding .ea-clube-stats{margin-top:4px;padding:16px}
+    #painel-estatisticas.ea-onboarding .ea-clube-form{grid-template-columns:1fr}
+    .ea-clube-primeiro-acesso{padding:18px}
+    .ea-clube-primeiro-acesso h2{font-size:23px}
+    .ea-clube-primeiro-acesso ol{grid-template-columns:1fr}
     .ea-clube-stats-topo,.ea-clube-identidade{align-items:stretch;flex-direction:column}
     .ea-clube-status{align-self:flex-start}
     .ea-clube-form{grid-template-columns:1fr}
     .ea-clube-form button{grid-column:auto}
     .ea-clube-resultado{grid-template-columns:1fr;gap:12px}
     .ea-clube-resultado-campanha{grid-row:auto;grid-column:auto;grid-template-columns:auto auto auto auto auto auto}
-    .ea-clube-resultado button,.ea-clube-atualizar{width:100%}
+    .ea-clube-resultado button,.ea-clube-atualizar,.ea-clube-trocar{width:100%}
+    .ea-clube-identidade-acoes{display:grid;grid-template-columns:1fr 1fr;width:100%}
+    .ea-clube-forma-wrap,.ea-clube-elenco-topo{align-items:flex-start;flex-direction:column}
+    .ea-clube-forma{flex-wrap:wrap}
+    .ea-clube-elenco-tabela-wrap{overflow:visible}
+    .ea-clube-elenco-tabela thead{display:none}
+    .ea-clube-elenco-tabela,.ea-clube-elenco-tabela tbody{display:block}
+    .ea-clube-elenco-tabela tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:13px;border-bottom:1px solid #2c342f}
+    .ea-clube-elenco-tabela tbody tr:last-child{border-bottom:0}
+    .ea-clube-elenco-tabela td{display:grid;gap:4px;padding:0;border:0;text-align:left;white-space:normal}
+    .ea-clube-elenco-tabela td:first-child{grid-column:1/-1;padding-bottom:5px}
+    .ea-clube-elenco-tabela td::before{color:#738078;font-size:7px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;content:attr(data-label)}
     .clube-area-cabecalho,.clube-gestao-toolbar{align-items:stretch;flex-direction:column}
     .clube-acao-principal,.clube-busca-vagas input{width:100%}
     .clube-resumo-grid,.clube-estatisticas-grid{grid-template-columns:1fr}
