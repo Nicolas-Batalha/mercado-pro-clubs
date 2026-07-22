@@ -40,8 +40,11 @@ function formatarData(valor) {
 function statusTorneio(torneio) {
   const status = normalizar(torneio.status).replaceAll(" ", "_");
   if (["andamento", "em_andamento", "iniciado"].includes(status)) return "andamento";
-  if (["finalizado", "encerrado", "concluido"].includes(status)) return "finalizado";
+  if (["finalizado", "concluido"].includes(status)) return "finalizado";
   if (["cancelado", "cancelada"].includes(status)) return "cancelado";
+  if (["encerrado", "inscricoes_encerradas"].includes(status)) return "encerrado";
+  const limite = timestampParaMs(torneio.inscricoesAte);
+  if (limite > 0 && Date.now() > limite) return "encerrado";
   return "aberto";
 }
 
@@ -74,7 +77,7 @@ async function carregarMetricas() {
 
 function escolherDestaque(torneios) {
   const agora = Date.now();
-  const prioridade = { aberto: 0, andamento: 1, finalizado: 2, cancelado: 3 };
+  const prioridade = { aberto: 0, andamento: 1, encerrado: 2, finalizado: 3, cancelado: 4 };
   return torneios
     .filter((torneio) => statusTorneio(torneio) !== "cancelado")
     .sort((a, b) => {
@@ -112,7 +115,9 @@ async function carregarDestaque() {
     const inscricoes = await getDocs(collection(db, "torneios", torneio.id, "inscricoes"));
     const confirmados = inscricoes.docs.filter((registro) => normalizar(registro.data().status) === "aprovada").length;
     const status = statusTorneio(torneio);
-    const rotuloStatus = status === "aberto" ? "Inscrições abertas" : status === "andamento" ? "Em andamento" : "Finalizado";
+    const rotuloStatus = { aberto: "Inscrições abertas", encerrado: "Inscrições encerradas", andamento: "Em andamento", finalizado: "Finalizado" }[status] || "Torneio";
+    const dataStatus = ["aberto", "encerrado"].includes(status) ? torneio.inscricoesAte : torneio.dataInicio;
+    const prefixoData = status === "aberto" ? "Até" : status === "encerrado" ? "Encerradas em" : "Início";
     const urlRelativa = `./HTML/torneio.html?torneio=${encodeURIComponent(torneio.id)}`;
     const urlPublica = `https://www.mercadoproclubs.com/HTML/torneio.html?torneio=${encodeURIComponent(torneio.id)}`;
 
@@ -123,9 +128,9 @@ async function carregarDestaque() {
       <span>${escaparHtml(String(torneio.jogo || "EA FC"))}</span>
       <span>${escaparHtml(String(torneio.plataforma || "Crossplay"))}</span>
       <span>${confirmados} clube${confirmados === 1 ? "" : "s"} confirmado${confirmados === 1 ? "" : "s"}</span>
-      <span>${status === "aberto" ? `Até ${escaparHtml(formatarData(torneio.inscricoesAte))}` : `Início ${escaparHtml(formatarData(torneio.dataInicio))}`}</span>`;
+      <span>${prefixoData} ${escaparHtml(formatarData(dataStatus))}</span>`;
     link.href = urlRelativa;
-    link.textContent = status === "aberto" ? "VER E INSCREVER MEU CLUBE" : "ACOMPANHAR TORNEIO";
+    link.textContent = status === "aberto" ? "VER E INSCREVER MEU CLUBE" : status === "encerrado" ? "VER DETALHES DO TORNEIO" : "ACOMPANHAR TORNEIO";
     compartilhar.hidden = false;
     compartilhar.dataset.compartilharUrl = urlPublica;
     compartilhar.dataset.compartilharTitulo = String(torneio.nome || "Torneio de Pro Clubs");

@@ -14,6 +14,19 @@ const ROTULOS = {
   switch: "Nintendo Switch",
   switch1: "Nintendo Switch",
   switch2: "Nintendo Switch 2",
+  crossplay: "Crossplay",
+  misto: "Misto",
+  "new-gen": "Nova geração",
+  "new gen": "Nova geração",
+  newgen: "Nova geração",
+  "nova-geracao": "Nova geração",
+  "ven-gen": "Antiga geração",
+  "ven gen": "Antiga geração",
+  "old-gen": "Antiga geração",
+  "old gen": "Antiga geração",
+  oldgen: "Antiga geração",
+  "antiga-geracao": "Antiga geração",
+  "america do sul": "América do Sul",
   eafc26: "EA FC 26",
   eafc25: "EA FC 25",
   eafc24: "EA FC 24",
@@ -86,7 +99,15 @@ function vagaAtiva(vaga) {
 function preencherSelect(id, valores) {
   const select = document.getElementById(id);
   if (!select) return;
-  const valoresUnicos = [...new Set(valores.filter(Boolean).map(String))]
+  const unicosPorRotulo = new Map();
+  valores
+    .filter(Boolean)
+    .map(String)
+    .forEach((valor) => {
+      const chave = normalizar(rotulo(valor));
+      if (!unicosPorRotulo.has(chave)) unicosPorRotulo.set(chave, valor);
+    });
+  const valoresUnicos = [...unicosPorRotulo.values()]
     .sort((a, b) => rotulo(a).localeCompare(rotulo(b), "pt-BR"));
   valoresUnicos.forEach((valor) => {
     const option = document.createElement("option");
@@ -125,7 +146,7 @@ function montarClubes(clubesDocs, jogadoresDocs, vagasDocs) {
     vagas.forEach((vaga) => {
       if (vaga.posicao && normalizar(vaga.posicao) !== "psd") necessidades.push(vaga.posicao);
     });
-    const posicoes = [...new Set(necessidades)];
+    const posicoes = [...new Map(necessidades.filter(Boolean).map((valor) => [normalizar(rotulo(valor)), valor])).values()];
     const primeiraVaga = vagas[0] || {};
     return {
       id: clubeDoc.id,

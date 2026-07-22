@@ -20,10 +20,31 @@ import { doc, getDoc, setDoc, serverTimestamp }
                                                              from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const googleProvider = new GoogleAuthProvider();
-const CONFIGURACAO_ACAO_EMAIL = {
-  url: "https://www.mercadoproclubs.com/HTML/cadastrar-se.html#login",
-  handleCodeInApp: false,
-};
+const CHAVE_PERFIL_INICIAL = "mercadoPerfilInicial";
+const PERFIS_INICIAIS = new Set(["jogador", "capitao"]);
+
+function perfilInicialSolicitado() {
+  const parametro = new URLSearchParams(window.location.search).get("perfil");
+  let salvo = "";
+  try {
+    salvo = localStorage.getItem(CHAVE_PERFIL_INICIAL) || "";
+  } catch {
+    salvo = "";
+  }
+  const perfil = String(parametro || salvo).trim().toLowerCase();
+  return PERFIS_INICIAIS.has(perfil) ? perfil : "";
+}
+
+function configuracaoAcaoEmail(incluirPerfil = false) {
+  const url = new URL("https://www.mercadoproclubs.com/HTML/cadastrar-se.html");
+  const perfil = perfilInicialSolicitado();
+  if (incluirPerfil && perfil) url.searchParams.set("perfil", perfil);
+  url.hash = "login";
+  return {
+    url: url.toString(),
+    handleCodeInApp: false,
+  };
+}
 
 function mensagemErroAuth(err) {
   const mensagens = {
@@ -65,20 +86,32 @@ function definirCarregando(botao, carregando, textoCarregando) {
 
 function destinoAposLogin() {
   const destinoSolicitado = new URLSearchParams(window.location.search).get("continuar");
-  if (!destinoSolicitado) return "../index.html";
-
-  try {
-    const destino = new URL(destinoSolicitado, window.location.origin);
-    const caminhoPermitido = destino.pathname === "/" || destino.pathname.startsWith("/HTML/");
-    if (destino.origin !== window.location.origin || !caminhoPermitido) return "../index.html";
-    return `${destino.pathname}${destino.search}${destino.hash}`;
-  } catch {
-    return "../index.html";
+  if (destinoSolicitado) {
+    try {
+      const destino = new URL(destinoSolicitado, window.location.origin);
+      const caminhoPermitido = destino.pathname === "/" || destino.pathname.startsWith("/HTML/");
+      if (destino.origin === window.location.origin && caminhoPermitido) {
+        return `${destino.pathname}${destino.search}${destino.hash}`;
+      }
+    } catch {
+      // Continua para o destino definido pelo perfil inicial.
+    }
   }
+
+  const perfil = perfilInicialSolicitado();
+  if (perfil === "capitao") return "/HTML/clubes.html?primeiroAcesso=1";
+  if (perfil === "jogador") return "/HTML/meu-perfil.html?primeiroAcesso=1";
+  return "../index.html";
 }
 
 function irParaInicio() {
-  window.location.href = destinoAposLogin();
+  const destino = destinoAposLogin();
+  try {
+    localStorage.removeItem(CHAVE_PERFIL_INICIAL);
+  } catch {
+    // O redirecionamento ainda funciona quando o armazenamento estiver indisponível.
+  }
+  window.location.href = destino;
 }
 
 function senhaForte(senha) {
@@ -166,17 +199,20 @@ if (formCadastro) {
         console.warn("Não foi possível atualizar o nome da conta:", perfilAuthErr);
       }
       try {
-        await setDoc(doc(db, "jogadores", user.uid), {
+        const perfilInicial = perfilInicialSolicitado();
+        const dadosPerfil = {
           nickname: nome,
           criadoEm: serverTimestamp(),
-        }, { merge: true });
+        };
+        if (perfilInicial) dadosPerfil.objetivoInicial = perfilInicial;
+        await setDoc(doc(db, "jogadores", user.uid), dadosPerfil, { merge: true });
         await salvarEmailPrivado(user);
       } catch (perfilErr) {
         console.error("Conta criada, mas o perfil inicial não pôde ser salvo:", perfilErr);
       }
       let verificacaoEnviada = true;
       try {
-        await sendEmailVerification(user, CONFIGURACAO_ACAO_EMAIL);
+        await sendEmailVerification(user, configuracaoAcaoEmail(true));
       } catch (verificacaoErr) {
         verificacaoEnviada = false;
         console.warn("Conta criada, mas o e-mail de verificação não pôde ser enviado:", verificacaoErr);
@@ -217,7 +253,7 @@ if (formLogin) {
       const { user } = await signInWithEmailAndPassword(auth, email, senha);
       if (!user.emailVerified) {
         try {
-          await sendEmailVerification(user, CONFIGURACAO_ACAO_EMAIL);
+          await sendEmailVerification(user, configuracaoAcaoEmail(true));
         } catch (verificacaoErr) {
           console.warn("Não foi possível reenviar a verificação:", verificacaoErr);
         }
@@ -262,7 +298,7 @@ btnEsqueciSenha?.addEventListener("click", async () => {
 
   definirCarregando(btnEsqueciSenha, true, "Enviando...");
   try {
-    await sendPasswordResetEmail(auth, email, CONFIGURACAO_ACAO_EMAIL);
+    await sendPasswordResetEmail(auth, email, configuracaoAcaoEmail(false));
     mostrarFeedback(
       "login-feedback",
       "Se existir uma conta com esse e-mail, você receberá o link para criar uma nova senha.",
@@ -292,14 +328,19 @@ if (btnGoogle) {
     try {
       const { user } = await signInWithPopup(auth, googleProvider);
       try {
+        const perfilInicial = perfilInicialSolicitado();
         const perfilRef = doc(db, "jogadores", user.uid);
         const perfilSnap = await getDoc(perfilRef);
         if (!perfilSnap.exists()) {
-          await setDoc(perfilRef, {
+          const dadosPerfil = {
             nickname: user.displayName || "Jogador",
             fotoURL: user.photoURL || "",
             criadoEm: serverTimestamp(),
-          });
+          };
+          if (perfilInicial) dadosPerfil.objetivoInicial = perfilInicial;
+          await setDoc(perfilRef, dadosPerfil);
+        } else if (perfilInicial) {
+          await setDoc(perfilRef, { objetivoInicial: perfilInicial }, { merge: true });
         }
         await salvarEmailPrivado(user);
       } catch (perfilErr) {

@@ -173,7 +173,7 @@
 
 .torneios-abas {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 6px;
   padding: 6px;
   border: 1px solid #2c2e31;
@@ -189,7 +189,7 @@
   background: transparent;
   color: #aeb2b7;
   font: inherit;
-  font-size: 0.77rem;
+  font-size: 0.875rem;
   font-weight: 800;
   cursor: pointer;
 }
@@ -341,6 +341,7 @@
 }
 
 .torneio-status-andamento,
+.torneio-status-encerrado,
 .torneio-status-pendente {
   border-color: rgba(255, 198, 59, 0.55);
   color: #ffce54;

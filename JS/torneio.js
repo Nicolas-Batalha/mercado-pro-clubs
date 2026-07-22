@@ -85,17 +85,25 @@ function urlImagemSegura(valor) {
   return "../IMG/clube.svg";
 }
 
+function inscricoesEncerradas(torneio) {
+  const limite = timestampParaMs(torneio.inscricoesAte);
+  return limite > 0 && Date.now() > limite;
+}
+
 function statusTorneio(torneio) {
   const status = normalizar(torneio.status).replaceAll(" ", "_");
   if (["andamento", "em_andamento", "iniciado"].includes(status)) return "andamento";
-  if (["finalizado", "encerrado", "concluido"].includes(status)) return "finalizado";
+  if (["finalizado", "concluido"].includes(status)) return "finalizado";
   if (["cancelado", "cancelada"].includes(status)) return "cancelado";
+  if (["encerrado", "inscricoes_encerradas"].includes(status)) return "encerrado";
+  if (inscricoesEncerradas(torneio)) return "encerrado";
   return "aberto";
 }
 
 function rotuloStatus(status) {
   return {
     aberto: "Inscrições abertas",
+    encerrado: "Inscrições encerradas",
     andamento: "Em andamento",
     finalizado: "Finalizado",
     cancelado: "Cancelado",
@@ -321,6 +329,8 @@ function cardTorneio(torneio) {
   const statusMinha = minha ? statusInscricao(minha) : "";
   const urlPublica = `https://www.mercadoproclubs.com/HTML/torneio.html?torneio=${encodeURIComponent(torneio.id)}`;
   const tituloCompartilhar = texto(torneio.nome, "Torneio de Pro Clubs");
+  const rotuloData = status === "aberto" ? "Inscrições até" : status === "encerrado" ? "Inscrições encerradas em" : "Início";
+  const dataDestaque = ["aberto", "encerrado"].includes(status) ? torneio.inscricoesAte : torneio.dataInicio;
 
   return `
     <article class="torneio-card">
@@ -343,7 +353,7 @@ function cardTorneio(torneio) {
         <div class="torneio-progresso-barra"><span style="width:${percentual}%"></span></div>
       </div>
       <div class="torneio-card-rodape">
-        <span class="torneio-card-data">${status === "aberto" ? "Inscrições até" : "Início"}<br><strong>${formatarData(status === "aberto" ? torneio.inscricoesAte : torneio.dataInicio)}</strong></span>
+        <span class="torneio-card-data">${rotuloData}<br><strong>${formatarData(dataDestaque)}</strong></span>
         <div class="torneio-card-botoes">
           <button type="button" class="torneio-btn" data-compartilhar-url="${escaparHtml(urlPublica)}" data-compartilhar-titulo="${escaparHtml(tituloCompartilhar)}" data-compartilhar-texto="Confira o torneio ${escaparHtml(tituloCompartilhar)} no Mercado Pro Clubs.">Compartilhar</button>
           <button type="button" class="torneio-btn torneio-btn-primario" data-torneio-acao="detalhes" data-torneio-id="${escaparHtml(torneio.id)}">Ver detalhes</button>

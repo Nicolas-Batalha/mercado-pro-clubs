@@ -3,6 +3,65 @@ const tabCadastro = document.getElementById("tabCadastro");
 const tabLogin = document.getElementById("tabLogin");
 const formCadastro = document.getElementById("form-cadastro");
 const formLogin = document.getElementById("form-login");
+const CHAVE_PERFIL_INICIAL = "mercadoPerfilInicial";
+const PERFIS_INICIAIS = new Set(["jogador", "capitao"]);
+const botoesPerfil = [...document.querySelectorAll("[data-perfil-inicial]")];
+const tituloIntencao = document.getElementById("cad-intencao-titulo");
+const descricaoIntencao = document.getElementById("cad-intencao-descricao");
+const botaoCriarConta = formCadastro?.querySelector('button[type="submit"]');
+
+function perfilDaUrl() {
+  const perfil = new URLSearchParams(window.location.search).get("perfil");
+  return PERFIS_INICIAIS.has(perfil) ? perfil : "";
+}
+
+function perfilSalvo() {
+  try {
+    const perfil = localStorage.getItem(CHAVE_PERFIL_INICIAL) || "";
+    return PERFIS_INICIAIS.has(perfil) ? perfil : "";
+  } catch {
+    return "";
+  }
+}
+
+function definirPerfilInicial(perfil, atualizarUrl = true) {
+  if (!PERFIS_INICIAIS.has(perfil)) return;
+  try {
+    localStorage.setItem(CHAVE_PERFIL_INICIAL, perfil);
+  } catch {
+    // A URL continua preservando a escolha quando o armazenamento local está indisponível.
+  }
+
+  botoesPerfil.forEach((botao) => {
+    const ativo = botao.dataset.perfilInicial === perfil;
+    botao.classList.toggle("ativo", ativo);
+    botao.setAttribute("aria-pressed", String(ativo));
+  });
+
+  const capitao = perfil === "capitao";
+  if (tituloIntencao) tituloIntencao.textContent = capitao ? "Você vai começar como capitão" : "Você vai começar como jogador";
+  if (descricaoIntencao) {
+    descricaoIntencao.textContent = capitao
+      ? "Depois de entrar, você poderá criar o clube, organizar o elenco e publicar a primeira vaga."
+      : "Depois de entrar, você completará posição, plataforma e OVR para encontrar vagas compatíveis.";
+  }
+  if (botaoCriarConta) botaoCriarConta.textContent = capitao ? "Criar conta de capitão" : "Criar conta de jogador";
+
+  if (atualizarUrl) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("perfil", perfil);
+    history.replaceState(null, "", url.toString());
+  }
+}
+
+botoesPerfil.forEach((botao) => {
+  botao.setAttribute("aria-pressed", "false");
+  botao.addEventListener("click", () => definirPerfilInicial(botao.dataset.perfilInicial));
+});
+
+const perfilInicial = perfilDaUrl() || perfilSalvo();
+if (perfilInicial) definirPerfilInicial(perfilInicial, false);
+
 
 function selecionarAba(modo, atualizarHash = true) {
   const loginAtivo = modo === "login";
@@ -24,7 +83,9 @@ function selecionarAba(modo, atualizarHash = true) {
   if (formLogin) formLogin.hidden = !loginAtivo;
 
   if (atualizarHash) {
-    history.replaceState(null, "", loginAtivo ? "#login" : "#cadastro");
+    const url = new URL(window.location.href);
+    url.hash = loginAtivo ? "login" : "cadastro";
+    history.replaceState(null, "", url.toString());
   }
 }
 

@@ -139,6 +139,10 @@
     position: relative;
     top: -8px;
   }
+
+  .main-header > .login-header {
+    padding-left: 8px;
+  }
 }
 
 @media (min-width: 769px) and (max-width: 1320px) {

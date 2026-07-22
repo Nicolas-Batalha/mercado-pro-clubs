@@ -156,8 +156,11 @@ function numero(valor, fallback = 0) {
 function statusTorneio(torneio) {
   const status = normalizar(torneio?.status).replaceAll(" ", "_");
   if (["andamento", "em_andamento", "iniciado"].includes(status)) return "andamento";
-  if (["finalizado", "encerrado", "concluido"].includes(status)) return "finalizado";
+  if (["finalizado", "concluido"].includes(status)) return "finalizado";
   if (status === "cancelado") return "cancelado";
+  if (["encerrado", "inscricoes_encerradas"].includes(status)) return "encerrado";
+  const limite = timestampParaMs(torneio?.inscricoesAte);
+  if (limite > 0 && Date.now() > limite) return "encerrado";
   return "aberto";
 }
 
@@ -196,6 +199,7 @@ function analisarEnviosPartida(torneioId, partidaId) {
 function rotuloStatusTorneio(status) {
   return {
     aberto: "Inscrições abertas",
+    encerrado: "Inscrições encerradas",
     andamento: "Em andamento",
     finalizado: "Finalizado",
     cancelado: "Cancelado",
@@ -923,7 +927,7 @@ function torneioCardAdmin(torneio) {
         <small>Inscrições até<br><strong>${escaparHtml(formatarData(torneio.inscricoesAte))}</strong></small>
         <div class="admin-torneio-card-acoes">
           <button type="button" class="admin-btn-secundario" data-admin-acao="gerenciar-torneio" data-torneio-id="${escaparHtml(torneio.id)}">Gerenciar</button>
-          ${status === "aberto" ? `<button type="button" class="admin-btn-link" data-admin-acao="editar-torneio" data-torneio-id="${escaparHtml(torneio.id)}">Editar</button>` : ""}
+          ${["aberto", "encerrado"].includes(status) ? `<button type="button" class="admin-btn-link" data-admin-acao="editar-torneio" data-torneio-id="${escaparHtml(torneio.id)}">Editar</button>` : ""}
           <button type="button" class="admin-btn-perigo" data-admin-acao="excluir-torneio" data-torneio-id="${escaparHtml(torneio.id)}" data-nome="${escaparHtml(texto(torneio.nome, "Torneio"))}" ${estado.podeModerar ? "" : "disabled"}>Excluir</button>
         </div>
       </div>
@@ -935,7 +939,7 @@ function renderizarTorneiosAdmin() {
   const lista = porId("admin-lista-torneios");
   if (!lista) return;
   const torneios = [...estado.dados.torneios].sort((a, b) => {
-    const prioridade = { aberto: 0, andamento: 1, finalizado: 2, cancelado: 3 };
+    const prioridade = { aberto: 0, andamento: 1, encerrado: 2, finalizado: 3, cancelado: 4 };
     return prioridade[statusTorneio(a)] - prioridade[statusTorneio(b)]
       || timestampParaMs(b.criadoEm) - timestampParaMs(a.criadoEm);
   });
@@ -1148,6 +1152,7 @@ function renderizarModalTorneio(torneioId) {
   }
   const status = statusTorneio(torneio);
   const inscricoes = inscricoesDoTorneio(torneioId);
+  const podeGerenciarInscricoes = ["aberto", "encerrado"].includes(status);
   const aprovadas = inscricoes.filter((item) => statusInscricaoTorneio(item) === "aprovada");
   const partidas = [...partidasDoTorneio(torneioId)].sort(
     (a, b) => numero(a.rodada, 1) - numero(b.rodada, 1) || numero(a.ordem, 0) - numero(b.ordem, 0),
@@ -1169,13 +1174,13 @@ function renderizarModalTorneio(torneioId) {
               </div>
               <div class="admin-torneio-inscricao-acoes">
                 <span class="admin-torneio-status ${statusAtual}">${statusAtual}</span>
-                ${status === "aberto" && statusAtual !== "aprovada" ? `<button type="button" class="admin-btn-primary" data-admin-acao="status-inscricao-torneio" data-torneio-id="${escaparHtml(torneioId)}" data-inscricao-id="${escaparHtml(inscricao.id)}" data-status="aprovada">Aprovar</button>` : ""}
-                ${status === "aberto" && statusAtual !== "rejeitada" ? `<button type="button" class="admin-btn-perigo" data-admin-acao="status-inscricao-torneio" data-torneio-id="${escaparHtml(torneioId)}" data-inscricao-id="${escaparHtml(inscricao.id)}" data-status="rejeitada">Rejeitar</button>` : ""}
+                ${podeGerenciarInscricoes && statusAtual !== "aprovada" ? `<button type="button" class="admin-btn-primary" data-admin-acao="status-inscricao-torneio" data-torneio-id="${escaparHtml(torneioId)}" data-inscricao-id="${escaparHtml(inscricao.id)}" data-status="aprovada">Aprovar</button>` : ""}
+                ${podeGerenciarInscricoes && statusAtual !== "rejeitada" ? `<button type="button" class="admin-btn-perigo" data-admin-acao="status-inscricao-torneio" data-torneio-id="${escaparHtml(torneioId)}" data-inscricao-id="${escaparHtml(inscricao.id)}" data-status="rejeitada">Rejeitar</button>` : ""}
               </div>
             </article>`;
         }).join("") : '<div class="admin-torneio-vazio">Nenhum clube se inscreveu ainda.</div>'}
       </div>
-      ${status === "aberto" ? `<div class="admin-torneio-form-acoes"><button type="button" class="admin-btn-primary" data-admin-acao="iniciar-torneio" data-torneio-id="${escaparHtml(torneioId)}">Gerar chave e iniciar torneio</button></div>` : ""}
+      ${podeGerenciarInscricoes ? `<div class="admin-torneio-form-acoes"><button type="button" class="admin-btn-primary" data-admin-acao="iniciar-torneio" data-torneio-id="${escaparHtml(torneioId)}">Gerar chave e iniciar torneio</button></div>` : ""}
     </section>
     <section class="admin-torneio-modal-bloco">
       <h3>Partidas e placares (${partidas.length})</h3>
@@ -1205,7 +1210,7 @@ async function alterarStatusInscricaoTorneio(torneioId, inscricaoId, novoStatus,
   if (!estado.podeModerar) return;
   const torneio = estado.dados.torneios.find((item) => item.id === torneioId);
   const inscricao = inscricoesDoTorneio(torneioId).find((item) => item.id === inscricaoId);
-  if (!torneio || !inscricao || statusTorneio(torneio) !== "aberto") return;
+  if (!torneio || !inscricao || !["aberto", "encerrado"].includes(statusTorneio(torneio))) return;
   const maximo = Math.max(2, numero(torneio.maxClubes, 8));
   const aprovadas = inscricoesDoTorneio(torneioId).filter((item) => statusInscricaoTorneio(item) === "aprovada");
   if (novoStatus === "aprovada" && statusInscricaoTorneio(inscricao) !== "aprovada" && aprovadas.length >= maximo) {
@@ -1251,7 +1256,7 @@ async function iniciarTorneio(torneioId, botao) {
   const torneio = estado.dados.torneios.find((item) => item.id === torneioId);
   const aprovadas = inscricoesDoTorneio(torneioId).filter((item) => statusInscricaoTorneio(item) === "aprovada");
   const quantidade = aprovadas.length;
-  if (!torneio || statusTorneio(torneio) !== "aberto") return;
+  if (!torneio || !["aberto", "encerrado"].includes(statusTorneio(torneio))) return;
   if (quantidade < 2 || (quantidade & (quantidade - 1)) !== 0) {
     toast("Para gerar a chave, aprove 2, 4, 8 ou 16 clubes.", "erro");
     return;

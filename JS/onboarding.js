@@ -79,8 +79,8 @@ function mostrarProximoPasso({ saudacao, tituloTexto, descricaoTexto, href, bota
 async function montarOrientacao(usuario) {
   if (!usuario) {
     if (painel) painel.hidden = true;
-    if (caminhoJogador) caminhoJogador.href = "./HTML/cadastrar-se.html#cadastro";
-    if (caminhoCapitao) caminhoCapitao.href = "./HTML/cadastrar-se.html#cadastro";
+    if (caminhoJogador) caminhoJogador.href = "./HTML/cadastrar-se.html?perfil=jogador#cadastro";
+    if (caminhoCapitao) caminhoCapitao.href = "./HTML/cadastrar-se.html?perfil=capitao#cadastro";
     return;
   }
 
@@ -93,7 +93,8 @@ async function montarOrientacao(usuario) {
 
   const perfil = perfilSnap.exists() ? perfilSnap.data() : {};
   const clube = clubeSnap.exists() ? clubeSnap.data() : null;
-  const ehCapitao = Boolean(clube || perfil.ehCapitao);
+  const objetivoInicial = texto(perfil.objetivoInicial).toLowerCase();
+  const ehCapitao = Boolean(clube || perfil.ehCapitao || objetivoInicial === "capitao");
   const nome = texto(perfil.nickname || usuario.displayName).split(" ")[0];
   const saudacao = nome ? `Olá, ${nome}` : "";
 
@@ -123,18 +124,6 @@ async function montarOrientacao(usuario) {
   const convites = documentos(consultas[2]);
   const vagas = documentos(consultas[3]);
   const temNegociacaoPendente = [candidaturasJogador, candidaturasCapitao, convites].some(possuiPendente);
-
-  if (!perfilSnap.exists() || !perfilCompleto(perfil)) {
-    mostrarProximoPasso({
-      saudacao,
-      tituloTexto: "complete seu perfil de jogador",
-      descricaoTexto: "Informe seu nickname, ID EA, posição e plataforma para aparecer corretamente nas buscas.",
-      href: "./HTML/meu-perfil.html",
-      botao: "COMPLETAR PERFIL",
-      etapa: 1,
-    });
-    return;
-  }
 
   if (temNegociacaoPendente) {
     mostrarProximoPasso({
@@ -197,6 +186,18 @@ async function montarOrientacao(usuario) {
   }
 
   if (perfil.clubeAtualId) {
+  if (!perfilSnap.exists() || !perfilCompleto(perfil)) {
+    mostrarProximoPasso({
+      saudacao,
+      tituloTexto: "complete seu perfil de jogador",
+      descricaoTexto: "Informe seu nickname, ID EA, posição e plataforma para aparecer corretamente nas buscas.",
+      href: "./HTML/meu-perfil.html",
+      botao: "COMPLETAR PERFIL",
+      etapa: 1,
+    });
+    return;
+  }
+
     mostrarProximoPasso({
       saudacao,
       tituloTexto: "acompanhe seu clube atual",

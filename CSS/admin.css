@@ -949,6 +949,7 @@ tr .admin-vazio {
 }
 
 .admin-torneio-status.andamento,
+.admin-torneio-status.encerrado,
 .admin-torneio-status.pendente {
   border-color: rgba(250, 204, 21, 0.55);
   color: #fde047;

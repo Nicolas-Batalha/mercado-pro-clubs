@@ -903,7 +903,7 @@ textarea {
     width: 100%;
     padding: 9px 6px;
     overflow: hidden;
-    font-size: 11px;
+    font-size: 13px;
     text-align: center;
     text-overflow: ellipsis;
   }
@@ -954,7 +954,7 @@ textarea {
   .login,
   .cadastra-se {
     padding: 7px 8px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .header-menu-toggle {

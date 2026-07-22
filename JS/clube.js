@@ -1135,6 +1135,24 @@ const ROTULOS_POSICOES_CLUBE = {
   ponta: "Ponta",
 };
 
+const ROTULOS_PUBLICOS_CLUBE = {
+  ps5: "PlayStation 5",
+  ps4: "PlayStation 4",
+  xboxs: "Xbox Series X/S",
+  "xbox-series": "Xbox Series X/S",
+  xboxo: "Xbox One",
+  "xbox-one": "Xbox One",
+  pc: "PC",
+  crossplay: "Crossplay",
+  "new-gen": "Nova geração",
+  "new gen": "Nova geração",
+  "ven-gen": "Antiga geração",
+  "ven gen": "Antiga geração",
+  "old-gen": "Antiga geração",
+  "old gen": "Antiga geração",
+  "america do sul": "América do Sul",
+};
+
 const TEMPO_ATIVO_VAGA_MS = 30 * 24 * 60 * 60 * 1000;
 
 function textoPublico(valor, fallback = "Não informado") {
@@ -1145,6 +1163,8 @@ function textoPublico(valor, fallback = "Não informado") {
 function rotuloPublico(valor) {
   const texto = String(valor ?? "").trim();
   if (!texto) return "Não informado";
+  const chave = texto.toLowerCase().replaceAll("_", "-").trim();
+  if (ROTULOS_PUBLICOS_CLUBE[chave]) return ROTULOS_PUBLICOS_CLUBE[chave];
   const formatado = texto.replaceAll("_", " ").replaceAll("-", " ");
   return formatado.charAt(0).toUpperCase() + formatado.slice(1);
 }
@@ -1286,9 +1306,11 @@ function renderizarPerfilPublico(clube, perfilCapitao, elenco, vagas, uidClube) 
 
   const nome = textoPublico(clube.nome, "Clube");
   const escudo = imagemSegura(clube.escudoUrl, "../IMG/real madrid.svg");
-  const necessidades = Object.entries(clube.necessidades || {})
-    .filter(([, ativo]) => ativo === true)
-    .map(([posicao]) => posicao);
+  const necessidades = [...new Map(
+    Object.entries(clube.necessidades || {})
+      .filter(([, ativo]) => ativo === true)
+      .map(([posicao]) => [rotuloPosicaoClube(posicao).toLowerCase(), posicao]),
+  ).values()];
   const dias = Array.isArray(clube.diasTreino) ? clube.diasTreino : [];
 
   document.title = `${nome} | Mercado Pro Clubs`;
@@ -1331,7 +1353,7 @@ function renderizarPerfilPublico(clube, perfilCapitao, elenco, vagas, uidClube) 
   const detalhes = [
     ["Jogo", clube.jogo],
     ["Plataforma", rotuloPublico(clube.plataforma)],
-    ["Região", clube.regiao],
+    ["Região", rotuloPublico(clube.regiao)],
     ["Divisão", clube.divisao],
     ["Estilo", clube.estiloJogo],
     ["Objetivo", rotuloPublico(clube.objetivo)],
