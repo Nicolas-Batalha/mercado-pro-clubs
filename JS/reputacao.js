@@ -47,7 +47,7 @@ function seloReputacao({ total, media }, tipo) {
   if (total >= 8 && media >= 4.7) return `${entidade} de elite`;
   if (total >= 3 && media >= 4.2) return `${entidade} confiável`;
   if (total >= 1) return "Reputação em formação";
-  return "Novo no Mercado";
+  return "Sem avaliações";
 }
 
 function renderizarInline(elemento, resumo, tipo) {
@@ -56,10 +56,11 @@ function renderizarInline(elemento, resumo, tipo) {
   elemento.dataset.reputacaoRender = assinatura;
   elemento.classList.add("reputacao-inline");
   if (!resumo.total) {
-    elemento.innerHTML = '<span class="reputacao-novo">Novo no Mercado</span>';
+    elemento.replaceChildren(); elemento.hidden = true;
     elemento.setAttribute("aria-label", `${tipo === "clube" ? "Clube" : "Jogador"} ainda sem avaliações`);
     return;
   }
+  elemento.hidden = false;
   elemento.innerHTML = `<span class="reputacao-estrela" aria-hidden="true">★</span>
     <strong>${resumo.media.toFixed(1)}</strong><small>(${resumo.total})</small>`;
   elemento.setAttribute("aria-label", `Nota ${resumo.media.toFixed(1)} de 5 em ${resumo.total} avaliações verificadas`);
