@@ -3635,6 +3635,19 @@ body.clube-onboarding .menu-clubes{
     min-height:42px;
     white-space:nowrap;
 }
+#ea-clube-buscar{
+    padding:0 16px;
+    color:#b9c4bd;
+    border:1px solid #354039;
+    border-radius:8px;
+    background:#151a17;
+    font:inherit;
+    font-size:10px;
+    font-weight:800;
+    cursor:pointer;
+}
+#ea-clube-buscar:hover{color:#12e06c;border-color:#12e06c}
+#ea-clube-buscar:disabled{cursor:wait;opacity:.65}
 .ea-clube-feedback{
     min-height:16px;
     margin:0;
@@ -3647,9 +3660,9 @@ body.clube-onboarding .menu-clubes{
     justify-content:space-between;
     gap:16px;
     padding:14px 16px;
-    border:1px solid rgba(240,201,101,.32);
+    border:1px solid rgba(18,224,108,.28);
     border-radius:11px;
-    background:rgba(240,201,101,.06);
+    background:rgba(18,224,108,.05);
 }
 .ea-clube-continuar-manual[hidden]{display:none!important}
 .ea-clube-continuar-manual > div{
@@ -3672,7 +3685,7 @@ body.clube-onboarding .menu-clubes{
     color:#08150d;
     border:0;
     border-radius:8px;
-    background:#f0c965;
+    background:#12e06c;
     font:inherit;
     font-size:10px;
     font-weight:900;

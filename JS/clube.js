@@ -14,7 +14,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { confirmModal } from "./confirm-modal.js";
 import { carregarMercadoStats, inicializarMercadoStats } from "./mercado-stats.js?v=20260722-3";
-import { inicializarEAClubStats } from "./ea-club-stats.js?v=20260722-3";
+import { inicializarEAClubStats } from "./ea-club-stats.js?v=20260722-5";
 
 function toast(msg, tipo = "sucesso") {
   document.getElementById("toast-clube")?.remove();
@@ -1091,7 +1091,7 @@ function prepararCriacaoClube(usuario, perfilAtual) {
   const titulo = document.querySelector(".text-menu h1");
   if (titulo) titulo.textContent = "Encontre seu clube";
   const descricao = document.querySelector(".text-menu p");
-  if (descricao) descricao.textContent = "Conecte o clube do jogo antes de completar seu perfil no Mercado Pro Clubs.";
+  if (descricao) descricao.textContent = "Crie o clube agora com nome e plataforma. Complete o perfil depois.";
 
   inicializarEAClubStats({
     uid: usuario.uid,
@@ -1101,7 +1101,7 @@ function prepararCriacaoClube(usuario, perfilAtual) {
       clubeCarregado = { ...clubeCarregado, ...vinculacao };
     },
     onCriado: () => {
-      toast("✅ Clube encontrado! Agora complete o perfil.");
+      toast("✅ Clube criado! Agora complete o perfil.");
       window.setTimeout(() => window.location.reload(), 900);
     },
   });

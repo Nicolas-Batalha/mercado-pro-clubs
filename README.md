@@ -29,9 +29,34 @@ O projeto usa modulos JavaScript. Abra a pasta por um servidor HTTP local, como 
 - A configuracao web do Firebase identifica o projeto, mas a protecao real dos dados depende das regras do Firestore.
 - O arquivo `firestore.rules` deve ser publicado no Firebase Console e nao e enviado ao navegador pela Vercel.
 
+## Dados automaticos de clubes
+
+A rota `api/ea-clubs.js` aceita uma fonte de dados autorizada configurada somente no servidor. Nenhuma chave e enviada ao navegador ou salva no Firestore.
+
+Para ativar:
+
+1. Contrate ou obtenha permissao para uma fonte que permita consulta e exibicao dos dados.
+2. Abra **Vercel > Settings > Environment Variables**.
+3. Cadastre as variaveis abaixo nos ambientes Production, Preview e Development.
+4. Faca um novo deploy.
+
+Variaveis:
+
+- `CLUBS_DATA_PROVIDER_URL`: endereco HTTPS do provedor.
+- `CLUBS_DATA_PROVIDER_API_KEY`: chave secreta, cadastrada apenas na Vercel.
+- `CLUBS_DATA_PROVIDER_AUTH_HEADER`: normalmente `Authorization` ou `X-API-Key`.
+- `CLUBS_DATA_PROVIDER_NAME`: nome exibido como fonte dos dados.
+
+O provedor deve aceitar:
+
+- `action=search`, `name` e `platform`, retornando `{ "resultados": [...] }`.
+- `action=details`, `clubId`, `name` e `platform`, retornando `{ "club": {}, "stats": {}, "players": [] }`.
+
+A chave real nunca deve ser colocada no `.env.example`, no JavaScript do navegador ou no GitHub. Sem um provedor configurado, o site mantem a criacao manual do clube e informa que os dados podem ser conectados depois.
+
 ## Aviso legal
 
-O Mercado Pro Clubs e uma plataforma independente, sem vinculo oficial com a EA Sports. Todas as marcas registradas pertencem aos seus respectivos proprietarios.
+Este site nao e endossado pela EA ou seus licenciadores, nem afiliado a eles. Todas as marcas pertencem aos seus respectivos proprietarios.
 
 ## Ativação final dos e-mails da conta
 

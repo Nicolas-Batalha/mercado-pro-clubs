@@ -1,4 +1,9 @@
 const EA_BASE_URL = "https://proclubs.ea.com/api/fc/";
+const PROVIDER_URL = String(process.env.CLUBS_DATA_PROVIDER_URL || "").trim();
+const PROVIDER_API_KEY = String(process.env.CLUBS_DATA_PROVIDER_API_KEY || "").trim();
+const PROVIDER_AUTH_HEADER = String(process.env.CLUBS_DATA_PROVIDER_AUTH_HEADER || "Authorization").trim();
+const PROVIDER_NAME = String(process.env.CLUBS_DATA_PROVIDER_NAME || "Fonte autorizada de dados").trim();
+const EA_DATA_ACCESS_AUTHORIZED = String(process.env.EA_DATA_ACCESS_AUTHORIZED || "").toLowerCase() === "true";
 const ROTAS = {
   busca: "allTimeLeaderboard/search",
   estatisticas: "clubs/overallStats",
@@ -9,6 +14,40 @@ const PLATAFORMAS = new Set(["common-gen5", "common-gen4", "nx"]);
 const JANELA_LIMITE_MS = 60_000;
 const MAXIMO_POR_JANELA = 20;
 const acessos = new Map();
+
+function erroDaFonte(mensagem, codigo = "FONTE_INDISPONIVEL", status = 503) {
+  const erro = new Error(mensagem);
+  erro.codigoFonte = codigo;
+  erro.statusFonte = status;
+  return erro;
+}
+
+function configuracaoDoProvedor() {
+  if (!PROVIDER_URL) return null;
+  let url;
+  try {
+    url = new URL(PROVIDER_URL);
+  } catch {
+    throw erroDaFonte("A URL da fonte de dados e invalida.", "FONTE_MAL_CONFIGURADA", 500);
+  }
+  const local = ["localhost", "127.0.0.1"].includes(url.hostname);
+  if (url.protocol !== "https:" && !(local && url.protocol === "http:")) {
+    throw erroDaFonte("A fonte de dados precisa usar HTTPS.", "FONTE_MAL_CONFIGURADA", 500);
+  }
+  if (url.username || url.password || url.hash) {
+    throw erroDaFonte("A URL da fonte de dados contem informacoes nao permitidas.", "FONTE_MAL_CONFIGURADA", 500);
+  }
+  if (!/^[A-Za-z0-9-]{1,64}$/.test(PROVIDER_AUTH_HEADER)) {
+    throw erroDaFonte("O cabecalho de autenticacao da fonte e invalido.", "FONTE_MAL_CONFIGURADA", 500);
+  }
+  return { url, nome: textoSeguro(PROVIDER_NAME, 80) || "Fonte autorizada de dados" };
+}
+
+function fonteAtual() {
+  const provedor = configuracaoDoProvedor();
+  if (provedor) return provedor.nome;
+  return EA_DATA_ACCESS_AUTHORIZED ? "EA SPORTS FC Clubs" : "Nao configurada";
+}
 
 function enviar(res, status, dados) {
   res.statusCode = status;
@@ -95,6 +134,55 @@ async function consultarRota(rota, parametros) {
   }
 }
 
+async function consultarProvedor(acao, parametros) {
+  const provedor = configuracaoDoProvedor();
+  if (!provedor) {
+    throw erroDaFonte(
+      "A busca automatica ainda nao possui uma fonte de dados autorizada.",
+      "FONTE_NAO_CONFIGURADA",
+      503,
+    );
+  }
+  const url = new URL(provedor.url);
+  url.searchParams.set("action", acao);
+  Object.entries(parametros).forEach(([chave, valor]) => {
+    if (valor !== undefined && valor !== null && String(valor).length) {
+      url.searchParams.set(chave, String(valor));
+    }
+  });
+
+  const headers = { Accept: "application/json" };
+  if (PROVIDER_API_KEY) {
+    headers[PROVIDER_AUTH_HEADER] = PROVIDER_AUTH_HEADER.toLowerCase() === "authorization"
+      ? `Bearer ${PROVIDER_API_KEY}`
+      : PROVIDER_API_KEY;
+  }
+
+  const controlador = new AbortController();
+  const limite = setTimeout(() => controlador.abort(), 10_000);
+  try {
+    const resposta = await fetch(url, { method: "GET", headers, signal: controlador.signal });
+    if (!resposta.ok) {
+      throw erroDaFonte(
+        `A fonte de dados respondeu com ${resposta.status}.`,
+        "FONTE_INDISPONIVEL",
+        resposta.status >= 500 || resposta.status === 429 ? 503 : 502,
+      );
+    }
+    const corpo = await resposta.text();
+    if (corpo.length > 2_000_000) {
+      throw erroDaFonte("A resposta da fonte de dados excedeu o limite permitido.", "RESPOSTA_INVALIDA", 502);
+    }
+    try {
+      return JSON.parse(corpo);
+    } catch {
+      throw erroDaFonte("A fonte de dados retornou uma resposta invalida.", "RESPOSTA_INVALIDA", 502);
+    }
+  } finally {
+    clearTimeout(limite);
+  }
+}
+
 function campanhaBase(item, plataformaConsultada) {
   const jogos = numeroSeguro(item?.gamesPlayed);
   const vitorias = numeroSeguro(item?.wins);
@@ -121,8 +209,8 @@ function campanhaBase(item, plataformaConsultada) {
 
 function normalizarClubeBusca(item, plataformaConsultada) {
   return {
-    clubId: textoSeguro(item?.clubId, 20),
-    clubName: textoSeguro(item?.clubName || item?.clubInfo?.name, 64),
+    clubId: textoSeguro(item?.clubId || item?.club_id || item?.id, 20),
+    clubName: textoSeguro(item?.clubName || item?.club_name || item?.name || item?.clubInfo?.name, 64),
     ...campanhaBase(item, plataformaConsultada),
     cleanSheets: numeroSeguro(item?.cleanSheets),
     currentDivision: numeroSeguro(item?.currentDivision, 99),
@@ -154,18 +242,67 @@ function normalizarEstatisticas(item, plataforma, clubeDaBusca = null) {
 
 function normalizarJogador(jogador) {
   return {
-    name: textoSeguro(jogador?.name, 64),
+    name: textoSeguro(jogador?.name || jogador?.playerName || jogador?.player_name, 64),
     proPos: textoSeguro(jogador?.proPos, 8),
     favoritePosition: textoSeguro(jogador?.favoritePosition, 24).toLowerCase(),
     gamesPlayed: numeroSeguro(jogador?.gamesPlayed, 99_999),
     goals: numeroSeguro(jogador?.goals, 99_999),
     assists: numeroSeguro(jogador?.assists, 99_999),
     manOfTheMatch: numeroSeguro(jogador?.manOfTheMatch, 99_999),
-    ratingAverage: Number(decimalSeguro(jogador?.ratingAve).toFixed(1)),
+    ratingAverage: Number(decimalSeguro(jogador?.ratingAve ?? jogador?.ratingAverage ?? jogador?.rating_average).toFixed(1)),
+  };
+}
+
+function normalizarDetalhesDoProvedor(dados, clubId, plataforma, nome = "") {
+  const clubeBruto = dados?.club || dados?.clube || {};
+  const estatisticasBrutas = dados?.stats || dados?.estatisticas || {};
+  const jogadoresBrutos = Array.isArray(dados?.players)
+    ? dados.players
+    : (Array.isArray(dados?.jogadores) ? dados.jogadores : []);
+  const jogadores = jogadoresBrutos
+    .map(normalizarJogador)
+    .filter((jogador) => jogador.name)
+    .sort((a, b) => b.gamesPlayed - a.gamesPlayed || a.name.localeCompare(b.name, "pt-BR"))
+    .slice(0, 50);
+  const posicoes = dados?.positionCount || dados?.posicoes || {};
+  return {
+    club: {
+      clubId,
+      clubName: textoSeguro(clubeBruto?.clubName || clubeBruto?.name || nome, 64),
+      platform: PLATAFORMAS.has(clubeBruto?.platform) ? clubeBruto.platform : plataforma,
+      stadiumName: textoSeguro(clubeBruto?.stadiumName || clubeBruto?.stadium_name, 80),
+    },
+    stats: normalizarEstatisticas(estatisticasBrutas, plataforma, estatisticasBrutas),
+    players: jogadores,
+    positionCount: {
+      goalkeeper: numeroSeguro(posicoes?.goalkeeper, 50),
+      defender: numeroSeguro(posicoes?.defender, 50),
+      midfielder: numeroSeguro(posicoes?.midfielder, 50),
+      forward: numeroSeguro(posicoes?.forward, 50),
+    },
+    partial: Boolean(dados?.partial),
   };
 }
 
 async function consultarBusca(nome, plataforma) {
+  if (configuracaoDoProvedor()) {
+    const dados = await consultarProvedor("search", { name: nome, platform: plataforma });
+    const lista = Array.isArray(dados?.resultados)
+      ? dados.resultados
+      : (Array.isArray(dados?.results) ? dados.results : (Array.isArray(dados) ? dados : []));
+    return lista
+      .map((item) => normalizarClubeBusca(item, plataforma))
+      .filter((clube) => /^\d{1,20}$/.test(clube.clubId) && clube.clubName)
+      .slice(0, 12);
+  }
+  if (!EA_DATA_ACCESS_AUTHORIZED) {
+    throw erroDaFonte(
+      "A busca automatica ainda nao possui uma fonte de dados autorizada.",
+      "FONTE_NAO_CONFIGURADA",
+      503,
+    );
+  }
+
   const dados = await consultarRota("busca", { platform: plataforma, clubName: nome });
   return (Array.isArray(dados) ? dados : [])
     .map((item) => normalizarClubeBusca(item, plataforma))
@@ -174,6 +311,18 @@ async function consultarBusca(nome, plataforma) {
 }
 
 async function consultarDetalhes(clubId, plataforma, nome = "") {
+  if (configuracaoDoProvedor()) {
+    const dados = await consultarProvedor("details", { clubId, platform: plataforma, name: nome });
+    return normalizarDetalhesDoProvedor(dados, clubId, plataforma, nome);
+  }
+  if (!EA_DATA_ACCESS_AUTHORIZED) {
+    throw erroDaFonte(
+      "A busca automatica ainda nao possui uma fonte de dados autorizada.",
+      "FONTE_NAO_CONFIGURADA",
+      503,
+    );
+  }
+
   const consultas = await Promise.allSettled([
     consultarRota("estatisticas", { platform: plataforma, clubIds: clubId }),
     consultarRota("jogadores", { platform: plataforma, clubId }),
@@ -257,7 +406,7 @@ module.exports = async function handler(req, res) {
       const detalhes = await consultarDetalhes(clubId, plataforma, nome);
       enviar(res, 200, {
         ...detalhes,
-        source: "EA SPORTS FC Clubs",
+        source: fonteAtual(),
         updatedAt: new Date().toISOString(),
       });
       return;
@@ -267,12 +416,21 @@ module.exports = async function handler(req, res) {
     enviar(res, 200, {
       resultados,
       consulta: { nome, plataforma },
-      fonte: "EA SPORTS FC Clubs",
+      fonte: fonteAtual(),
       atualizadoEm: new Date().toISOString(),
     });
   } catch (erro) {
     console.error("Falha na consulta pública de clubes da EA:", erro?.message || erro);
-    const indisponivel = erro?.name === "AbortError" || [403, 429, 500, 502, 503, 504].includes(erro?.statusEA);
+    if (erro?.codigoFonte === "FONTE_NAO_CONFIGURADA") {
+      res.setHeader("Cache-Control", "no-store");
+      enviar(res, 503, {
+        erro: "A busca automatica ainda nao esta configurada. Continue com o nome do clube e conecte os dados depois.",
+      });
+      return;
+    }
+    const indisponivel = erro?.name === "AbortError"
+      || [403, 429, 500, 502, 503, 504].includes(erro?.statusEA)
+      || [429, 500, 502, 503, 504].includes(erro?.statusFonte);
     res.setHeader("Cache-Control", "no-store");
     enviar(res, indisponivel ? 503 : 502, {
       erro: indisponivel

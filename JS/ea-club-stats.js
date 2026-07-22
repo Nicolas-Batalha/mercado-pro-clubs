@@ -107,11 +107,11 @@ function definirCarregando(carregando, texto = "Buscando...") {
   const atualizar = elemento("ea-clube-atualizar");
   if (buscar) {
     buscar.disabled = carregando;
-    buscar.textContent = carregando ? texto : "Buscar na EA";
+    buscar.textContent = carregando ? texto : "Buscar clube";
   }
   if (atualizar) {
     atualizar.disabled = carregando;
-    atualizar.textContent = carregando ? "Atualizando..." : "Atualizar da EA";
+    atualizar.textContent = carregando ? "Atualizando..." : "Atualizar dados";
   }
 }
 
@@ -298,7 +298,7 @@ async function carregarDetalhes(clubeVinculado, fallback = null) {
   const plataforma = plataformaValida(clubeVinculado?.eaPlatform || clubeVinculado?.platform);
   if (!clubId) return;
   definirCarregando(true, "Atualizando...");
-  definirFeedback("Carregando campanha e jogadores diretamente da EA...");
+  definirFeedback("Carregando campanha e jogadores pela fonte de dados conectada...");
   try {
     const nome = String(clubeVinculado?.eaClubName || clubeVinculado?.clubName || "").trim();
     const parametros = { clubId, platform: plataforma };
@@ -337,9 +337,9 @@ async function carregarDetalhes(clubeVinculado, fallback = null) {
 
 async function executarBusca(nome, plataforma, { conectarExato = false } = {}) {
   definirCarregando(true);
-  definirFeedback("Procurando o clube nos dados públicos da EA...");
+  definirFeedback("Procurando o clube na fonte de dados conectada...");
   const continuarManual = elemento("ea-clube-continuar-manual");
-  if (continuarManual) continuarManual.hidden = true;
+  if (continuarManual) continuarManual.hidden = !estado.modoCriacao;
   renderizarResultados([]);
   try {
     const resultados = await consultarClubes(nome, plataforma);
@@ -359,10 +359,10 @@ async function executarBusca(nome, plataforma, { conectarExato = false } = {}) {
   } catch (erro) {
     renderizarResultados([]);
     const permiteContinuar = estado.modoCriacao && [502, 503, 504].includes(erro?.status);
-    if (continuarManual) continuarManual.hidden = !permiteContinuar;
+    if (continuarManual) continuarManual.hidden = !estado.modoCriacao && !permiteContinuar;
     definirFeedback(
       permiteContinuar
-        ? "A EA bloqueou a consulta automática agora. Você pode continuar e conectar as estatísticas depois."
+        ? "A consulta autom\u00e1tica est\u00e1 indispon\u00edvel agora. Voc\u00ea pode continuar e conectar os dados depois."
         : (erro?.message || "A busca está indisponível no momento."),
       permiteContinuar ? "aviso" : "erro",
     );
@@ -403,7 +403,7 @@ async function criarClubeManual() {
     await lote.commit();
     estado.onVinculado?.(vinculacao);
     estado.modoCriacao = false;
-    definirFeedback("Clube criado. Você poderá conectar os dados da EA no painel.", "sucesso");
+    definirFeedback("Clube criado! Agora complete o perfil e convide seus jogadores.", "sucesso");
     estado.onCriado?.(vinculacao);
   } catch (erro) {
     definirFeedback(
@@ -415,7 +415,7 @@ async function criarClubeManual() {
   } finally {
     if (botao) {
       botao.disabled = false;
-      botao.textContent = "Continuar com este nome";
+      botao.textContent = "Criar meu clube";
     }
   }
 }
@@ -550,6 +550,8 @@ export function inicializarEAClubStats({
   if (primeiroAcesso) primeiroAcesso.hidden = !estado.modoCriacao;
   const formulario = elemento("ea-clube-form");
   if (formulario) formulario.hidden = estado.somenteLeitura || conectado;
+  const continuarManual = elemento("ea-clube-continuar-manual");
+  if (continuarManual) continuarManual.hidden = !estado.modoCriacao;
   const atualizar = elemento("ea-clube-atualizar");
   if (atualizar) atualizar.hidden = estado.somenteLeitura;
   const trocar = elemento("ea-clube-trocar");
@@ -571,6 +573,6 @@ export function inicializarEAClubStats({
   } else if (estado.somenteLeitura) {
     definirFeedback("O capitão ainda não conectou este clube aos dados da EA.", "aviso");
   } else if (String(clube.nome || "").trim().length >= 2) {
-    executarBusca(String(clube.nome).trim(), plataformaDoClube(clube), { conectarExato: true });
+    definirFeedback("Clube criado. A conexão com dados automáticos é opcional.", "sucesso");
   }
 }
