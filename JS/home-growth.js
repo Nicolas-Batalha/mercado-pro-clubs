@@ -37,6 +37,27 @@ function formatarData(valor) {
   return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(ms));
 }
 
+function rotuloDado(valor, fallback) {
+  const original = String(valor || fallback || "").trim();
+  const chave = normalizar(original).replace(/[\s_-]+/g, "");
+  return {
+    eafc26: "EA FC 26",
+    eafc25: "EA FC 25",
+    eafc24: "EA FC 24",
+    eafc23: "EA FC 23",
+    crossplay: "Crossplay",
+    newgen: "Nova geração",
+    oldgen: "Antiga geração",
+    ondgen: "Antiga geração",
+  }[chave] || original;
+}
+
+function nomeTorneio(valor) {
+  const original = String(valor || "Torneio de Pro Clubs").trim();
+  const chave = normalizar(original).replace(/[\s_-]+/g, "");
+  return ["ondgen", "oldgen"].includes(chave) ? "Old Gen" : original;
+}
+
 function statusTorneio(torneio) {
   const status = normalizar(torneio.status).replaceAll(" ", "_");
   if (["andamento", "em_andamento", "iniciado"].includes(status)) return "andamento";
@@ -77,9 +98,9 @@ async function carregarMetricas() {
 
 function escolherDestaque(torneios) {
   const agora = Date.now();
-  const prioridade = { aberto: 0, andamento: 1, encerrado: 2, finalizado: 3, cancelado: 4 };
+  const prioridade = { aberto: 0, andamento: 1 };
   return torneios
-    .filter((torneio) => statusTorneio(torneio) !== "cancelado")
+    .filter((torneio) => ["aberto", "andamento"].includes(statusTorneio(torneio)))
     .sort((a, b) => {
       const statusA = statusTorneio(a);
       const statusB = statusTorneio(b);
@@ -106,9 +127,12 @@ async function carregarDestaque() {
     const torneios = snapshot.docs.map((registro) => ({ id: registro.id, ...registro.data() }));
     const torneio = escolherDestaque(torneios);
     if (!torneio) {
-      titulo.textContent = "Seu clube pode ser o próximo campeão";
-      descricao.textContent = "Acompanhe a área de torneios e prepare seu elenco para as próximas inscrições.";
-      meta.innerHTML = '<span>Calendário competitivo</span><span>Resultados organizados</span>';
+      titulo.textContent = "Próximo torneio em breve";
+      descricao.textContent = "Estamos preparando a próxima competição. Organize seu elenco e acompanhe as novidades.";
+      meta.innerHTML = '<span>Calendário competitivo</span><span>Novas inscrições em breve</span>';
+      link.href = "./HTML/torneio.html";
+      link.textContent = "ACOMPANHAR TORNEIOS";
+      compartilhar.hidden = true;
       return;
     }
 
@@ -121,20 +145,20 @@ async function carregarDestaque() {
     const urlRelativa = `./HTML/torneio.html?torneio=${encodeURIComponent(torneio.id)}`;
     const urlPublica = `https://www.mercadoproclubs.com/HTML/torneio.html?torneio=${encodeURIComponent(torneio.id)}`;
 
-    titulo.textContent = String(torneio.nome || "Torneio de Pro Clubs");
+    titulo.textContent = nomeTorneio(torneio.nome);
     descricao.textContent = String(torneio.descricao || "Uma competição para os clubes da comunidade Mercado Pro Clubs.");
     meta.innerHTML = `
       <span>${escaparHtml(rotuloStatus)}</span>
-      <span>${escaparHtml(String(torneio.jogo || "EA FC"))}</span>
-      <span>${escaparHtml(String(torneio.plataforma || "Crossplay"))}</span>
+      <span>${escaparHtml(rotuloDado(torneio.jogo, "EA FC"))}</span>
+      <span>${escaparHtml(rotuloDado(torneio.plataforma, "Crossplay"))}</span>
       <span>${confirmados} clube${confirmados === 1 ? "" : "s"} confirmado${confirmados === 1 ? "" : "s"}</span>
       <span>${prefixoData} ${escaparHtml(formatarData(dataStatus))}</span>`;
     link.href = urlRelativa;
     link.textContent = status === "aberto" ? "VER E INSCREVER MEU CLUBE" : status === "encerrado" ? "VER DETALHES DO TORNEIO" : "ACOMPANHAR TORNEIO";
     compartilhar.hidden = false;
     compartilhar.dataset.compartilharUrl = urlPublica;
-    compartilhar.dataset.compartilharTitulo = String(torneio.nome || "Torneio de Pro Clubs");
-    compartilhar.dataset.compartilharTexto = `Confira o torneio ${torneio.nome || "de Pro Clubs"} no Mercado Pro Clubs.`;
+    compartilhar.dataset.compartilharTitulo = nomeTorneio(torneio.nome);
+    compartilhar.dataset.compartilharTexto = `Confira o torneio ${nomeTorneio(torneio.nome)} no Mercado Pro Clubs.`;
   } catch (erro) {
     console.debug("Destaque de torneio indisponível:", erro?.code || erro?.message);
     titulo.textContent = "Entre em campo e dispute o topo";

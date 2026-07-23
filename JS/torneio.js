@@ -111,6 +111,7 @@ function rotuloStatus(status) {
 }
 
 function rotuloPlataforma(valor) {
+  const chave = normalizar(valor).replaceAll("-", "_").replaceAll(" ", "_");
   return {
     ps5: "PlayStation 5",
     ps4: "PlayStation 4",
@@ -118,7 +119,30 @@ function rotuloPlataforma(valor) {
     xbox_series: "Xbox Series",
     pc: "PC",
     crossplay: "Crossplay",
-  }[normalizar(valor).replaceAll(" ", "_")] || texto(valor);
+    new_gen: "Nova geração",
+    newgen: "Nova geração",
+    old_gen: "Antiga geração",
+    oldgen: "Antiga geração",
+    ond_gen: "Antiga geração",
+    ondgen: "Antiga geração",
+  }[chave] || texto(valor);
+}
+
+function rotuloJogo(valor) {
+  const original = texto(valor, "EA FC");
+  const chave = normalizar(original).replace(/[\s_-]+/g, "");
+  return {
+    eafc26: "EA FC 26",
+    eafc25: "EA FC 25",
+    eafc24: "EA FC 24",
+    eafc23: "EA FC 23",
+  }[chave] || original;
+}
+
+function nomeTorneio(valor) {
+  const original = texto(valor, "Torneio de Pro Clubs");
+  const chave = normalizar(original).replace(/[\s_-]+/g, "");
+  return ["ondgen", "oldgen"].includes(chave) ? "Old Gen" : original;
 }
 
 function statusInscricao(inscricao) {
@@ -328,7 +352,7 @@ function cardTorneio(torneio) {
   const minha = minhaInscricao(torneio.id);
   const statusMinha = minha ? statusInscricao(minha) : "";
   const urlPublica = `https://www.mercadoproclubs.com/HTML/torneio.html?torneio=${encodeURIComponent(torneio.id)}`;
-  const tituloCompartilhar = texto(torneio.nome, "Torneio de Pro Clubs");
+  const tituloCompartilhar = nomeTorneio(torneio.nome);
   const rotuloData = status === "aberto" ? "Inscrições até" : status === "encerrado" ? "Inscrições encerradas em" : "Início";
   const dataDestaque = ["aberto", "encerrado"].includes(status) ? torneio.inscricoesAte : torneio.dataInicio;
 
@@ -338,12 +362,12 @@ function cardTorneio(torneio) {
         <span class="torneio-status torneio-status-${status}">${rotuloStatus(status)}</span>
         ${minha ? `<span class="torneio-status torneio-status-${statusMinha}">Minha inscrição: ${statusMinha}</span>` : ""}
       </div>
-      <h3>${escaparHtml(texto(torneio.nome, "Torneio de Pro Clubs"))}</h3>
+      <h3>${escaparHtml(nomeTorneio(torneio.nome))}</h3>
       <p class="torneio-card-organizador">Organizado por ${escaparHtml(texto(torneio.organizadorNome, "Mercado Pro Clubs"))}</p>
       <p class="torneio-card-descricao">${escaparHtml(texto(torneio.descricao, "Competição aberta para clubes da comunidade."))}</p>
       ${status === "finalizado" && torneio.campeaoNome ? `<p class="torneio-card-campeao">🏆 Campeão: <strong>${escaparHtml(torneio.campeaoNome)}</strong></p>` : ""}
       <div class="torneio-card-meta">
-        <span class="torneio-chip">${escaparHtml(texto(torneio.jogo, "EA FC"))}</span>
+        <span class="torneio-chip">${escaparHtml(rotuloJogo(torneio.jogo))}</span>
         <span class="torneio-chip">${escaparHtml(rotuloPlataforma(torneio.plataforma))}</span>
         <span class="torneio-chip">${escaparHtml(texto(torneio.formato, "Mata-mata"))}</span>
         <span class="torneio-chip">${escaparHtml(texto(torneio.regiao, "Todas as regiões"))}</span>
@@ -371,6 +395,14 @@ function renderizarTorneios() {
   porId("torneios-contagem").textContent = `${lista.length} ${lista.length === 1 ? "torneio encontrado" : "torneios encontrados"}`;
 
   if (!lista.length) {
+    const semFiltros = !estado.busca && !estado.jogo && !estado.plataforma;
+    if (estado.aba === "aberto" && semFiltros) {
+      mostrarEstado(
+        "Próximo torneio em breve",
+        "Estamos preparando a próxima competição. Enquanto isso, organize seu elenco e acompanhe as novidades.",
+      );
+      return;
+    }
     const mensagem = estado.aba === "meus" && !estado.usuario
       ? "Entre na sua conta para acompanhar as inscrições do seu clube."
       : "Nenhum torneio corresponde a esta seleção no momento.";
@@ -496,7 +528,7 @@ function abrirDetalhes(torneioId) {
     <div class="torneio-detalhe-topo">
       <div>
         <span class="torneio-status torneio-status-${status}">${rotuloStatus(status)}</span>
-        <h2 id="torneio-modal-titulo">${escaparHtml(texto(torneio.nome, "Torneio de Pro Clubs"))}</h2>
+        <h2 id="torneio-modal-titulo">${escaparHtml(nomeTorneio(torneio.nome))}</h2>
         <p>Organizado por ${escaparHtml(texto(torneio.organizadorNome, "Mercado Pro Clubs"))}</p>
       </div>
     </div>
@@ -508,7 +540,7 @@ function abrirDetalhes(torneioId) {
         <strong>${escaparHtml(torneio.campeaoNome)}</strong>
       </section>` : ""}
     <div class="torneio-detalhe-meta">
-      <span class="torneio-chip">Jogo: ${escaparHtml(texto(torneio.jogo, "EA FC"))}</span>
+      <span class="torneio-chip">Jogo: ${escaparHtml(rotuloJogo(torneio.jogo))}</span>
       <span class="torneio-chip">Plataforma: ${escaparHtml(rotuloPlataforma(torneio.plataforma))}</span>
       <span class="torneio-chip">Formato: ${escaparHtml(texto(torneio.formato, "Mata-mata"))}</span>
       <span class="torneio-chip">Região: ${escaparHtml(texto(torneio.regiao, "Todas"))}</span>

@@ -814,9 +814,9 @@ function renderizarVagasClube() {
         const pendentes = candidaturas.filter((item) => statusNegociacaoClube(item) === "pendente").length;
         return `<article class="clube-vaga-item">
           <div>
-            <h4>${escHtml(rotuloPosicaoClube(vaga.posicao))} · ${escHtml(vaga.jogo || "Jogo não informado")}</h4>
+            <h4>${escHtml(rotuloPosicaoClube(vaga.posicao))} · ${escHtml(rotuloPublico(vaga.jogo))}</h4>
             <div class="clube-vaga-meta">
-              <span>${escHtml(vaga.plataforma || "Plataforma não informada")}</span>
+              <span>${escHtml(rotuloPublico(vaga.plataforma))}</span>
               <span>${escHtml(vaga.estilo || "Estilo não informado")}</span>
               <span>${candidaturas.length} candidatura${candidaturas.length === 1 ? "" : "s"}</span>
               ${pendentes ? `<span>${pendentes} aguardando resposta</span>` : ""}
@@ -1150,7 +1150,15 @@ const ROTULOS_PUBLICOS_CLUBE = {
   "ven gen": "Antiga geração",
   "old-gen": "Antiga geração",
   "old gen": "Antiga geração",
+  oldgen: "Antiga geração",
+  "ond-gen": "Antiga geração",
+  "ond gen": "Antiga geração",
+  ondgen: "Antiga geração",
   "america do sul": "América do Sul",
+  eafc26: "EA FC 26",
+  eafc25: "EA FC 25",
+  eafc24: "EA FC 24",
+  eafc23: "EA FC 23",
 };
 
 const TEMPO_ATIVO_VAGA_MS = 30 * 24 * 60 * 60 * 1000;
@@ -1287,7 +1295,7 @@ function renderizarVagasPublicas(vagas) {
           <h3>${escHtml(textoPublico(vaga.clube, "Vaga do clube"))}</h3>
           <p>${escHtml(textoPublico(vaga.descricao, "Veja os detalhes desta oportunidade no mercado."))}</p>
           <div class="publico-vaga-rodape">
-            <span>${escHtml(textoPublico(vaga.jogo))} · ${escHtml(rotuloPublico(vaga.estilo))}</span>
+             <span>${escHtml(rotuloPublico(vaga.jogo))} · ${escHtml(rotuloPublico(vaga.estilo))}</span>
             <a href="./mercado.html?vaga=${encodeURIComponent(vaga.id)}">Ver e candidatar-se →</a>
           </div>
         </article>`).join("")
@@ -1351,7 +1359,7 @@ function renderizarPerfilPublico(clube, perfilCapitao, elenco, vagas, uidClube) 
     <div><span>${escHtml(titulo)}</span><strong>${escHtml(valor)}</strong></div>`).join("");
 
   const detalhes = [
-    ["Jogo", clube.jogo],
+    ["Jogo", rotuloPublico(clube.jogo)],
     ["Plataforma", rotuloPublico(clube.plataforma)],
     ["Região", rotuloPublico(clube.regiao)],
     ["Divisão", clube.divisao],

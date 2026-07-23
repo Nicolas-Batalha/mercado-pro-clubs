@@ -104,6 +104,23 @@ const ROTULOS_PLATAFORMA = {
   "xbox one": "Xbox One",
   switch2: "Nintendo Switch 2",
   switch1: "Nintendo Switch",
+  crossplay: "Crossplay",
+};
+
+const ROTULOS_POSICAO = {
+  gol: "Goleiro",
+  gk: "Goleiro",
+  zag: "Zagueiro",
+  lateral: "Lateral",
+  lat: "Lateral",
+  ld: "Lateral direito",
+  le: "Lateral esquerdo",
+  vol: "Volante",
+  mc: "Meio-campo",
+  mei: "Meia ofensivo",
+  ata: "Atacante",
+  pe: "Ponta esquerda",
+  pd: "Ponta direita",
 };
 
 function valorCampo(id) {
@@ -236,7 +253,7 @@ function atualizarTopo(dados) {
   set("inputClube",       dados.clubeAtualId
     ? (dados.clubeAtualNome || "Clube")
     : (dados.agenteLivre ? "Free Agent" : (dados.clube || "clube fc")));
-  set("radioPos",         dados.posicao || "posição");
+  set("radioPos",         ROTULOS_POSICAO[String(dados.posicao || "").toLowerCase()] || dados.posicao || "posição");
   set("radioPlat",        ROTULOS_PLATAFORMA[dados.plataforma] || dados.plataforma || "plataforma");
   set("topo-overall",     dados.overall || "—");
   set("topo-partidas",    dados.partidas || 0);

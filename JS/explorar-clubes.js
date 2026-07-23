@@ -25,7 +25,11 @@ const ROTULOS = {
   "old-gen": "Antiga geração",
   "old gen": "Antiga geração",
   oldgen: "Antiga geração",
+  "ond-gen": "Antiga geração",
+  "ond gen": "Antiga geração",
+  ondgen: "Antiga geração",
   "antiga-geracao": "Antiga geração",
+  "antiga geracao": "Antiga geração",
   "america do sul": "América do Sul",
   eafc26: "EA FC 26",
   eafc25: "EA FC 25",
@@ -48,6 +52,8 @@ const ROTULOS = {
   vol: "Volante",
   zag: "Zagueiro",
   zagueiro: "Zagueiro",
+  lateral: "Lateral",
+  lat: "Lateral",
   ld: "Lateral direito",
   le: "Lateral esquerdo",
   gk: "Goleiro",
@@ -80,7 +86,9 @@ function uidValido(valor) {
 
 function rotulo(valor) {
   const texto = String(valor || "").trim();
-  return ROTULOS[texto] || ROTULOS[normalizar(texto)] || texto;
+  const chave = normalizar(texto);
+  const chaveSemSeparador = chave.replace(/[_-]+/g, " ").replace(/\s+/g, " ");
+  return ROTULOS[texto] || ROTULOS[chave] || ROTULOS[chaveSemSeparador] || texto;
 }
 
 function imagemSegura(valor) {

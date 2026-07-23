@@ -144,6 +144,7 @@
   margin-top: 24px;
   padding: 24px;
   border-radius: 18px;
+  scroll-margin-top: 110px;
 }
 
 .explorar-painel-topo,
@@ -707,7 +708,33 @@
   }
 
   .explorar-hero {
-    padding: 8px 4px 24px;
+    gap: 16px;
+    padding: 4px 4px 16px;
+  }
+
+  .explorar-hero p {
+    margin-top: 12px;
+    line-height: 1.55;
+  }
+
+  .explorar-atalhos {
+    margin-top: 18px;
+  }
+
+  .explorar-metricas {
+    gap: 6px;
+  }
+
+  .explorar-metricas div {
+    padding: 10px 5px;
+  }
+
+  .explorar-metricas strong {
+    font-size: 1.3rem;
+  }
+
+  .explorar-metricas span {
+    font-size: 0.56rem;
   }
 
   .explorar-painel {
@@ -735,7 +762,7 @@
   }
 
   .explorar-metricas {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .explorar-filtros,

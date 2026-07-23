@@ -48,6 +48,16 @@ const ROTULOS_PLATAFORMA = {
   ps5: "PlayStation 5",
   ps4: "PlayStation 4",
   pc: "PC",
+  crossplay: "Crossplay",
+  "new-gen": "Nova geração",
+  "new gen": "Nova geração",
+  newgen: "Nova geração",
+  "old-gen": "Antiga geração",
+  "old gen": "Antiga geração",
+  oldgen: "Antiga geração",
+  "ond-gen": "Antiga geração",
+  "ond gen": "Antiga geração",
+  ondgen: "Antiga geração",
 };
 const ROTULOS_POSICAO = {
   psd: "Todas as posições",
@@ -55,6 +65,10 @@ const ROTULOS_POSICAO = {
   mei: "Meio-campo",
   vol: "Volante",
   zag: "Defesa",
+  lateral: "Lateral",
+  lat: "Lateral",
+  ld: "Lateral direito",
+  le: "Lateral esquerdo",
   gk: "Goleiro",
 };
 const ROTULOS_JOGO = {
@@ -75,6 +89,23 @@ const ROTULOS_PLATAFORMA_JOGADOR = {
   "xbox one": "Xbox One",
   switch2: "Nintendo Switch 2",
   switch1: "Nintendo Switch",
+};
+const ROTULOS_POSICAO_JOGADOR = {
+  gol: "Goleiro",
+  gk: "Goleiro",
+  zag: "Zagueiro",
+  lateral: "Lateral",
+  lat: "Lateral",
+  ld: "Lateral direito",
+  le: "Lateral esquerdo",
+  vol: "Volante",
+  mc: "Meio-campo",
+  mei: "Meia ofensivo",
+  "me/md": "Meia lateral",
+  pe: "Ponta esquerda",
+  ata: "Atacante",
+  sa: "Segundo atacante",
+  pd: "Ponta direita",
 };
 const ROTULOS_DISPONIBILIDADE = {
   manha: "Manhã",
@@ -102,6 +133,11 @@ const ROTULOS_ESTILO_JOGADOR = {
 
 function normalizarPlataforma(valor) {
   return ({ "xbox-Series": "xboxS", "xbox-One": "xboxO" })[valor] || valor || "";
+}
+
+function rotuloPosicaoJogador(valor) {
+  const original = String(valor || "").trim();
+  return ROTULOS_POSICAO_JOGADOR[original.toLowerCase()] || original || "—";
 }
 
 function filtrosMercadoAtivos() {
@@ -214,9 +250,9 @@ function cardJogadorMercado(jogador) {
   const regiao = ROTULOS_REGIAO[jogador.regiao] || "Não informada";
   const estilo = ROTULOS_ESTILO_JOGADOR[jogador.estiloJogo] || "Não informado";
   const bio = jogador.bio || "Este jogador ainda não adicionou uma apresentação.";
-  const posicao = jogador.posicao || "—";
-  const secundaria = jogador.posicaoSecundaria && jogador.posicaoSecundaria !== posicao
-    ? `<span class="jogador-card-badge">Também joga: ${escHtml(jogador.posicaoSecundaria)}</span>`
+  const posicao = rotuloPosicaoJogador(jogador.posicao);
+  const secundaria = jogador.posicaoSecundaria && jogador.posicaoSecundaria !== jogador.posicao
+    ? `<span class="jogador-card-badge">Também joga: ${escHtml(rotuloPosicaoJogador(jogador.posicaoSecundaria))}</span>`
     : "";
   return `
     <article class="mercado-jogador-card">

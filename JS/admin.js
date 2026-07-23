@@ -37,8 +37,12 @@ const NOMES_COLECOES = {
 
 const ROTULOS_POSICAO = {
   gk: "Goleiro",
+  gol: "Goleiro",
   zag: "Zagueiro",
   lat: "Lateral",
+  lateral: "Lateral",
+  ld: "Lateral direito",
+  le: "Lateral esquerdo",
   vol: "Volante",
   mei: "Meia",
   ponta: "Ponta",
@@ -53,6 +57,19 @@ const ROTULOS_PLATAFORMA = {
   xbox_series: "Xbox Series",
   pc: "PC",
   crossplay: "Crossplay",
+  new_gen: "Nova geração",
+  newgen: "Nova geração",
+  old_gen: "Antiga geração",
+  oldgen: "Antiga geração",
+  ond_gen: "Antiga geração",
+  ondgen: "Antiga geração",
+};
+
+const ROTULOS_JOGO = {
+  eafc26: "EA FC 26",
+  eafc25: "EA FC 25",
+  eafc24: "EA FC 24",
+  eafc23: "EA FC 23",
 };
 
 const ROTULOS_MOTIVO_DENUNCIA = {
@@ -217,6 +234,18 @@ function rotuloPosicao(valor) {
 function rotuloPlataforma(valor) {
   const chave = normalizar(valor).replaceAll(" ", "_").replaceAll("-", "_");
   return ROTULOS_PLATAFORMA[chave] || texto(valor);
+}
+
+function rotuloJogo(valor) {
+  const original = texto(valor, "EA FC");
+  const chave = normalizar(original).replace(/[\s_-]+/g, "");
+  return ROTULOS_JOGO[chave] || original;
+}
+
+function nomeTorneio(valor) {
+  const original = texto(valor, "Torneio sem nome");
+  const chave = normalizar(original).replace(/[\s_-]+/g, "");
+  return ["ondgen", "oldgen"].includes(chave) ? "Old Gen" : original;
 }
 
 function statusDenuncia(denuncia) {
@@ -681,7 +710,7 @@ function renderizarVagas() {
           <div class="admin-registro-meta">
             <span class="admin-badge">${escaparHtml(rotuloPosicao(vaga.posicao))}</span>
             <span class="admin-badge">${escaparHtml(rotuloPlataforma(vaga.plataforma))}</span>
-            <span class="admin-badge">${escaparHtml(texto(vaga.jogo, "Jogo não informado"))}</span>
+            <span class="admin-badge">${escaparHtml(rotuloJogo(vaga.jogo))}</span>
           </div>
           <p>${escaparHtml(texto(vaga.descricao, "Sem descrição."))}</p>
           <div class="admin-registro-meta">
@@ -916,8 +945,8 @@ function torneioCardAdmin(torneio) {
         <span class="admin-torneio-status ${status}">${rotuloStatusTorneio(status)}</span>
         ${pendentes ? `<span class="admin-torneio-status pendente">${pendentes} para analisar</span>` : ""}
       </div>
-      <h3>${escaparHtml(texto(torneio.nome, "Torneio sem nome"))}</h3>
-      <p>${escaparHtml(texto(torneio.jogo, "EA FC"))} • ${escaparHtml(rotuloPlataforma(torneio.plataforma))} • ${escaparHtml(texto(torneio.formato, "Mata-mata"))}</p>
+      <h3>${escaparHtml(nomeTorneio(torneio.nome))}</h3>
+      <p>${escaparHtml(rotuloJogo(torneio.jogo))} • ${escaparHtml(rotuloPlataforma(torneio.plataforma))} • ${escaparHtml(texto(torneio.formato, "Mata-mata"))}</p>
       <div class="admin-torneio-meta">
         <span class="admin-torneio-chip">${aprovadas}/${maximo} clubes</span>
         <span class="admin-torneio-chip">Início: ${escaparHtml(formatarData(torneio.dataInicio, false))}</span>
@@ -1170,7 +1199,7 @@ function renderizarModalTorneio(torneioId) {
             <article class="admin-torneio-inscricao">
               <div class="admin-torneio-inscricao-info">
                 <strong>${escaparHtml(texto(inscricao.clubeNome, "Clube sem nome"))}</strong>
-                <small>${escaparHtml(texto(inscricao.plataforma, "Plataforma não informada"))} • ${escaparHtml(formatarData(inscricao.criadoEm))}</small>
+                <small>${escaparHtml(rotuloPlataforma(inscricao.plataforma))} • ${escaparHtml(formatarData(inscricao.criadoEm))}</small>
               </div>
               <div class="admin-torneio-inscricao-acoes">
                 <span class="admin-torneio-status ${statusAtual}">${statusAtual}</span>
